@@ -1,1 +1,81 @@
 # docloom
+
+Beautiful, template-driven technical documentation — fast.
+
+Docloom is a system for technical folks to generate high‑quality documents by combining structured templates with source materials and model‑assisted content. The aim is consistent, branded, and reviewable outputs that you can print, share, and iterate on quickly.
+
+Docloom is currently in early development. The Software Requirements Specification (SRS) lives in `docs/` and a working HTML template prototype is in `source-example-template-that-spawned-the-idea/`.
+
+## What It Is
+
+- **Templates:** Curated, branded skeletons (e.g., Architecture Vision) with `data-field` placeholders for structured content.
+- **Fields & Schema:** Each template defines a field schema; AI generations and manual edits populate these fields.
+- **Sources:** Local Markdown, text, and other artifacts provide the factual basis for generation.
+- **Renderers:** Produce attractive HTML ready for print/PDF, plus a JSON sidecar of the filled fields for traceability.
+
+## Current Status
+
+- The SRS defines the planned CLI, behaviors, and extensibility. See `docs/SRS.md`.
+- A sample HTML template (Architecture Vision) demonstrates the look, layout, and simple JSON-based filling.
+- CLI and end‑to‑end pipeline are under active design per the SRS.
+
+## Repository Layout
+
+- `docs/` — Authoritative SRS: scope, terminology, and requirements.
+- `source-example-template-that-spawned-the-idea/` — Prototype HTML template, styles, and a simple filler script:
+  - `architecture-vision.html` — HTML skeleton with `data-field` placeholders
+  - `style.css`, `terumo.css`, `logo.svg` — Layout and brand styling
+  - `fill.js` — Minimal helper to populate placeholders from JSON
+
+## Try the Sample Template
+
+You can open the template directly in a browser or serve it locally to test auto‑filling.
+
+1) Change into the sample directory:
+   - `cd source-example-template-that-spawned-the-idea`
+2) Serve the folder (pick one):
+   - `python3 -m http.server 8080` (then open `http://localhost:8080/architecture-vision.html`)
+   - or simply double‑click `architecture-vision.html` to open it directly
+3) To auto‑fill fields, define `window.DOC_DATA` before `fill.js` or call `window.DocFill.fill(data)` in the console.
+
+Example snippet to embed before `fill.js` in the HTML (or paste in DevTools console and then call `DocFill.fill`):
+
+```html
+<script>
+  window.DOC_DATA = {
+    project_name: "NextGen EHR Integration",
+    author: "Jane Doe",
+    summary: "<p>This initiative unifies...</p>",
+    introduction: "<p>We aim to...</p>",
+    // ...other fields...
+    copyright_year: 2025,
+    doc_code: "AV-2025-00012"
+  };
+</script>
+<script src="fill.js"></script>
+```
+
+Printing tips:
+- Use the browser’s Print dialog to export to PDF.
+- Enable printing of backgrounds so header/footer visuals appear.
+
+## Planned CLI (from SRS)
+
+The SRS outlines a CLI along these lines:
+
+- `docloom generate --type <template> --source <paths...> --out <file>`
+- Template registry (e.g., `architecture-vision`, `technical-debt-summary`, `reference-architecture`).
+- HTML output plus a JSON sidecar of filled fields.
+- Config via `docloom.yaml`, env vars, and flags; verbose/dry‑run modes; schema validation and repair.
+
+For full details and requirement IDs, see `docs/SRS.md`.
+
+## Contributing
+
+- Start by reading `docs/SRS.md` to understand scope and constraints.
+- Explore the template prototype to get a feel for structure and fields.
+- Proposals, templates, and small improvements are welcome as issues or PRs.
+
+## License
+
+TBD.

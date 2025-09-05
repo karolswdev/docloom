@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Architecture Vision</title>
+    <link rel="stylesheet" href="terumo.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Fixed header (prints on every page) -->
+    <header class="doc-header">
+      <div class="brand">
+        <div class="logo">
+          <img src="logo.svg" alt="Terumo BCT" />
+        </div>
+      </div>
+      <div class="doc-title">Architecture Vision</div>
+      <div class="doc-meta">
+        <div><span class="label">Project:</span> <span id="project_name" data-field="project_name">&lt;Project Name&gt;</span></div>
+        <div><span class="label">Author:</span> <span id="author" data-field="author">&lt;Author&gt;</span></div>
+      </div>
+    </header>
+
+    <!-- Fixed footer (prints on every page) -->
+    <footer class="doc-footer">
+      <div class="footer-left">
+        <span class="site">TerumoBCT.com</span>
+      </div>
+      <div class="footer-right">
+        <span class="copyright">&copy;<span id="copyright_year" data-field="copyright_year">2025</span> Terumo BCT, Inc.</span>
+        <span class="doc-code" id="doc_code" data-field="doc_code">XX-XXXX-00000</span>
+      </div>
+    </footer>
+
+    <main class="doc">
+      <!-- Cover / Summary Page -->
+      <section class="page cover">
+        <h1 class="doc-heading">Architecture Vision</h1>
+        <div class="doc-subtitle">
+          <span data-field="project_name">&lt;Project Name&gt;</span> &middot; <span data-field="author">&lt;Author&gt;</span>
+        </div>
+        <h2>Summary</h2>
+        <div class="richtext" id="summary" data-field="summary">
+          &lt;Summary of the project and architectural vision&gt;
+        </div>
+      </section>
+
+      <!-- Introduction -->
+      <section class="page">
+        <h2>Introduction</h2>
+        <div class="richtext" id="introduction" data-field="introduction">
+          &lt;Brief introduction to the project. The purpose of the vision is to agree at the outset what the desired outcome should be.&gt;
+        </div>
+
+        <h2>Problem Description</h2>
+        <div class="richtext" id="problem_description" data-field="problem_description">
+          &lt;Description of the problem and what the outcome of the effort should be.&gt;
+        </div>
+
+        <h2>Stakeholders</h2>
+        <div class="richtext" id="stakeholders" data-field="stakeholders">
+          &lt;List the stakeholders and discuss their concerns.&gt;
+        </div>
+      </section>
+
+      <!-- Business Context -->
+      <section class="page">
+        <h2>Business Scenarios</h2>
+        <div class="richtext" id="business_scenarios" data-field="business_scenarios">
+          &lt;List the business scenarios to be addressed. If use cases exist, put them here or link to the documentation containing them.&gt;
+        </div>
+
+        <h2>Business Alignment</h2>
+        <div class="richtext" id="business_alignment" data-field="business_alignment">
+          &lt;Discuss how this is aligned with larger business goals.&gt;
+        </div>
+
+        <h2>Scope</h2>
+        <div class="richtext" id="scope" data-field="scope">
+          &lt;Discuss the scope of the project. Discuss the major features, capabilities and requirements included in the project. Also, discuss the capabilities specifically excluded from the effort (out of scope).&gt;
+        </div>
+
+        <h2>Dependencies</h2>
+        <div class="richtext" id="dependencies" data-field="dependencies">
+          &lt;Discuss business and project dependencies. List specifics to what this effort is dependent on and any impact of non-delivery of that dependency.&gt;
+        </div>
+      </section>
+
+      <!-- Requirements & Objectives -->
+      <section class="page">
+        <h2>Requirements</h2>
+        <div class="richtext" id="requirements" data-field="requirements">
+          &lt;List known requirements or link to the documentation containing them.&gt;
+        </div>
+
+        <h2>Architecture Objective</h2>
+        <div class="richtext" id="architecture_objective" data-field="architecture_objective">
+          &lt;State the specific objectives around the architecture engagement with this project. What deliverables are expected to be produced? What is the anticipated level of engagement?&gt;
+        </div>
+
+        <h2>Critical Issues and Risks</h2>
+        <div class="richtext" id="critical_issues_and_risks" data-field="critical_issues_and_risks">
+          &lt;Discuss critical issues to solve and any major risks seen in the system. Validate the feasibility of the solution.&gt;
+        </div>
+      </section>
+
+      <!-- Constraints & Assumptions -->
+      <section class="page">
+        <h2>Constraints and Assumptions</h2>
+        <h3>Constraints</h3>
+        <div class="richtext" id="constraints" data-field="constraints">
+          &lt;List the constraints on the architecture. Discuss their impact as needed.&gt;
+        </div>
+        <h3>Assumptions</h3>
+        <div class="richtext" id="assumptions" data-field="assumptions">
+          &lt;List the assumptions that the architecture is depending on. If these assumptions prove to be false, this will impact the architecture, and thus the project, in a potentially negative manner.&gt;
+        </div>
+      </section>
+
+      <!-- Architecture Approach & States -->
+      <section class="page">
+        <h2>Architecture Approach</h2>
+        <div class="richtext" id="architecture_approach" data-field="architecture_approach">
+          &lt;Discuss the approach the architecture will take, what technologies will be used, what systems need to be modified, and what new systems need to be created. List the key architecture principles that will be applied.&gt;
+        </div>
+
+        <h2>Current Architecture</h2>
+        <div class="richtext" id="current_architecture" data-field="current_architecture">
+          &lt;Discuss the current architecture. Insert any current architecture diagrams that are relevant.&gt;
+        </div>
+
+        <h2>To-Be Architecture</h2>
+        <div class="richtext" id="to_be_architecture" data-field="to_be_architecture">
+          &lt;Discuss the to-be architecture. Insert any relevant diagram.&gt;
+        </div>
+      </section>
+
+      <!-- References -->
+      <section class="page references">
+        <h2>References</h2>
+        <div class="richtext" id="references" data-field="references">
+          <ol>
+            <li>&lt;List any relevant references here&gt;</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <script src="fill.js"></script>
+  </body>
+  </html>
