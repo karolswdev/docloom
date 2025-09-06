@@ -88,8 +88,8 @@ func (r *Registry) loadAgent(path string) error {
 	if def.APIVersion == "" {
 		return fmt.Errorf("missing apiVersion")
 	}
-	if def.Kind != "ResearchAgent" {
-		return fmt.Errorf("invalid kind: %s (expected ResearchAgent)", def.Kind)
+	if def.Kind != "Agent" && def.Kind != "ResearchAgent" {
+		return fmt.Errorf("invalid kind: %s (expected Agent or ResearchAgent)", def.Kind)
 	}
 	if def.Metadata.Name == "" {
 		return fmt.Errorf("missing metadata.name")

@@ -172,6 +172,47 @@ To troubleshoot agent discovery issues:
 4. **Version Control**: Track project agents in version control
 5. **Test Locally**: Validate agents work before sharing
 
+## Intermediate Artifact Cache
+
+The registry works in conjunction with an artifact cache system to manage temporary files produced by agents.
+
+### Cache Directory Structure
+
+```
+/tmp/docloom-agent-cache/
+├── agent-name-20240106-150405-12345/
+│   ├── analysis.md
+│   ├── metrics.md
+│   └── recommendations.md
+└── another-agent-20240106-151230-12346/
+    └── report.md
+```
+
+### Cache Lifecycle
+
+1. **Creation**: A unique directory is created for each agent run
+2. **Naming**: Directories follow the pattern: `{agent-name}-{timestamp}-{pid}`
+3. **Location**: Cache resides in the system temp directory (`/tmp` or `%TEMP%`)
+4. **Usage**: Agents write their output files to this directory
+5. **Consumption**: DocLoom reads artifacts from the cache for document generation
+6. **Cleanup**: Directories older than 24 hours are automatically cleaned
+
+### Cache Management
+
+The cache system provides:
+
+- **Isolation**: Each agent run gets its own directory
+- **Uniqueness**: Timestamp and PID prevent collisions
+- **Automatic Cleanup**: Old artifacts are purged daily
+- **No Manual Intervention**: Users don't need to manage cache files
+
+### Benefits
+
+- **Clean Source Directories**: No intermediate files in user's project
+- **Parallel Execution**: Multiple agents can run simultaneously
+- **Debugging**: Artifacts persist for inspection if needed
+- **Performance**: Fast local disk I/O for artifacts
+
 ## Future Enhancements
 
 Planned improvements to the registry include:
