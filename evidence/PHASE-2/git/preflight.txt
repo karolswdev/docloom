@@ -1,0 +1,4 @@
+Go version: go version go1.24.4 linux/amd64
+golangci-lint version: golangci-lint has version v1.64.8 built with go1.24.4 from (unknown, modified: ?, mod sum: "h1:y5TdeVidMtBGG32zgSC7ZXTFNHrsJkDnpO4ItB3Am+I=") on (unknown)
+Branch: phase/PHASE-2
+Base commit: 1de225b5c02509549f2a15f3fa6a2740e63c557d

@@ -1,0 +1,35 @@
+=== RUN   TestIngester_IngestSources
+{"level":"debug","file":"/tmp/TestIngester_IngestSources3975529838/001/doc1.md","bytes":39,"time":"2025-09-05T18:34:52-06:00","message":"Ingested file"}
+{"level":"debug","file":"/tmp/TestIngester_IngestSources3975529838/001/doc2.txt","bytes":27,"time":"2025-09-05T18:34:52-06:00","message":"Ingested file"}
+{"level":"debug","file":"/tmp/TestIngester_IngestSources3975529838/001/subdir/doc3.md","bytes":38,"time":"2025-09-05T18:34:52-06:00","message":"Ingested file"}
+{"level":"debug","file":"/tmp/TestIngester_IngestSources3975529838/001/subdir/nested/doc4.txt","bytes":27,"time":"2025-09-05T18:34:52-06:00","message":"Ingested file"}
+{"level":"info","files":4,"total_bytes":432,"time":"2025-09-05T18:34:52-06:00","message":"Ingestion complete"}
+--- PASS: TestIngester_IngestSources (0.00s)
+=== RUN   TestIngester_IngestSources_SingleFile
+{"level":"debug","file":"/tmp/TestIngester_IngestSources_SingleFile2787929871/001/single.md","bytes":39,"time":"2025-09-05T18:34:52-06:00","message":"Ingested file"}
+{"level":"info","files":1,"total_bytes":120,"time":"2025-09-05T18:34:52-06:00","message":"Ingestion complete"}
+--- PASS: TestIngester_IngestSources_SingleFile (0.00s)
+=== RUN   TestIngester_IngestSources_MultiplePaths
+{"level":"debug","file":"/tmp/TestIngester_IngestSources_MultiplePaths3780893485/001/file1.txt","bytes":19,"time":"2025-09-05T18:34:52-06:00","message":"Ingested file"}
+{"level":"debug","file":"/tmp/TestIngester_IngestSources_MultiplePaths3780893485/001/subdir/file2.md","bytes":21,"time":"2025-09-05T18:34:52-06:00","message":"Ingested file"}
+{"level":"info","files":2,"total_bytes":216,"time":"2025-09-05T18:34:52-06:00","message":"Ingestion complete"}
+--- PASS: TestIngester_IngestSources_MultiplePaths (0.00s)
+=== RUN   TestIngester_IngestSources_NoSupportedFiles
+--- PASS: TestIngester_IngestSources_NoSupportedFiles (0.00s)
+=== RUN   TestIngester_IngestSources_NonExistentPath
+--- PASS: TestIngester_IngestSources_NonExistentPath (0.00s)
+=== RUN   TestIngester_IngestSources_EmptyFile
+{"level":"debug","file":"/tmp/TestIngester_IngestSources_EmptyFile2069191679/001/empty.md","bytes":0,"time":"2025-09-05T18:34:52-06:00","message":"Ingested file"}
+{"level":"info","files":1,"total_bytes":79,"time":"2025-09-05T18:34:52-06:00","message":"Ingestion complete"}
+--- PASS: TestIngester_IngestSources_EmptyFile (0.00s)
+=== RUN   TestIngester_AddSupportedExtension
+{"level":"warn","file":"/tmp/TestIngester_AddSupportedExtension477522987/001/custom.log","time":"2025-09-05T18:34:52-06:00","message":"File type not supported for ingestion"}
+{"level":"debug","file":"/tmp/TestIngester_AddSupportedExtension477522987/001/custom.log","bytes":16,"time":"2025-09-05T18:34:52-06:00","message":"Ingested file"}
+{"level":"info","files":1,"total_bytes":94,"time":"2025-09-05T18:34:52-06:00","message":"Ingestion complete"}
+--- PASS: TestIngester_AddSupportedExtension (0.00s)
+=== RUN   TestIngester_AddSupportedExtension_NoDot
+--- PASS: TestIngester_AddSupportedExtension_NoDot (0.00s)
+=== RUN   TestIngester_AddSupportedExtension_Duplicate
+--- PASS: TestIngester_AddSupportedExtension_Duplicate (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/ingest	1.012s

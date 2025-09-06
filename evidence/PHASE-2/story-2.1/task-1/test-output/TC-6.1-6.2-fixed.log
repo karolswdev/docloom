@@ -1,0 +1,22 @@
+=== RUN   TestAIClient_GenerateJSON_Success
+--- PASS: TestAIClient_GenerateJSON_Success (0.00s)
+=== RUN   TestAIClient_GenerateJSON_RetriesOn503
+{"level":"warn","error":"AI request failed: error, status code: 503, message: Service temporarily unavailable","attempt":0,"max_retries":2,"time":"2025-09-05T18:33:28-06:00","message":"AI request failed, will retry"}
+{"level":"info","attempt":1,"delay":10,"time":"2025-09-05T18:33:28-06:00","message":"Retrying AI request after delay"}
+{"level":"warn","error":"AI request failed: error, status code: 503, message: Service temporarily unavailable","attempt":1,"max_retries":2,"time":"2025-09-05T18:33:28-06:00","message":"AI request failed, will retry"}
+{"level":"info","attempt":2,"delay":20,"time":"2025-09-05T18:33:28-06:00","message":"Retrying AI request after delay"}
+--- PASS: TestAIClient_GenerateJSON_RetriesOn503 (0.03s)
+=== RUN   TestNewOpenAIClient_Validation
+=== RUN   TestNewOpenAIClient_Validation/missing_API_key
+=== RUN   TestNewOpenAIClient_Validation/missing_model
+--- PASS: TestNewOpenAIClient_Validation (0.00s)
+    --- PASS: TestNewOpenAIClient_Validation/missing_API_key (0.00s)
+    --- PASS: TestNewOpenAIClient_Validation/missing_model (0.00s)
+=== RUN   TestOpenAIClient_GenerateJSON_InvalidJSON
+--- PASS: TestOpenAIClient_GenerateJSON_InvalidJSON (0.00s)
+=== RUN   TestOpenAIClient_GenerateJSON_ContextCancellation
+{"level":"warn","error":"AI request failed: error, status code: 503, message: Service temporarily unavailable","attempt":0,"max_retries":5,"time":"2025-09-05T18:33:28-06:00","message":"AI request failed, will retry"}
+{"level":"info","attempt":1,"delay":100,"time":"2025-09-05T18:33:28-06:00","message":"Retrying AI request after delay"}
+--- PASS: TestOpenAIClient_GenerateJSON_ContextCancellation (0.05s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/ai	1.102s
