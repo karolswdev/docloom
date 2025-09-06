@@ -2,16 +2,16 @@
 
 <div align="center">
 
-![GitHub Release](https://img.shields.io/badge/release-v0.1.0--alpha-blue?style=flat-square)
-![Go Version](https://img.shields.io/github/go-mod/go-version/karolswdev/docloom?style=flat-square&logo=go)
-![Build Status](https://img.shields.io/github/actions/workflow/status/karolswdev/docloom/ci.yml?branch=main&style=flat-square&label=build)
-![Go Report Card](https://goreportcard.com/badge/github.com/karolswdev/docloom?style=flat-square)
-![Coverage](https://img.shields.io/badge/coverage-78%25-brightgreen?style=flat-square)
-![License](https://img.shields.io/github/license/karolswdev/docloom?style=flat-square)
-![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?style=flat-square&logo=docker)
-![Last Commit](https://img.shields.io/github/last-commit/karolswdev/docloom?style=flat-square)
-![Contributors](https://img.shields.io/github/contributors/karolswdev/docloom?style=flat-square)
-![Stars](https://img.shields.io/github/stars/karolswdev/docloom?style=social)
+[![GitHub Release](https://img.shields.io/badge/release-v0.1.0--alpha-blue?style=flat-square)](https://github.com/karolswdev/docloom/releases)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/karolswdev/docloom?style=flat-square&logo=go)](https://github.com/karolswdev/docloom/blob/main/go.mod)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/karolswdev/docloom/ci.yml?branch=main&style=flat-square&label=build)](https://github.com/karolswdev/docloom/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/karolswdev/docloom?style=flat-square)](https://goreportcard.com/report/github.com/karolswdev/docloom)
+[![Coverage](https://img.shields.io/badge/coverage-78%25-brightgreen?style=flat-square)](https://github.com/karolswdev/docloom/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/karolswdev/docloom?style=flat-square)](https://github.com/karolswdev/docloom/blob/main/LICENSE)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?style=flat-square&logo=docker)](https://github.com/karolswdev/docloom/pkgs/container/docloom)
+[![Last Commit](https://img.shields.io/github/last-commit/karolswdev/docloom?style=flat-square)](https://github.com/karolswdev/docloom/commits/main)
+[![Contributors](https://img.shields.io/github/contributors/karolswdev/docloom?style=flat-square)](https://github.com/karolswdev/docloom/graphs/contributors)
+[![Stars](https://img.shields.io/github/stars/karolswdev/docloom?style=social)](https://github.com/karolswdev/docloom)
 
 **Beautiful, template-driven technical documentation — fast.**
 
