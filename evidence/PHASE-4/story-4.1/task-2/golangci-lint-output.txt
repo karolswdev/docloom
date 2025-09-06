@@ -1,0 +1,138 @@
+internal/render/renderer_test.go:12:1: cyclomatic complexity 18 of func `TestRenderer_RenderHTML_Golden` is high (> 15) (gocyclo)
+func TestRenderer_RenderHTML_Golden(t *testing.T) {
+^
+internal/render/renderer.go:93:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(outputPath, []byte(renderedHTML), 0644); err != nil {
+	          ^
+internal/render/renderer.go:107:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(jsonPath, jsonData, 0644); err != nil {
+	          ^
+internal/render/renderer.go:29:6: exported: func name will be used as render.RenderHTML by other packages, and that stutters; consider calling this HTML (revive)
+func RenderHTML(htmlTemplate string, fields map[string]interface{}) (string, error) {
+     ^
+internal/render/renderer.go:144:6: exported: func name will be used as render.RenderToWriter by other packages, and that stutters; consider calling this ToWriter (revive)
+func RenderToWriter(htmlTemplate string, fields map[string]interface{}, htmlWriter, jsonWriter io.Writer) error {
+     ^
+internal/render/renderer.go:32:1: File is not properly formatted (gofmt)
+	
+^
+internal/render/renderer_test.go:20:1: File is not properly formatted (gofmt)
+	
+^
+internal/render/renderer.go:88:5: shadow: declaration of "err" shadows declaration at line 81 (govet)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+	   ^
+internal/render/renderer_test.go:30:5: shadow: declaration of "err" shadows declaration at line 16 (govet)
+	if err := json.Unmarshal(fieldsBytes, &fields); err != nil {
+	   ^
+internal/render/renderer_test.go:87:9: shadow: declaration of "err" shadows declaration at line 80 (govet)
+		if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+		      ^
+internal/render/renderer_test.go:93:9: shadow: declaration of "err" shadows declaration at line 80 (govet)
+		if _, err := os.Stat(jsonPath); os.IsNotExist(err) {
+		      ^
+internal/templates/registry_test.go:11:1: cyclomatic complexity 35 of func `TestTemplateRegistry_Load` is high (> 15) (gocyclo)
+func TestTemplateRegistry_Load(t *testing.T) {
+^
+internal/templates/registry.go:27:2: field `embedFS` is unused (unused)
+	embedFS   fs.FS
+	^
+internal/templates/registry.go:32:5: var `defaultTemplatesFS` is unused (unused)
+var defaultTemplatesFS embed.FS
+    ^
+internal/templates/registry.go:16:1: File is not properly formatted (gofmt)
+	Name        string          `json:"name"`
+^
+internal/templates/registry.go:15:15: fieldalignment: struct with 96 pointer bytes could be 80 (govet)
+type Template struct {
+              ^
+internal/templates/registry_test.go:120:6: shadow: declaration of "err" shadows declaration at line 112 (govet)
+		if err := os.MkdirAll(testTemplateDir, 0755); err != nil {
+		   ^
+internal/templates/registry_test.go:126:6: shadow: declaration of "err" shadows declaration at line 112 (govet)
+		if err := os.WriteFile(templateJSON, []byte(`{"name": "test-template"}`), 0644); err != nil {
+		   ^
+internal/templates/registry_test.go:132:6: shadow: declaration of "err" shadows declaration at line 112 (govet)
+		if err := os.WriteFile(htmlFile, []byte("<html></html>"), 0644); err != nil {
+		   ^
+internal/templates/registry_test.go:35:11: SA5011: possible nil pointer dereference (staticcheck)
+		if tmpl.Name != "architecture-vision" {
+		        ^
+internal/templates/registry_test.go:31:6: SA5011(related information): this check suggests that the pointer can be nil (staticcheck)
+		if tmpl == nil {
+		   ^
+internal/templates/registry_test.go:166:11: SA5011: possible nil pointer dereference (staticcheck)
+		if tmpl.Name != "test-template" {
+		        ^
+internal/templates/registry_test.go:162:6: SA5011(related information): this check suggests that the pointer can be nil (staticcheck)
+		if tmpl == nil {
+		   ^
+internal/templates/registry.go:82:45: (*Registry).loadTemplate - result 0 (error) is always nil (unparam)
+func (r *Registry) loadTemplate(dir string) error {
+                                            ^
+internal/ai/client.go:22:13: fieldalignment: struct with 72 pointer bytes could be 48 (govet)
+type Config struct {
+            ^
+internal/ai/client_test.go:147:13: fieldalignment: struct with 112 pointer bytes could be 104 (govet)
+	tests := []struct {
+	           ^
+internal/ai/client_test.go:276:13: fieldalignment: struct with 144 pointer bytes could be 136 (govet)
+	tests := []struct {
+	           ^
+internal/ai/client_test.go:254:35: `cancelled` is a misspelling of `canceled` (misspell)
+	// Create a context that will be cancelled after first request
+	                                 ^
+internal/validate/validator.go:162:23: fieldalignment: struct with 16 pointer bytes could be 8 (govet)
+type ValidationResult struct {
+                      ^
+internal/config/config_test.go:9:1: cyclomatic complexity 27 of func `TestConfig_LoadWithPrecedence` is high (> 15) (gocyclo)
+func TestConfig_LoadWithPrecedence(t *testing.T) {
+^
+internal/config/config.go:137:1: cyclomatic complexity 27 of func `applyCliOverrides` is high (> 15) (gocyclo)
+func applyCliOverrides(cfg *Config, overrides map[string]interface{}) {
+^
+internal/config/config.go:12:13: fieldalignment: struct with 80 pointer bytes could be 56 (govet)
+type Config struct {
+            ^
+internal/config/config.go:98:19: `loadFromFile` - `cfg` is unused (unparam)
+func loadFromFile(cfg *Config, path string) error {
+                  ^
+internal/ingest/ingester_test.go:194:2: ineffectual assignment to result (ineffassign)
+	result, err := ingester.IngestSources([]string{customFile})
+	^
+internal/generate/orchestrator.go:72:1: cyclomatic complexity 20 of func `(*Orchestrator).Generate` is high (> 15) (gocyclo)
+func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
+^
+internal/generate/orchestrator.go:211:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(jsonFile, []byte(generatedJSON), 0644); err != nil {
+	          ^
+internal/generate/orchestrator.go:22:14: fieldalignment: struct of size 144 could be 136 (govet)
+type Options struct {
+             ^
+internal/generate/orchestrator_test.go:19:19: fieldalignment: struct with 40 pointer bytes could be 32 (govet)
+type MockAIClient struct {
+                  ^
+internal/generate/orchestrator_test.go:183:13: fieldalignment: struct with 168 pointer bytes could be 152 (govet)
+	tests := []struct {
+	           ^
+internal/cli/generate_test.go:329:3: shadow: declaration of "outputFile" shadows declaration at line 16 (govet)
+		outputFile := tempDir + "/output.html"
+		^
+internal/cli/generate_test.go:365:3: shadow: declaration of "outputFile" shadows declaration at line 16 (govet)
+		outputFile := tempDir + "/output.html"
+		^
+internal/generate/orchestrator.go:126:16: shadow: declaration of "err" shadows declaration at line 86 (govet)
+		schemaBytes, err := json.MarshalIndent(tmpl.Schema, "", "  ")
+		             ^
+internal/generate/orchestrator.go:156:18: shadow: declaration of "err" shadows declaration at line 86 (govet)
+			repairPrompt, err := o.builder.BuildRepairPrompt(
+			              ^
+internal/cli/generate_test.go:353:3: ineffectual assignment to err (ineffassign)
+		err = rootCmd.Execute()
+		^
+internal/cli/generate_test.go:390:3: ineffectual assignment to err (ineffassign)
+		err = rootCmd.Execute()
+		^
+internal/cli/generate_test.go:434:4: ineffectual assignment to output (ineffassign)
+			output += err.Error()
+			^

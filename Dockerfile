@@ -17,8 +17,17 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o docloom ./cmd/docloom
+# Build arguments for version information
+ARG VERSION=dev
+ARG GIT_COMMIT=unknown
+ARG BUILD_DATE=unknown
+
+# Build the binary with version information
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
+    -ldflags "-X github.com/karolswdev/docloom/internal/version.Version=${VERSION} \
+    -X github.com/karolswdev/docloom/internal/version.GitCommit=${GIT_COMMIT} \
+    -X github.com/karolswdev/docloom/internal/version.BuildDate=${BUILD_DATE}" \
+    -o docloom ./cmd/docloom
 
 # Run tests
 RUN go test ./...

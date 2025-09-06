@@ -1,0 +1,127 @@
+# golangci-lint configuration for DocLoom
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    # Default linters
+    - errcheck      # Check for unchecked errors
+    - gosimple      # Simplify code
+    - govet         # Reports suspicious constructs
+    - ineffassign   # Detects ineffectual assignments
+    - staticcheck   # Static analysis
+    - typecheck     # Type-checks Go code
+    - unused        # Check for unused constants, variables, functions and types
+    
+    # Additional linters for code quality
+    - gofmt         # Checks whether code was gofmt-ed
+    - goimports     # Check import statements are formatted
+    - misspell      # Finds commonly misspelled words
+    - revive        # Drop-in replacement of golint
+    - unconvert     # Remove unnecessary type conversions
+    - unparam       # Reports unused function parameters
+    - gosec         # Security issues
+    - prealloc      # Find slice declarations that could be preallocated
+    - bodyclose     # Checks whether HTTP response body is closed
+    - dupl          # Code clone detection
+    - goconst       # Find repeated strings that could be constants
+    - gocyclo       # Cyclomatic complexity
+    - copyloopvar   # Checks for pointers to enclosing loop variables
+
+  disable:
+    - depguard      # Go module dependencies guard
+    - gochecknoinits # Check that no init functions are present
+    - gomodguard    # Allow or block modules
+    
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+    
+  govet:
+    enable-all: true
+    
+  gofmt:
+    simplify: true
+    
+  goimports:
+    local-prefixes: github.com/karolswdev/docloom
+    
+  gocyclo:
+    min-complexity: 15
+    
+  dupl:
+    threshold: 100
+    
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+    
+  misspell:
+    locale: US
+    
+  revive:
+    confidence: 0.8
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      
+  gosec:
+    excludes:
+      - G104  # Ignore error checking for certain functions
+      - G304  # File path provided as taint input
+    confidence: medium
+    severity: medium
+    
+  unparam:
+    check-exported: false
+
+issues:
+  # Exclude certain issues
+  exclude-rules:
+    # Exclude test files from certain linters
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+        - goconst
+        - errcheck
+        
+    # Exclude generated files
+    - path: \.pb\.go
+      linters:
+        - all
+        
+    # Allow certain patterns in main packages
+    - path: cmd/
+      linters:
+        - gocyclo
+        
+  # Maximum issues to report
+  max-issues-per-linter: 50
+  max-same-issues: 3
+  
+  # Show all issues from a linter
+  new: false
+  
+  # Fix found issues (if it's supported by the linter)
+  fix: false

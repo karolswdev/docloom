@@ -65,6 +65,8 @@ To see available commands and options:
 
 ```bash
 docloom --help
+docloom --version              # Display version information
+docloom version                # Display detailed version information
 docloom generate --help
 docloom templates list
 ```
@@ -266,9 +268,67 @@ docker pull ghcr.io/karolswdev/docloom:latest
 
 ## Contributing
 
-- Start by reading `docs/SRS.md` to understand scope and constraints.
-- Explore the template prototype to get a feel for structure and fields.
-- Proposals, templates, and small improvements are welcome as issues or PRs.
+We welcome contributions! Please follow these guidelines:
+
+### Code Standards
+
+- **Commit Messages**: We use [Conventional Commits](https://www.conventionalcommits.org/) format:
+  - `feat:` New features
+  - `fix:` Bug fixes
+  - `docs:` Documentation changes
+  - `style:` Formatting, missing semicolons, etc.
+  - `refactor:` Code changes that neither fix bugs nor add features
+  - `test:` Adding or updating tests
+  - `chore:` Maintenance tasks
+  - `ci:` CI/CD changes
+
+  Examples:
+  ```
+  feat(templates): add support for custom template directories
+  fix(render): correct HTML escaping in template fields
+  docs: update installation instructions
+  ```
+
+- **Code Quality**: All code must pass our linting checks:
+  ```bash
+  make lint        # Run golangci-lint
+  make test        # Run tests with race detection
+  make ci          # Run all quality checks
+  ```
+
+- **Testing**: Write tests for new functionality. We aim for good coverage on critical paths.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch from `main`
+3. Make your changes following the code standards
+4. Run `make ci` to ensure all checks pass
+5. Submit a PR with a clear description
+
+### Getting Started
+
+- Start by reading `docs/SRS.md` to understand scope and constraints
+- Explore the template prototype to get a feel for structure and fields
+- Check existing issues for good first contributions
+- Proposals, templates, and improvements are welcome as issues or PRs
+
+### Building from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/karolswdev/docloom.git
+cd docloom
+
+# Build with version information
+make build
+
+# Run the built binary
+./build/docloom --version
+
+# Install to $GOPATH/bin
+make install
+```
 
 ## License
 

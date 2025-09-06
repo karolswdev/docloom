@@ -126,6 +126,10 @@ func init() {
 	generateCmd.Flags().StringVar(&configFile, "config", "", "Config file path")
 	
 	// Mark required flags
-	generateCmd.MarkFlagRequired("type")
-	generateCmd.MarkFlagRequired("out")
+	if err := generateCmd.MarkFlagRequired("type"); err != nil {
+		panic(fmt.Sprintf("failed to mark type flag as required: %v", err))
+	}
+	if err := generateCmd.MarkFlagRequired("out"); err != nil {
+		panic(fmt.Sprintf("failed to mark out flag as required: %v", err))
+	}
 }

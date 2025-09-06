@@ -52,7 +52,10 @@ type Orchestrator struct {
 // NewOrchestrator creates a new generation orchestrator.
 func NewOrchestrator(aiClient ai.Client) *Orchestrator {
 	registry := templates.NewRegistry()
-	registry.LoadDefaults() // Load default templates
+	if err := registry.LoadDefaults(); err != nil {
+		// Log warning but continue - templates can be loaded later
+		log.Warn().Err(err).Msg("Failed to load default templates")
+	}
 	
 	return &Orchestrator{
 		aiClient:  aiClient,
@@ -120,7 +123,11 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 			fmt.Println(generationPrompt)
 		}
 		fmt.Println("\n=== SCHEMA ===")
-		schemaBytes, _ := json.MarshalIndent(tmpl.Schema, "", "  ")
+		schemaBytes, err := json.MarshalIndent(tmpl.Schema, "", "  ")
+		if err != nil {
+			log.Warn().Err(err).Msg("Failed to marshal schema for display")
+			schemaBytes = []byte("{}")
+		}
 		fmt.Println(string(schemaBytes))
 		return nil
 	}

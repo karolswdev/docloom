@@ -1,0 +1,5 @@
+DocLoom version 1.0.0-test
+  Build Date: 2024-01-01T00:00:00Z
+  Git Commit: test123
+  Go Version: go1.24.4
+  Platform:   linux/amd64

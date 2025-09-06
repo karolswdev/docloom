@@ -1,0 +1,5 @@
+DocLoom version 58484a1-dirty
+  Build Date: 2025-09-06T01:24:09Z
+  Git Commit: 58484a1
+  Go Version: go1.24.4
+  Platform:   linux/amd64
