@@ -43,7 +43,7 @@ Example:
   docloom generate --agent research-agent --source ./repo --type report --out analysis.html`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
-		
+
 		// If agent is specified, run it first
 		actualSources := sources
 		if agentName != "" {
@@ -98,7 +98,7 @@ Example:
 			actualSources = []string{result.OutputPath}
 			fmt.Printf("Agent completed. Using artifacts from: %s\n", result.OutputPath)
 		}
-		
+
 		// Get API key from flag or environment
 		if apiKey == "" {
 			apiKey = os.Getenv("OPENAI_API_KEY")

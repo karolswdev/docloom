@@ -62,7 +62,7 @@ func (e *Executor) Run(opts RunOptions) (*RunResult, error) {
 
 	// Prepare command with arguments
 	args := make([]string, 0, len(agent.Spec.Runner.Args)+2)
-	
+
 	// Add configured args from agent definition
 	for _, arg := range agent.Spec.Runner.Args {
 		// Replace placeholders
@@ -70,17 +70,17 @@ func (e *Executor) Run(opts RunOptions) (*RunResult, error) {
 		arg = strings.ReplaceAll(arg, "${OUTPUT_PATH}", outputPath)
 		args = append(args, arg)
 	}
-	
+
 	// If no args specified, use default pattern (source output)
 	if len(args) == 0 {
 		args = []string{opts.SourcePath, outputPath}
 	}
 
-	cmd := exec.Command(agent.Spec.Runner.Command, args...)
+	cmd := exec.Command(agent.Spec.Runner.Command, args...) // #nosec G204 - Agent commands are from trusted configuration
 
 	// Set up environment variables for parameters
 	env := os.Environ()
-	
+
 	// First, apply default values from agent definition
 	for _, param := range agent.Spec.Parameters {
 		if param.Default != nil {
@@ -89,13 +89,13 @@ func (e *Executor) Run(opts RunOptions) (*RunResult, error) {
 			env = append(env, fmt.Sprintf("%s=%s", envKey, envVal))
 		}
 	}
-	
+
 	// Then apply overrides from options
 	for key, value := range opts.Parameters {
 		envKey := fmt.Sprintf("PARAM_%s", strings.ToUpper(key))
 		env = append(env, fmt.Sprintf("%s=%s", envKey, value))
 	}
-	
+
 	cmd.Env = env
 
 	// Set up stdout and stderr pipes for logging
@@ -110,7 +110,7 @@ func (e *Executor) Run(opts RunOptions) (*RunResult, error) {
 	}
 
 	// Start the command
-	if err := cmd.Start(); err != nil {
+	if err = cmd.Start(); err != nil {
 		return nil, fmt.Errorf("failed to start agent: %w", err)
 	}
 
@@ -120,7 +120,7 @@ func (e *Executor) Run(opts RunOptions) (*RunResult, error) {
 
 	// Wait for completion
 	err = cmd.Wait()
-	
+
 	exitCode := 0
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {

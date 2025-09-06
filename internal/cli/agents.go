@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"text/tabwriter"
 
-	"github.com/karolswdev/docloom/internal/agent"
 	"github.com/spf13/cobra"
+
+	"github.com/karolswdev/docloom/internal/agent"
 )
 
 // agentsCmd represents the agents command
