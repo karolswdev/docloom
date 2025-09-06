@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -235,33 +234,6 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 		Str("json_file", jsonFile).
 		Msg("Document generation complete")
 	log.Debug().Msg("Generation workflow completed successfully")
-
-	return nil
-}
-
-// writeOutput writes the generated HTML and JSON to files.
-func (o *Orchestrator) writeOutput(outputFile string, htmlContent string, fields map[string]interface{}, force bool) error {
-	// Check if output file exists and force flag
-	if !force {
-		if _, err := os.Stat(outputFile); err == nil {
-			return fmt.Errorf("output file '%s' already exists (use --force to overwrite)", outputFile)
-		}
-	}
-
-	// Write HTML file
-	if err := os.WriteFile(outputFile, []byte(htmlContent), 0644); err != nil {
-		return fmt.Errorf("failed to write HTML file: %w", err)
-	}
-
-	// Write JSON sidecar file
-	jsonFile := strings.TrimSuffix(outputFile, filepath.Ext(outputFile)) + ".json"
-	jsonData, err := json.MarshalIndent(fields, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal JSON: %w", err)
-	}
-	if err := os.WriteFile(jsonFile, jsonData, 0644); err != nil {
-		return fmt.Errorf("failed to write JSON file: %w", err)
-	}
 
 	return nil
 }

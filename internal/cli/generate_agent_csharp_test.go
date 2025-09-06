@@ -7,11 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/karolswdev/docloom/internal/agent"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
+
+	"github.com/karolswdev/docloom/internal/agent"
 )
 
 // TestCSharpAgent_E2E_Integration tests the full integration of the C# analyzer agent

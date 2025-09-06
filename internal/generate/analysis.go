@@ -23,8 +23,8 @@ type AnalysisOptions struct {
 	AgentParams map[string]string
 }
 
-// runAnalysisLoop executes the multi-turn conversation between AI and agent tools.
-func (o *Orchestrator) runAnalysisLoop(ctx context.Context, opts AnalysisOptions) (string, error) {
+// RunAnalysisLoop executes the multi-turn conversation between AI and agent tools.
+func (o *Orchestrator) RunAnalysisLoop(ctx context.Context, opts AnalysisOptions) (string, error) {
 	// Get the agent definition
 	agentDef, exists := o.agentRegistry.Get(opts.AgentName)
 	if !exists {
@@ -34,7 +34,33 @@ func (o *Orchestrator) runAnalysisLoop(ctx context.Context, opts AnalysisOptions
 	// Convert agent tools to AI tools
 	aiTools := convertAgentTools(agentDef)
 
-	// Initialize conversation with system prompt
+	// Initialize conversation
+	messages := o.initializeConversation(opts)
+
+	log.Info().
+		Str("agent", opts.AgentName).
+		Int("tools", len(aiTools)).
+		Msg("Starting AI analysis loop")
+
+	// Analysis loop
+	for turn := 0; turn < opts.MaxTurns; turn++ {
+		result, shouldContinue, err := o.executeAnalysisTurn(ctx, turn, messages, aiTools, opts)
+		if err != nil {
+			return "", err
+		}
+		if result != "" {
+			return result, nil
+		}
+		if !shouldContinue {
+			break
+		}
+	}
+
+	return "", fmt.Errorf("analysis loop reached maximum turns (%d) without completion", opts.MaxTurns)
+}
+
+// initializeConversation sets up the initial message context.
+func (o *Orchestrator) initializeConversation(opts AnalysisOptions) []ai.ChatMessage {
 	messages := []ai.ChatMessage{
 		{
 			Role:    "system",
@@ -51,123 +77,152 @@ func (o *Orchestrator) runAnalysisLoop(ctx context.Context, opts AnalysisOptions
 		messages[1].Content += fmt.Sprintf("\n\nRepository path: %s", opts.SourcePath)
 	}
 
-	log.Info().
-		Str("agent", opts.AgentName).
-		Int("tools", len(aiTools)).
-		Msg("Starting AI analysis loop")
+	return messages
+}
 
-	// Analysis loop
-	for turn := 0; turn < opts.MaxTurns; turn++ {
-		log.Debug().
-			Int("turn", turn+1).
-			Int("messages", len(messages)).
-			Msg("Sending request to AI")
+// executeAnalysisTurn performs a single turn of the analysis loop.
+func (o *Orchestrator) executeAnalysisTurn(ctx context.Context, turn int, messages []ai.ChatMessage, aiTools []ai.Tool, opts AnalysisOptions) (string, bool, error) {
+	log.Debug().
+		Int("turn", turn+1).
+		Int("messages", len(messages)).
+		Msg("Sending request to AI")
 
-		// Get AI response
-		openaiClient, ok := o.aiClient.(*ai.OpenAIClient)
-		if !ok {
-			return "", fmt.Errorf("AI client does not support tool calling")
-		}
+	// Get AI response
+	openaiClient, ok := o.aiClient.(*ai.OpenAIClient)
+	if !ok {
+		return "", false, fmt.Errorf("AI client does not support tool calling")
+	}
 
-		response, err := openaiClient.ChatWithTools(ctx, messages, aiTools)
+	response, err := openaiClient.ChatWithTools(ctx, messages, aiTools)
+	if err != nil {
+		return "", false, fmt.Errorf("AI request failed: %w", err)
+	}
+
+	// Check if AI wants to call tools
+	if len(response.ToolCalls) > 0 {
+		err := o.handleToolCalls(response.ToolCalls, &messages, opts)
 		if err != nil {
-			return "", fmt.Errorf("AI request failed: %w", err)
+			return "", false, err
 		}
+		return "", true, nil
+	}
 
-		// Check if AI wants to call tools
-		if len(response.ToolCalls) > 0 {
-			log.Debug().
-				Int("tool_calls", len(response.ToolCalls)).
-				Msg("AI requested tool calls")
+	// AI provided a response
+	return o.handleAIResponse(response, &messages)
+}
 
-			// Add assistant message with tool calls to history
-			assistantMsg := ai.ChatMessage{
-				Role:      "assistant",
-				ToolCalls: response.ToolCalls,
-			}
-			messages = append(messages, assistantMsg)
+// handleToolCalls processes and executes requested tool calls.
+func (o *Orchestrator) handleToolCalls(toolCalls []ai.ToolCall, messages *[]ai.ChatMessage, opts AnalysisOptions) error {
+	log.Debug().
+		Int("tool_calls", len(toolCalls)).
+		Msg("AI requested tool calls")
 
-			// Execute each tool call
-			for _, toolCall := range response.ToolCalls {
-				log.Info().
-					Str("tool", toolCall.Name).
-					Str("id", toolCall.ID).
-					Msg("Executing tool")
+	// Add assistant message with tool calls to history
+	assistantMsg := ai.ChatMessage{
+		Role:      "assistant",
+		ToolCalls: toolCalls,
+	}
+	*messages = append(*messages, assistantMsg)
 
-				// Parse tool arguments
-				var args map[string]string
-				if err := json.Unmarshal(toolCall.Arguments, &args); err != nil {
-					// If arguments are not a map, try as a simple string
-					args = map[string]string{"input": string(toolCall.Arguments)}
-				}
-
-				// Merge with agent parameters
-				for k, v := range opts.AgentParams {
-					if _, exists := args[k]; !exists {
-						args[k] = v
-					}
-				}
-
-				// Add source path if not present
-				if _, exists := args["SOURCE_PATH"]; !exists && opts.SourcePath != "" {
-					args["SOURCE_PATH"] = opts.SourcePath
-				}
-
-				// Execute the tool
-				toolOutput, err := o.agentExecutor.RunTool(opts.AgentName, toolCall.Name, args)
-				if err != nil {
-					// Add error as tool response
-					toolOutput = fmt.Sprintf("Error executing tool: %v", err)
-					log.Error().
-						Err(err).
-						Str("tool", toolCall.Name).
-						Msg("Tool execution failed")
-				}
-
-				// Add tool response to conversation
-				toolMsg := ai.ChatMessage{
-					Role:       "tool",
-					Content:    toolOutput,
-					ToolCallID: toolCall.ID,
-				}
-				messages = append(messages, toolMsg)
-
-				log.Debug().
-					Str("tool", toolCall.Name).
-					Int("output_len", len(toolOutput)).
-					Msg("Tool executed successfully")
-			}
-		} else {
-			// AI provided final answer
-			log.Info().Msg("AI provided final response")
-
-			// Add final assistant message to history
-			messages = append(messages, ai.ChatMessage{
-				Role:    "assistant",
-				Content: response.Message,
-			})
-
-			// Check if response is valid JSON
-			var jsonCheck interface{}
-			if err := json.Unmarshal([]byte(response.Message), &jsonCheck); err != nil {
-				// If not JSON, ask AI to format as JSON
-				messages = append(messages, ai.ChatMessage{
-					Role:    "user",
-					Content: "Please format your response as valid JSON matching the template schema.",
-				})
-				continue
-			}
-
-			return response.Message, nil
-		}
-
-		// Check if we should stop (e.g., finish_reason is "stop")
-		if response.FinishReason == "stop" && response.Message != "" {
-			return response.Message, nil
+	// Execute each tool call
+	for _, toolCall := range toolCalls {
+		err := o.executeSingleTool(toolCall, messages, opts)
+		if err != nil {
+			return err
 		}
 	}
 
-	return "", fmt.Errorf("analysis loop reached maximum turns (%d) without completion", opts.MaxTurns)
+	return nil
+}
+
+// executeSingleTool executes a single tool call and adds the result to messages.
+func (o *Orchestrator) executeSingleTool(toolCall ai.ToolCall, messages *[]ai.ChatMessage, opts AnalysisOptions) error {
+	log.Info().
+		Str("tool", toolCall.Name).
+		Str("id", toolCall.ID).
+		Msg("Executing tool")
+
+	// Parse and prepare arguments
+	args := o.prepareToolArguments(toolCall, opts)
+
+	// Execute the tool
+	toolOutput, err := o.agentExecutor.RunTool(opts.AgentName, toolCall.Name, args)
+	if err != nil {
+		// Add error as tool response
+		toolOutput = fmt.Sprintf("Error executing tool: %v", err)
+		log.Error().
+			Err(err).
+			Str("tool", toolCall.Name).
+			Msg("Tool execution failed")
+	}
+
+	// Add tool response to conversation
+	toolMsg := ai.ChatMessage{
+		Role:       "tool",
+		Content:    toolOutput,
+		ToolCallID: toolCall.ID,
+	}
+	*messages = append(*messages, toolMsg)
+
+	log.Debug().
+		Str("tool", toolCall.Name).
+		Int("output_len", len(toolOutput)).
+		Msg("Tool executed successfully")
+
+	return nil
+}
+
+// prepareToolArguments prepares arguments for tool execution.
+func (o *Orchestrator) prepareToolArguments(toolCall ai.ToolCall, opts AnalysisOptions) map[string]string {
+	// Parse tool arguments
+	var args map[string]string
+	if err := json.Unmarshal(toolCall.Arguments, &args); err != nil {
+		// If arguments are not a map, try as a simple string
+		args = map[string]string{"input": string(toolCall.Arguments)}
+	}
+
+	// Merge with agent parameters
+	for k, v := range opts.AgentParams {
+		if _, exists := args[k]; !exists {
+			args[k] = v
+		}
+	}
+
+	// Add source path if not present
+	if _, exists := args["SOURCE_PATH"]; !exists && opts.SourcePath != "" {
+		args["SOURCE_PATH"] = opts.SourcePath
+	}
+
+	return args
+}
+
+// handleAIResponse processes the AI's final response.
+func (o *Orchestrator) handleAIResponse(response *ai.ChatResponse, messages *[]ai.ChatMessage) (string, bool, error) {
+	log.Info().Msg("AI provided final response")
+
+	// Add final assistant message to history
+	*messages = append(*messages, ai.ChatMessage{
+		Role:    "assistant",
+		Content: response.Message,
+	})
+
+	// Check if response is valid JSON
+	var jsonCheck interface{}
+	if err := json.Unmarshal([]byte(response.Message), &jsonCheck); err != nil {
+		// If not JSON, ask AI to format as JSON
+		*messages = append(*messages, ai.ChatMessage{
+			Role:    "user",
+			Content: "Please format your response as valid JSON matching the template schema.",
+		})
+		return "", true, nil
+	}
+
+	// Check if we should stop (e.g., finish_reason is "stop")
+	if response.FinishReason == "stop" && response.Message != "" {
+		return response.Message, false, nil
+	}
+
+	return response.Message, false, nil
 }
 
 // convertAgentTools converts agent tool definitions to AI tool format.
@@ -191,9 +246,11 @@ func convertAgentTools(agentDef *agent.Definition) []ai.Tool {
 					paramName := arg[start+2 : start+end]
 					// Convert to lowercase for consistency
 					paramKey := strings.ToLower(paramName)
-					params["properties"].(map[string]interface{})[paramKey] = map[string]interface{}{
-						"type":        "string",
-						"description": fmt.Sprintf("Value for %s", paramName),
+					if props, ok := params["properties"].(map[string]interface{}); ok {
+						props[paramKey] = map[string]interface{}{
+							"type":        "string",
+							"description": fmt.Sprintf("Value for %s", paramName),
+						}
 					}
 				}
 			}
@@ -209,74 +266,4 @@ func convertAgentTools(agentDef *agent.Definition) []ai.Tool {
 	}
 
 	return tools
-}
-
-// GenerateWithAgent generates a document using an agent for analysis.
-func (o *Orchestrator) GenerateWithAgent(ctx context.Context, opts Options, agentName string, agentParams map[string]string) error {
-	// Load template
-	template, err := o.registry.Load(opts.TemplateType)
-	if err != nil {
-		return fmt.Errorf("failed to load template: %w", err)
-	}
-
-	// Check if template has analysis prompts
-	if template.Analysis == nil || template.Analysis.SystemPrompt == "" {
-		return fmt.Errorf("template '%s' does not support agent-based analysis", opts.TemplateType)
-	}
-
-	// Determine source path
-	sourcePath := ""
-	if len(opts.Sources) > 0 {
-		sourcePath = opts.Sources[0] // Use first source as primary path
-	}
-
-	// Run the analysis loop
-	analysisOpts := AnalysisOptions{
-		AgentName:   agentName,
-		Template:    template,
-		SourcePath:  sourcePath,
-		MaxTurns:    10, // Default max turns
-		AgentParams: agentParams,
-	}
-
-	jsonResponse, err := o.runAnalysisLoop(ctx, analysisOpts)
-	if err != nil {
-		return fmt.Errorf("analysis loop failed: %w", err)
-	}
-
-	// Validate the response against template schema
-	schemaBytes, err := json.Marshal(template.FieldSchema)
-	if err != nil {
-		return fmt.Errorf("failed to marshal schema: %w", err)
-	}
-	if err := o.validator.Validate(jsonResponse, string(schemaBytes)); err != nil {
-		log.Warn().Err(err).Msg("AI response validation failed")
-		// For now, we'll continue with the response as-is
-		// In production, we would implement repair logic here
-	}
-
-	// Parse the JSON response
-	var fields map[string]interface{}
-	if err := json.Unmarshal([]byte(jsonResponse), &fields); err != nil {
-		return fmt.Errorf("failed to parse JSON response: %w", err)
-	}
-
-	// Render the document
-	// For now, using a simple approach - in production this would use the renderer
-	htmlContent := template.HTMLTemplate
-	for key, value := range fields {
-		placeholder := fmt.Sprintf(`<!-- data-field="%s" -->`, key)
-		htmlContent = strings.ReplaceAll(htmlContent, placeholder, fmt.Sprintf("%v", value))
-	}
-
-	// Write output files
-	if err := o.writeOutput(opts.OutputFile, htmlContent, fields, opts.Force); err != nil {
-		return fmt.Errorf("failed to write output: %w", err)
-	}
-
-	log.Info().
-		Str("output", opts.OutputFile).
-		Msg("Document generated successfully with agent analysis")
-
-	return nil
 }

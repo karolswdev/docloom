@@ -10,8 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/karolswdev/docloom/internal/agents/csharp/parser"
 	"github.com/spf13/cobra"
+
+	"github.com/karolswdev/docloom/internal/agents/csharp/parser"
 )
 
 // AgentOutput represents the structured output from the agent
@@ -275,8 +276,8 @@ var getFileContentCmd = &cobra.Command{
 			output := map[string]interface{}{
 				"error": fmt.Sprintf("File not found: %s", filePath),
 			}
-			if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
-				fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
+			if encodeErr := json.NewEncoder(os.Stdout).Encode(output); encodeErr != nil {
+				fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", encodeErr)
 				os.Exit(1)
 			}
 			return
@@ -411,9 +412,18 @@ func runLegacyAnalysis(cmd *cobra.Command, args []string) {
 	output := generateOutput(&allAPIs, extractMetrics)
 
 	// Write output files
-	writeProjectSummary(outputPath, &output.ProjectSummary)
-	writeAPISurface(outputPath, &allAPIs)
-	writeArchitecturalInsights(outputPath, &output.ArchitecturalInsights)
+	if writeErr := writeProjectSummary(outputPath, &output.ProjectSummary); writeErr != nil {
+		fmt.Fprintf(os.Stderr, "failed to write project summary: %v\n", writeErr)
+		os.Exit(1)
+	}
+	if writeErr := writeAPISurface(outputPath, &allAPIs); writeErr != nil {
+		fmt.Fprintf(os.Stderr, "failed to write API surface: %v\n", writeErr)
+		os.Exit(1)
+	}
+	if writeErr := writeArchitecturalInsights(outputPath, &output.ArchitecturalInsights); writeErr != nil {
+		fmt.Fprintf(os.Stderr, "failed to write architectural insights: %v\n", writeErr)
+		// Non-fatal, continue
+	}
 
 	// Write JSON output
 	jsonPath := filepath.Join(outputPath, "analysis.json")
