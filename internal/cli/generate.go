@@ -1,8 +1,12 @@
 package cli
 
 import (
+	"context"
 	"fmt"
+	"os"
 
+	"github.com/karolswdev/docloom/internal/ai"
+	"github.com/karolswdev/docloom/internal/generate"
 	"github.com/spf13/cobra"
 )
 
@@ -31,26 +35,72 @@ with a selected template type and AI-generated content mapped to that template's
 Example:
   docloom generate --type architecture-vision --source ./docs --out output.html`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// For now, just print a message indicating the command would run
-		if dryRun {
-			fmt.Println("Dry-run mode: would generate document with the following settings:")
-			fmt.Printf("  Template: %s\n", templateType)
-			fmt.Printf("  Sources: %v\n", sources)
-			fmt.Printf("  Output: %s\n", outputFile)
-			fmt.Printf("  Model: %s\n", model)
-			if baseURL != "" {
-				fmt.Printf("  Base URL: %s\n", baseURL)
+		// Get API key from flag or environment
+		if apiKey == "" {
+			apiKey = os.Getenv("OPENAI_API_KEY")
+			if apiKey == "" {
+				apiKey = os.Getenv("DOCLOOM_API_KEY")
 			}
-			fmt.Printf("  Temperature: %.2f\n", temperature)
-			if seed > 0 {
-				fmt.Printf("  Seed: %d\n", seed)
-			}
-			fmt.Printf("  Max retries: %d\n", maxRetries)
-			return nil
 		}
 		
-		// Placeholder for actual generation logic
-		return fmt.Errorf("generate command not yet implemented")
+		// For dry-run, we don't need to create a real AI client
+		var aiClient ai.Client
+		if !dryRun {
+			// Create AI client configuration
+			aiConfig := ai.Config{
+				BaseURL:     baseURL,
+				APIKey:      apiKey,
+				Model:       model,
+				Temperature: float32(temperature),
+				MaxTokens:   4096,
+				MaxRetries:  maxRetries,
+			}
+			
+			if seed > 0 {
+				aiConfig.Seed = &seed
+			}
+			
+			// Create AI client
+			var err error
+			aiClient, err = ai.NewOpenAIClient(aiConfig)
+			if err != nil {
+				return fmt.Errorf("failed to create AI client: %w", err)
+			}
+		}
+		
+		// Create orchestrator
+		orchestrator := generate.NewOrchestrator(aiClient)
+		
+		// Prepare options
+		opts := generate.Options{
+			TemplateType: templateType,
+			Sources:      sources,
+			OutputFile:   outputFile,
+			Model:        model,
+			BaseURL:      baseURL,
+			APIKey:       apiKey,
+			Temperature:  float32(temperature),
+			MaxRetries:   maxRetries,
+			DryRun:       dryRun,
+			Force:        force,
+			MaxRepairs:   3, // Default to 3 repair attempts
+		}
+		
+		if seed > 0 {
+			opts.Seed = &seed
+		}
+		
+		// Run generation
+		ctx := context.Background()
+		if err := orchestrator.Generate(ctx, opts); err != nil {
+			return err
+		}
+		
+		if !dryRun {
+			fmt.Printf("Successfully generated document: %s\n", outputFile)
+		}
+		
+		return nil
 	},
 }
 
