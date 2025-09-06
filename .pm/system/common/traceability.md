@@ -21,15 +21,15 @@ Each entry follows the format:
 ## Phase 6 Traceability
 
 ### STORY-6.1: Agent Execution Engine
-- **ARCH-008** (Decoupled Executor) → TC-20.1 → [Pending]
-- **ARCH-010** (Caching) → TC-20.1 → [Pending]
-- **USER-010** (Parameter Overrides) → TC-22.1 → [Pending]
+- **ARCH-008** (Decoupled Executor) → TC-20.1 → internal/agent/executor_test.go:TestAgentExecutor_RunCommand
+- **ARCH-010** (Caching) → TC-20.1 → internal/agent/cache.go + internal/agent/executor_test.go:TestAgentExecutor_RunCommand
+- **USER-010** (Parameter Overrides) → TC-22.1 → internal/agent/executor_test.go:TestAgentExecutor_ParameterOverrides
 
 ### STORY-6.2: Integration with generate Command
-- **PROD-014** (Integrated Agent Execution) → TC-21.1 → [Pending]
-- **PROD-016** (Agent Workflow) → TC-21.1 → [Pending]
-- **USER-008** (Agent CLI Flags) → TC-21.1 → [Pending]
-- **USER-010** (Parameter Overrides) → TC-22.1 → [Pending]
+- **PROD-014** (Integrated Agent Execution) → TC-21.1 → internal/cli/generate_agent_integration_test.go:TestGenerateCmd_WithAgent_E2E
+- **PROD-016** (Agent Workflow) → TC-21.1 → internal/cli/generate_agent_integration_test.go:TestAgentWorkflowIntegration
+- **USER-008** (Agent CLI Flags) → TC-21.1 → internal/cli/generate.go (--agent, --agent-param flags)
+- **USER-010** (Parameter Overrides) → TC-22.1 → internal/agent/executor_test.go:TestAgentExecutor_ParameterOverrides
 
 ## Previous Phases
 [Previous phase traceability would be maintained here]

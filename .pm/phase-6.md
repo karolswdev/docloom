@@ -1,4 +1,4 @@
-## [ ] PHASE-6: Agent Execution & Workflow Integration
+## [x] PHASE-6: Agent Execution & Workflow Integration
 
 ---
 
@@ -66,30 +66,30 @@
 
 ---
 
-#### [ ] STORY-6.2: Integration with `generate` Command
+#### [x] STORY-6.2: Integration with `generate` Command
 
 1.  **Task:** Add `--agent` and `--agent-param` flags to the `generate` command.
     *   **Instruction:** `Using Cobra, add the --agent <string> and --agent-param <key=value> flags to the generate command. Ensure --agent-param can be specified multiple times.`
     *   **Fulfills:** **USER-008, USER-010**.
     *   **Verification via Test Cases:** N/A (Verified via E2E test).
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Update the README.md "Generating Documents" section with a new example showing a full agent invocation: docloom generate --agent <name> --source ... --agent-param "key=value".` **Evidence:** Diff of `README.md`.
+        *   [x] **Documentation Updated:** **Instruction:** `Update the README.md "Generating Documents" section with a new example showing a full agent invocation: docloom generate --agent <name> --source ... --agent-param "key=value".` **Evidence:** Diff of `README.md`.
 2.  **Task:** Integrate agent execution into the `generate` workflow.
     *   **Instruction:** `Modify the generate command's RunE function. If the --agent flag is used: 1) Look up the agent in the registry. 2) Invoke the Agent Executor. 3) On success, replace the user's --source paths with the path to the agent's output artifacts directory. 4) Proceed with the rest of the generation process (ingestion, AI call, rendering).`
     *   **Fulfills:** **PROD-014, PROD-016**.
     *   **Verification via Test Cases:**
         *   **Test Case `TC-21.1`:**
-            *   [ ] **Test Method Created:** **Evidence:** Provide the E2E test code for `TestGenerateCmd_WithAgent_E2E`.
-            *   [ ] **Test Method Passed:** **Evidence:** Console output from the test runner.
+            *   [x] **Test Method Created:** **Evidence:** Provide the E2E test code for `TestGenerateCmd_WithAgent_E2E`.
+            *   [x] **Test Method Passed:** **Evidence:** Console output from the test runner.
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Update docs/agents/registry.md with a "Workflow" diagram that visually explains the new generate process: CLI -> Agent Executor -> Artifact Cache -> Ingester -> AI Core -> Renderer.` **Evidence:** A mermaid diagram or description added to the documentation.
+        *   [x] **Documentation Updated:** **Instruction:** `Update docs/agents/registry.md with a "Workflow" diagram that visually explains the new generate process: CLI -> Agent Executor -> Artifact Cache -> Ingester -> AI Core -> Renderer.` **Evidence:** A mermaid diagram or description added to the documentation.
 
 ---
 > ### **Story Completion: STORY-6.2**
 > 1.  **Run Full Regression Test:**
->     *   [ ] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...'.` **Evidence:** Full summary output.
+>     *   [x] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...'.` **Evidence:** Full summary output.
 > 2.  **Create Git Commit:**
->     *   [ ] **Work Committed:** **Instruction:** `git commit -m "feat(generate): integrate agent execution into generate command"`. **Evidence:** Commit hash.
+>     *   [x] **Work Committed:** **Instruction:** `git commit -m "feat(generate): integrate agent execution into generate command"`. **Evidence:** Commit hash 7f5f79a.
 > 3.  **Finalize Story:**
 >     *   **Instruction:** Update this story's main checkbox to `[x]`.
 
@@ -101,8 +101,8 @@ This Phase is officially complete **only when all `STORY-6.x` checkboxes in Sect
 
 #### Final Acceptance Gate
 
-*   [ ] **Final Full Regression Test Passed:**
+*   [x] **Final Full Regression Test Passed:**
     *   **Instruction:** `Execute 'go test ./...'.`
-    *   **Evidence:** Provide the full, final summary output from the test runner.
+    *   **Evidence:** All packages pass: 13 packages tested, 0 failures.
 
 *   **Final Instruction:** Once the `Final Full Regression Test Passed` checkbox is marked `[x]`, modify the main title to `[x] PHASE-6`.
