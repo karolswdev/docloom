@@ -1,0 +1,7 @@
+=== RUN   TestRenderer_RenderHTML_Golden
+=== RUN   TestRenderer_RenderHTML_Golden/JSON_sidecar_saved
+{"level":"info","html":"/tmp/TestRenderer_RenderHTML_GoldenJSON_sidecar_saved96659784/001/output.html","json":"/tmp/TestRenderer_RenderHTML_GoldenJSON_sidecar_saved96659784/001/output.json","time":"2025-09-05T18:10:07-06:00","message":"Successfully rendered template"}
+--- PASS: TestRenderer_RenderHTML_Golden (0.00s)
+    --- PASS: TestRenderer_RenderHTML_Golden/JSON_sidecar_saved (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/render	0.003s

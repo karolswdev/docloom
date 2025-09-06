@@ -118,6 +118,39 @@ The SRS outlines a CLI along these lines:
 
 For full details and requirement IDs, see `docs/SRS.md`.
 
+## Container Usage
+
+### Building the Docker Image
+
+To build the docloom Docker image locally:
+
+```bash
+docker build -t docloom:latest .
+```
+
+### Running with Docker
+
+To generate documents using the Docker container:
+
+```bash
+# Mount your source directory and run docloom
+docker run --rm \
+  -v $(pwd)/sources:/workspace/sources \
+  -v $(pwd)/output:/workspace/output \
+  docloom:latest generate \
+  --type architecture-vision \
+  --source /workspace/sources \
+  --out /workspace/output/document.html
+```
+
+### Using Pre-built Images
+
+Pre-built images will be available from GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/karolswdev/docloom:latest
+```
+
 ## Contributing
 
 - Start by reading `docs/SRS.md` to understand scope and constraints.

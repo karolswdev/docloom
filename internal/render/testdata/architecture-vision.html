@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Vision</title>
+</head>
+<body>
+    <header>
+        <h1><!-- data-field="document.title" --></h1>
+        <p class="author">Author: <!-- data-field="document.author" --></p>
+        <p class="date">Date: <!-- data-field="document.date" --></p>
+    </header>
+    
+    <main>
+        <section class="summary">
+            <h2>Executive Summary</h2>
+            <!-- data-field="summary" -->
+        </section>
+        
+        <section class="introduction">
+            <h2>Introduction</h2>
+            <!-- data-field="introduction" -->
+        </section>
+        
+        <section class="vision">
+            <h2>Vision Statement</h2>
+            <!-- data-field="vision.statement" -->
+            
+            <h3>Key Objectives</h3>
+            <ul>
+                <li><!-- data-field="vision.objectives.primary" --></li>
+                <li><!-- data-field="vision.objectives.secondary" --></li>
+            </ul>
+        </section>
+    </main>
+    
+    <footer>
+        <p>Document Code: <!-- data-field="metadata.doc_code" --></p>
+        <p>Version: <!-- data-field="metadata.version" --></p>
+        <p>&copy; <!-- data-field="metadata.copyright_year" --> - All rights reserved</p>
+    </footer>
+</body>
+</html>

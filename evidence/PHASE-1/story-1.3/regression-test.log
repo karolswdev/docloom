@@ -1,0 +1,5 @@
+?   	github.com/karolswdev/docloom/cmd/docloom	[no test files]
+ok  	github.com/karolswdev/docloom/internal/cli	0.003s
+ok  	github.com/karolswdev/docloom/internal/config	0.002s
+ok  	github.com/karolswdev/docloom/internal/render	0.003s
+ok  	github.com/karolswdev/docloom/internal/templates	0.002s
