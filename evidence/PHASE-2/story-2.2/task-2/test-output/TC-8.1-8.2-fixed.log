@@ -1,0 +1,18 @@
+=== RUN   TestValidator_Validate_ValidJSON
+--- PASS: TestValidator_Validate_ValidJSON (0.00s)
+=== RUN   TestValidator_Validate_InvalidJSON
+--- PASS: TestValidator_Validate_InvalidJSON (0.00s)
+=== RUN   TestValidator_Validate_MissingRequiredField
+--- PASS: TestValidator_Validate_MissingRequiredField (0.00s)
+=== RUN   TestValidator_Validate_InvalidJSONSyntax
+--- PASS: TestValidator_Validate_InvalidJSONSyntax (0.00s)
+=== RUN   TestValidator_Validate_ComplexSchema
+--- PASS: TestValidator_Validate_ComplexSchema (0.00s)
+=== RUN   TestValidator_Validate_EnumViolation
+--- PASS: TestValidator_Validate_EnumViolation (0.00s)
+=== RUN   TestValidator_ValidateWithDetails
+--- PASS: TestValidator_ValidateWithDetails (0.00s)
+=== RUN   TestValidator_Validate_AdditionalProperties
+--- PASS: TestValidator_Validate_AdditionalProperties (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/validate	1.021s

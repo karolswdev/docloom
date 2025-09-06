@@ -150,6 +150,15 @@ func (r *Registry) Get(name string) (*Template, error) {
 	return tmpl, nil
 }
 
+// Register adds a new template to the registry
+func (r *Registry) Register(name string, tmpl *Template) error {
+	if _, exists := r.templates[name]; exists {
+		return fmt.Errorf("template '%s' already exists", name)
+	}
+	r.templates[name] = tmpl
+	return nil
+}
+
 // List returns all available template names
 func (r *Registry) List() []string {
 	names := make([]string, 0, len(r.templates))

@@ -1,0 +1,75 @@
+=== RUN   TestGenerationFlow_RepairLoop
+--- PASS: TestGenerationFlow_RepairLoop (0.00s)
+=== RUN   TestConfig_SecretRedactionInLogs
+--- PASS: TestConfig_SecretRedactionInLogs (0.00s)
+=== RUN   TestOrchestrator_ValidateOptions
+=== RUN   TestOrchestrator_ValidateOptions/missing_template_type
+=== RUN   TestOrchestrator_ValidateOptions/missing_sources
+=== RUN   TestOrchestrator_ValidateOptions/missing_output_file
+=== RUN   TestOrchestrator_ValidateOptions/missing_API_key
+=== RUN   TestOrchestrator_ValidateOptions/valid_options
+=== RUN   TestOrchestrator_ValidateOptions/dry_run_without_API_key_is_allowed
+--- PASS: TestOrchestrator_ValidateOptions (0.00s)
+    --- PASS: TestOrchestrator_ValidateOptions/missing_template_type (0.00s)
+    --- PASS: TestOrchestrator_ValidateOptions/missing_sources (0.00s)
+    --- PASS: TestOrchestrator_ValidateOptions/missing_output_file (0.00s)
+    --- PASS: TestOrchestrator_ValidateOptions/missing_API_key (0.00s)
+    --- PASS: TestOrchestrator_ValidateOptions/valid_options (0.00s)
+    --- PASS: TestOrchestrator_ValidateOptions/dry_run_without_API_key_is_allowed (0.00s)
+=== RUN   TestOrchestrator_Generate_DryRun
+
+=== DRY RUN MODE ===
+Template: dry-test
+Sources: [/tmp/TestOrchestrator_Generate_DryRun910461871/001/test.md]
+Output: /tmp/TestOrchestrator_Generate_DryRun910461871/001/output.html
+Model: 
+Estimated tokens: 207
+
+=== PROMPT PREVIEW (first 1000 chars) ===
+You are a technical documentation generator. Your task is to generate structured JSON content based on the provided source documents and template requirements.
+
+## Template Instructions
+Test prompt
+
+## JSON Schema
+Your response MUST conform to the following JSON schema:
+```json
+{
+  "properties": {
+    "title": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}
+```
+
+## Source Documents
+Use the following source content to generate the JSON fields:
+```
+--- File: /tmp/TestOrchestrator_Generate_DryRun910461871/001/test.md ---
+# Test
+```
+
+## Instructions
+1. Analyze the source documents carefully
+2. Generate JSON that matches the schema exactly
+3. Use information from the source documents to populate the fields
+4. Ensure all required fields are present
+5. Return ONLY valid JSON, no additional text or markdown formatting
+
+
+=== SCHEMA ===
+{
+  "properties": {
+    "title": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}
+--- PASS: TestOrchestrator_Generate_DryRun (0.00s)
+=== RUN   TestOrchestrator_Generate_ForceOverwrite
+--- PASS: TestOrchestrator_Generate_ForceOverwrite (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/generate	1.019s

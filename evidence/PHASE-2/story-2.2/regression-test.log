@@ -1,0 +1,10 @@
+?   	github.com/karolswdev/docloom/cmd/docloom	[no test files]
+ok  	github.com/karolswdev/docloom/internal/ai	1.102s
+ok  	github.com/karolswdev/docloom/internal/cli	1.010s
+ok  	github.com/karolswdev/docloom/internal/config	1.010s
+ok  	github.com/karolswdev/docloom/internal/generate	1.020s
+ok  	github.com/karolswdev/docloom/internal/ingest	1.012s
+?   	github.com/karolswdev/docloom/internal/prompt	[no test files]
+ok  	github.com/karolswdev/docloom/internal/render	1.012s
+ok  	github.com/karolswdev/docloom/internal/templates	1.011s
+ok  	github.com/karolswdev/docloom/internal/validate	1.019s

@@ -1,0 +1,76 @@
+diff --git a/README.md b/README.md
+index 7012365..b9bc43c 100644
+--- a/README.md
++++ b/README.md
+@@ -66,6 +66,47 @@ To see available commands and options:
+ ```bash
+ docloom --help
+ docloom generate --help
++docloom templates list
++```
++
++### Generating Documents
++
++To generate a document from your source materials:
++
++```bash
++# Basic usage with API key via environment variable
++export OPENAI_API_KEY="your-api-key-here"
++docloom generate \
++  --type architecture-vision \
++  --source ./docs \
++  --out output.html
++
++# Or provide API key directly
++docloom generate \
++  --type architecture-vision \
++  --source ./docs \
++  --out output.html \
++  --api-key "your-api-key-here"
++
++# Using multiple source paths
++docloom generate \
++  --type technical-debt-summary \
++  --source ./docs --source ./notes.md \
++  --out debt-report.html
++
++# Dry-run mode to preview without API calls
++docloom generate \
++  --type architecture-vision \
++  --source ./docs \
++  --out output.html \
++  --dry-run
++
++# Force overwrite existing output
++docloom generate \
++  --type architecture-vision \
++  --source ./docs \
++  --out output.html \
++  --force
+ ```
+ 
+ ## Configuration
+@@ -99,13 +140,16 @@ dry_run: false
+ 
+ ### Environment Variables
+ 
+-- `DOCLOOM_MODEL` - AI model to use
+-- `DOCLOOM_BASE_URL` - Base URL for OpenAI-compatible API
+-- `DOCLOOM_API_KEY` or `OPENAI_API_KEY` - API key for authentication
+-- `DOCLOOM_TEMPERATURE` - Temperature for model generation
+-- `DOCLOOM_TEMPLATE_DIR` - Directory containing templates
+-- `DOCLOOM_VERBOSE` - Enable verbose logging
+-- `DOCLOOM_DRY_RUN` - Enable dry-run mode
++- `OPENAI_API_KEY` - API key for OpenAI or compatible services (required for generation)
++- `DOCLOOM_MODEL` - AI model to use (default: gpt-4)
++- `DOCLOOM_BASE_URL` - Base URL for OpenAI-compatible API (default: https://api.openai.com/v1)
++- `DOCLOOM_API_KEY` - Alternative to `OPENAI_API_KEY`
++- `DOCLOOM_TEMPERATURE` - Temperature for model generation (0.0-1.0, default: 0.7)
++- `DOCLOOM_TEMPLATE_DIR` - Directory containing custom templates
++- `DOCLOOM_VERBOSE` - Enable verbose logging (shows detailed progress)
++- `DOCLOOM_DRY_RUN` - Enable dry-run mode (preview without API calls)
++
++**Note:** API keys are never logged or included in output files. The system automatically redacts them from any debug output.
+ 
+ ## Planned CLI (from SRS)
+ 

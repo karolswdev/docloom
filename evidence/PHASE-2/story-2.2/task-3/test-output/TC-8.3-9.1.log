@@ -1,0 +1,16 @@
+# github.com/karolswdev/docloom/internal/generate [github.com/karolswdev/docloom/internal/generate.test]
+internal/generate/orchestrator.go:58:24: undefined: templates.GetRegistry
+internal/generate/orchestrator.go:59:14: not enough arguments in call to render.NewRenderer
+	have ()
+	want (string)
+internal/generate/orchestrator.go:78:26: o.registry.GetTemplate undefined (type *templates.Registry has no field or method GetTemplate)
+internal/generate/orchestrator.go:203:33: o.renderer.RenderTemplate undefined (type *render.Renderer has no field or method RenderTemplate)
+internal/generate/orchestrator_test.go:54:24: undefined: templates.GetRegistry
+internal/generate/orchestrator_test.go:69:3: unknown field ID in struct literal of type templates.Template
+internal/generate/orchestrator_test.go:72:16: cannot use testSchema (variable of type map[string]interface{}) as "encoding/json".RawMessage value in struct literal
+internal/generate/orchestrator_test.go:74:3: unknown field HTMLPath in struct literal of type templates.Template
+internal/generate/orchestrator_test.go:265:24: undefined: templates.GetRegistry
+internal/generate/orchestrator_test.go:276:3: unknown field ID in struct literal of type templates.Template
+internal/generate/orchestrator_test.go:276:3: too many errors
+FAIL	github.com/karolswdev/docloom/internal/generate [build failed]
+FAIL

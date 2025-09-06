@@ -1,0 +1,5 @@
+# github.com/karolswdev/docloom/internal/validate [github.com/karolswdev/docloom/internal/validate.test]
+internal/validate/validator.go:39:48: cannot use schemaData (variable of type interface{}) as io.Reader value in argument to compiler.AddResource: interface{} does not implement io.Reader (missing method Read)
+internal/validate/validator.go:140:48: cannot use schemaData (variable of type interface{}) as io.Reader value in argument to compiler.AddResource: interface{} does not implement io.Reader (missing method Read)
+FAIL	github.com/karolswdev/docloom/internal/validate [build failed]
+FAIL
