@@ -31,5 +31,13 @@ Each entry follows the format:
 - **USER-008** (Agent CLI Flags) → TC-21.1 → internal/cli/generate.go (--agent, --agent-param flags)
 - **USER-010** (Parameter Overrides) → TC-22.1 → internal/agent/executor_test.go:TestAgentExecutor_ParameterOverrides
 
+## Phase 7 Traceability
+
+### STORY-7.1: Integrating the Tree-sitter C# Parser
+- **PROD-017** (Initial C# Analyzer Agent) → TC-23.1 → internal/agents/csharp/parser/parser_test.go:TestCSharpParser_ExtractAPISurface
+
+### STORY-7.2: Building the Executable Agent and Final Integration  
+- **PROD-017** (Initial C# Analyzer Agent) → TC-23.2 → internal/cli/generate_agent_csharp_test.go:TestCSharpAgent_E2E_Integration
+
 ## Previous Phases
 [Previous phase traceability would be maintained here]
