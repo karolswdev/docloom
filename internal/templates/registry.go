@@ -54,6 +54,9 @@ func (r *Registry) LoadDefaults() error {
 	// For now, we'll create sample templates programmatically
 	// In production, these would be loaded from the embedded FS
 	r.registerDefaultTemplates()
+	
+	// Add analysis prompts to templates
+	r.UpdateDefaultTemplatesWithAnalysis()
 
 	return nil
 }
