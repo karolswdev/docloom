@@ -1,0 +1,214 @@
+# GoReleaser configuration for DocLoom
+# Documentation: https://goreleaser.com
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: docloom
+    main: ./cmd/docloom
+    binary: docloom
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    # Skip some combinations that are less common
+    ignore:
+      - goos: windows
+        goarch: arm64
+    # Build flags
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/karolswdev/docloom/internal/version.Version={{.Version}}
+      - -X github.com/karolswdev/docloom/internal/version.GitCommit={{.ShortCommit}}
+      - -X github.com/karolswdev/docloom/internal/version.BuildDate={{.Date}}
+    # Custom build tags
+    tags:
+      - netgo
+      - osusergo
+
+archives:
+  - id: default
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE*
+      - README.md
+      - docs/SRS.md
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^style:'
+      - '^ci:'
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: 'Features'
+      regexp: '^feat'
+    - title: 'Bug Fixes'
+      regexp: '^fix'
+    - title: 'Performance Improvements'
+      regexp: '^perf'
+    - title: 'Refactoring'
+      regexp: '^refactor'
+    - title: 'Other Changes'
+
+dockers:
+  - id: docloom-docker
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/karolswdev/docloom:latest"
+      - "ghcr.io/karolswdev/docloom:{{ .Tag }}"
+      - "ghcr.io/karolswdev/docloom:{{ .Major }}"
+      - "ghcr.io/karolswdev/docloom:{{ .Major }}.{{ .Minor }}"
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://github.com/karolswdev/docloom"
+      - "--label=org.opencontainers.image.description=Beautiful, template-driven technical documentation — fast"
+      - "--build-arg=VERSION={{.Version}}"
+      - "--build-arg=GIT_COMMIT={{.ShortCommit}}"
+      - "--build-arg=BUILD_DATE={{.Date}}"
+    skip_push: false
+    push_flags:
+      - --tls-verify=true
+
+release:
+  github:
+    owner: karolswdev
+    name: docloom
+  draft: false
+  prerelease: auto
+  name_template: "{{.ProjectName}} v{{.Version}}"
+  header: |
+    ## DocLoom {{.Version}}
+    
+    Beautiful, template-driven technical documentation — fast.
+    
+    ### What's Changed
+  footer: |
+    ## Installation
+    
+    ### Binary Installation
+    
+    Download the appropriate binary for your platform from the assets below.
+    
+    ```bash
+    # Linux/macOS
+    tar -xzf docloom_*.tar.gz
+    sudo mv docloom /usr/local/bin/
+    docloom --version
+    ```
+    
+    ### Docker
+    
+    ```bash
+    docker pull ghcr.io/karolswdev/docloom:{{.Version}}
+    docker run --rm ghcr.io/karolswdev/docloom:{{.Version}} --version
+    ```
+    
+    ### Go Install
+    
+    ```bash
+    go install github.com/karolswdev/docloom/cmd/docloom@{{.Tag}}
+    ```
+    
+    **Full Documentation:** https://github.com/karolswdev/docloom#readme
+  
+# Announce releases to various channels (optional)
+announce:
+  skip: true  # Can be configured later for Discord, Slack, Twitter, etc.
+
+# Sign the checksums file
+signs:
+  - artifacts: checksum
+    cmd: gpg
+    args:
+      - --batch
+      - --yes
+      - --detach-sign
+      - --armor
+      - --output
+      - "${signature}"
+      - "${artifact}"
+    signature: "${artifact}.sig"
+    artifacts: checksum
+    output: true
+    # Only sign if GPG key is available
+    ids:
+      - default
+
+# GitHub/GitLab/Gitea releases
+publishers:
+  - name: "github"
+    ids:
+      - default
+    draft: false
+    prerelease: auto
+    
+# Homebrew tap (optional, can be added later)
+# brews:
+#   - repository:
+#       owner: karolswdev
+#       name: homebrew-tap
+#     folder: Formula
+#     homepage: https://github.com/karolswdev/docloom
+#     description: Beautiful, template-driven technical documentation — fast
+#     license: MIT
+
+# Scoop bucket (optional, for Windows)
+# scoop:
+#   bucket:
+#     owner: karolswdev
+#     name: scoop-bucket
+#   homepage: https://github.com/karolswdev/docloom
+#   description: Beautiful, template-driven technical documentation — fast
+#   license: MIT
+
+# Snapcraft (optional, for Linux)
+# snapcrafts:
+#   - name: docloom
+#     summary: Beautiful, template-driven technical documentation — fast
+#     description: |
+#       Docloom is a system for technical folks to generate high-quality documents
+#       by combining structured templates with source materials and model-assisted content.
+#     grade: stable
+#     confinement: strict
+#     license: MIT

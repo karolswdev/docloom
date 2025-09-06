@@ -13,11 +13,87 @@ Docloom is currently in early development. The Software Requirements Specificati
 - **Sources:** Local Markdown, text, and other artifacts provide the factual basis for generation.
 - **Renderers:** Produce attractive HTML ready for print/PDF, plus a JSON sidecar of the filled fields for traceability.
 
+## Installation
+
+### Download Pre-built Binaries
+
+Download the latest release for your platform from the [GitHub Releases](https://github.com/karolswdev/docloom/releases) page.
+
+#### Linux/macOS
+
+```bash
+# Download the latest release (replace VERSION and PLATFORM)
+curl -L https://github.com/karolswdev/docloom/releases/download/VERSION/docloom_VERSION_PLATFORM.tar.gz -o docloom.tar.gz
+
+# Extract
+tar -xzf docloom.tar.gz
+
+# Move to PATH
+sudo mv docloom /usr/local/bin/
+
+# Verify installation
+docloom --version
+```
+
+#### Windows
+
+Download the `.zip` file from the releases page, extract it, and add the binary to your PATH.
+
+### Install via Go
+
+If you have Go 1.22+ installed:
+
+```bash
+go install github.com/karolswdev/docloom/cmd/docloom@latest
+```
+
+### Docker
+
+Pull and run the official Docker image:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/karolswdev/docloom:latest
+
+# Run docloom
+docker run --rm -v $(pwd):/workspace ghcr.io/karolswdev/docloom:latest --help
+
+# Generate a document
+docker run --rm \
+  -v $(pwd)/sources:/workspace/sources \
+  -v $(pwd)/output:/workspace/output \
+  -e OPENAI_API_KEY="$OPENAI_API_KEY" \
+  ghcr.io/karolswdev/docloom:latest generate \
+  --type architecture-vision \
+  --source /workspace/sources \
+  --out /workspace/output/document.html
+```
+
+### Build from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/karolswdev/docloom.git
+cd docloom
+
+# Build with make
+make build
+
+# Or build directly with Go
+go build -o docloom ./cmd/docloom
+
+# Install to $GOPATH/bin
+make install
+```
+
 ## Current Status
 
-- The SRS defines the planned CLI, behaviors, and extensibility. See `docs/SRS.md`.
-- A sample HTML template (Architecture Vision) demonstrates the look, layout, and simple JSON-based filling.
-- CLI and end‑to‑end pipeline are under active design per the SRS.
+- Full CLI implementation with document generation, validation, and repair loops
+- Multiple template types (architecture-vision, technical-debt-summary, reference-architecture)
+- AI integration with OpenAI-compatible APIs
+- PDF extraction support (optional, via pdftotext)
+- Dry-run mode for testing without API calls
+- Comprehensive test coverage and CI/CD pipeline
 
 ## Repository Layout
 
@@ -233,38 +309,6 @@ The SRS outlines a CLI along these lines:
 
 For full details and requirement IDs, see `docs/SRS.md`.
 
-## Container Usage
-
-### Building the Docker Image
-
-To build the docloom Docker image locally:
-
-```bash
-docker build -t docloom:latest .
-```
-
-### Running with Docker
-
-To generate documents using the Docker container:
-
-```bash
-# Mount your source directory and run docloom
-docker run --rm \
-  -v $(pwd)/sources:/workspace/sources \
-  -v $(pwd)/output:/workspace/output \
-  docloom:latest generate \
-  --type architecture-vision \
-  --source /workspace/sources \
-  --out /workspace/output/document.html
-```
-
-### Using Pre-built Images
-
-Pre-built images will be available from GitHub Container Registry:
-
-```bash
-docker pull ghcr.io/karolswdev/docloom:latest
-```
 
 ## Contributing
 
