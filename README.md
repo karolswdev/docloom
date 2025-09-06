@@ -107,6 +107,40 @@ docloom generate \
   --source ./docs \
   --out output.html \
   --force
+
+# Using different AI models
+docloom generate \
+  --type architecture-vision \
+  --source ./docs \
+  --out output.html \
+  --model gpt-3.5-turbo
+
+# Using Azure OpenAI
+docloom generate \
+  --type architecture-vision \
+  --source ./docs \
+  --out output.html \
+  --model gpt-35-turbo \
+  --base-url https://myinstance.openai.azure.com \
+  --api-key "your-azure-api-key"
+
+# Using a local LLM server (e.g., Ollama, LocalAI)
+docloom generate \
+  --type architecture-vision \
+  --source ./docs \
+  --out output.html \
+  --model llama2 \
+  --base-url http://localhost:8080/v1 \
+  --api-key "dummy-key-if-required"
+
+# Using Claude via OpenAI-compatible API
+docloom generate \
+  --type architecture-vision \
+  --source ./docs \
+  --out output.html \
+  --model claude-3-opus \
+  --base-url https://api.anthropic.com/v1 \
+  --api-key "your-anthropic-api-key"
 ```
 
 ## Configuration
@@ -150,6 +184,19 @@ dry_run: false
 - `DOCLOOM_DRY_RUN` - Enable dry-run mode (preview without API calls)
 
 **Note:** API keys are never logged or included in output files. The system automatically redacts them from any debug output.
+
+### Supported AI Providers
+
+DocLoom supports any OpenAI-compatible API endpoint. This includes:
+
+- **OpenAI** - Use models like `gpt-4`, `gpt-3.5-turbo`, `gpt-4-turbo-preview`
+- **Azure OpenAI** - Use your Azure deployment names (e.g., `gpt-35-turbo`)
+- **Local LLMs** - Via Ollama, LocalAI, or other OpenAI-compatible servers
+- **Anthropic Claude** - If using an OpenAI-compatible proxy
+- **Google Gemini** - If using an OpenAI-compatible proxy
+- **Custom deployments** - Any service implementing the OpenAI chat completions API
+
+The `--model` flag specifies which model to use, and `--base-url` specifies the API endpoint. The combination of these two settings allows you to use virtually any LLM provider.
 
 ## Planned CLI (from SRS)
 

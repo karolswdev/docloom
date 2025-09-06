@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -268,4 +269,138 @@ func TestOpenAIClient_GenerateJSON_ContextCancellation(t *testing.T) {
 	assert.Empty(t, result)
 	// Should have made only 1 or 2 requests before cancellation
 	assert.LessOrEqual(t, atomic.LoadInt32(&requestCount), int32(2))
+}
+
+// TestOpenAIClient_ConfigIntegration tests that model and base URL configuration are properly used.
+func TestOpenAIClient_ConfigIntegration(t *testing.T) {
+	tests := []struct {
+		name           string
+		config         Config
+		expectedModel  string
+		expectedPath   string
+		expectedAuth   string
+	}{
+		{
+			name: "OpenAI default configuration",
+			config: Config{
+				BaseURL: "https://api.openai.com/v1",
+				APIKey:  "sk-test123",
+				Model:   "gpt-4",
+			},
+			expectedModel: "gpt-4",
+			expectedPath:  "/v1/chat/completions",
+			expectedAuth:  "Bearer sk-test123",
+		},
+		{
+			name: "Azure OpenAI configuration",
+			config: Config{
+				BaseURL: "https://myinstance.openai.azure.com",
+				APIKey:  "azure-key-456",
+				Model:   "gpt-35-turbo",
+			},
+			expectedModel: "gpt-35-turbo",
+			expectedPath:  "/chat/completions",
+			expectedAuth:  "Bearer azure-key-456",
+		},
+		{
+			name: "Local LLM configuration",
+			config: Config{
+				BaseURL: "http://localhost:8080/v1",
+				APIKey:  "local-key",
+				Model:   "llama2-7b",
+			},
+			expectedModel: "llama2-7b",
+			expectedPath:  "/v1/chat/completions",
+			expectedAuth:  "Bearer local-key",
+		},
+		{
+			name: "Claude via OpenAI-compatible API",
+			config: Config{
+				BaseURL: "https://api.anthropic.com/v1",
+				APIKey:  "claude-key",
+				Model:   "claude-3-opus",
+			},
+			expectedModel: "claude-3-opus",
+			expectedPath:  "/v1/chat/completions",
+			expectedAuth:  "Bearer claude-key",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a mock server to capture the request details
+			var capturedModel string
+			var capturedPath string
+			var capturedAuth string
+			
+			mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				capturedPath = r.URL.Path
+				capturedAuth = r.Header.Get("Authorization")
+				
+				// Parse request body to get the model
+				var reqBody map[string]interface{}
+				if err := json.NewDecoder(r.Body).Decode(&reqBody); err == nil {
+					if model, ok := reqBody["model"].(string); ok {
+						capturedModel = model
+					}
+				}
+				
+				// Return a valid response
+				response := map[string]interface{}{
+					"id":      "test-id",
+					"object":  "chat.completion",
+					"created": time.Now().Unix(),
+					"model":   tt.expectedModel,
+					"choices": []map[string]interface{}{
+						{
+							"index": 0,
+							"message": map[string]interface{}{
+								"role":    "assistant",
+								"content": `{"test": "response"}`,
+							},
+							"finish_reason": "stop",
+						},
+					},
+				}
+				
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				json.NewEncoder(w).Encode(response)
+			}))
+			defer mockServer.Close()
+			
+			// Update config to use mock server, preserving the path structure
+			tt.config.BaseURL = mockServer.URL + strings.TrimPrefix(tt.config.BaseURL, strings.Split(tt.config.BaseURL, "/")[0]+"//"+strings.Split(tt.config.BaseURL, "/")[2])
+			
+			// Create client
+			client, err := NewOpenAIClient(tt.config)
+			require.NoError(t, err)
+			
+			// Make a request
+			ctx := context.Background()
+			_, err = client.GenerateJSON(ctx, "Test prompt")
+			require.NoError(t, err)
+			
+			// Verify the request used the correct configuration
+			assert.Equal(t, tt.expectedModel, capturedModel, "Model mismatch")
+			assert.Equal(t, tt.expectedPath, capturedPath, "Path mismatch")
+			assert.Equal(t, tt.expectedAuth, capturedAuth, "Authorization header mismatch")
+		})
+	}
+}
+
+// TestOpenAIClient_DefaultBaseURL tests that the default base URL is set when not provided.
+func TestOpenAIClient_DefaultBaseURL(t *testing.T) {
+	// Create a client without specifying BaseURL
+	config := Config{
+		APIKey: "test-key",
+		Model:  "gpt-4",
+	}
+	
+	client, err := NewOpenAIClient(config)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	
+	// Verify the default BaseURL was set
+	assert.Equal(t, "https://api.openai.com/v1", client.config.BaseURL)
 }

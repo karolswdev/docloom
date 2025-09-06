@@ -163,4 +163,76 @@ func TestConfig_LoadWithPrecedence(t *testing.T) {
 			t.Errorf("Expected API key from env, got '%s'", cfg.APIKey)
 		}
 	})
+	
+	// Test case 8: BaseURL configuration precedence
+	t.Run("BaseURL precedence", func(t *testing.T) {
+		// Test default BaseURL
+		cfg := DefaultConfig()
+		if cfg.BaseURL != "https://api.openai.com/v1" {
+			t.Errorf("Expected default BaseURL 'https://api.openai.com/v1', got '%s'", cfg.BaseURL)
+		}
+		
+		// Test environment override
+		os.Setenv("DOCLOOM_BASE_URL", "https://custom.api.com/v1")
+		defer os.Unsetenv("DOCLOOM_BASE_URL")
+		
+		cfg, err := Load("", nil)
+		if err != nil {
+			t.Fatalf("Failed to load config: %v", err)
+		}
+		if cfg.BaseURL != "https://custom.api.com/v1" {
+			t.Errorf("Expected BaseURL from env 'https://custom.api.com/v1', got '%s'", cfg.BaseURL)
+		}
+		
+		// Test CLI override
+		cliOverrides := map[string]interface{}{
+			"base_url": "https://cli.api.com/v1",
+		}
+		cfg, err = Load("", cliOverrides)
+		if err != nil {
+			t.Fatalf("Failed to load config: %v", err)
+		}
+		if cfg.BaseURL != "https://cli.api.com/v1" {
+			t.Errorf("Expected BaseURL from CLI 'https://cli.api.com/v1', got '%s'", cfg.BaseURL)
+		}
+	})
+	
+	// Test case 9: Model selection for different providers
+	t.Run("Model selection for different providers", func(t *testing.T) {
+		testCases := []struct {
+			name     string
+			model    string
+			baseURL  string
+			valid    bool
+		}{
+			{"OpenAI GPT-4", "gpt-4", "https://api.openai.com/v1", true},
+			{"OpenAI GPT-3.5", "gpt-3.5-turbo", "https://api.openai.com/v1", true},
+			{"Azure OpenAI", "gpt-4", "https://myinstance.openai.azure.com", true},
+			{"Local LLM", "llama2", "http://localhost:8080/v1", true},
+			{"Claude via OpenAI-compatible API", "claude-3-opus", "https://api.anthropic.com/v1", true},
+		}
+		
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				cliOverrides := map[string]interface{}{
+					"model":    tc.model,
+					"base_url": tc.baseURL,
+				}
+				
+				cfg, err := Load("", cliOverrides)
+				if err != nil && tc.valid {
+					t.Fatalf("Failed to load config for %s: %v", tc.name, err)
+				}
+				
+				if tc.valid {
+					if cfg.Model != tc.model {
+						t.Errorf("Expected model '%s', got '%s'", tc.model, cfg.Model)
+					}
+					if cfg.BaseURL != tc.baseURL {
+						t.Errorf("Expected BaseURL '%s', got '%s'", tc.baseURL, cfg.BaseURL)
+					}
+				}
+			})
+		}
+	})
 }

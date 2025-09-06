@@ -33,6 +33,7 @@ type Config struct {
 func DefaultConfig() *Config {
 	return &Config{
 		Model:       "gpt-4",
+		BaseURL:     "https://api.openai.com/v1",
 		Temperature: 0.7,
 		MaxRetries:  3,
 		TemplateDir: "templates",
