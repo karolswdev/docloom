@@ -2,9 +2,11 @@
 package ingest
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -20,7 +22,7 @@ type Ingester struct {
 // NewIngester creates a new Ingester with default supported extensions.
 func NewIngester() *Ingester {
 	return &Ingester{
-		SupportedExtensions: []string{".md", ".txt"},
+		SupportedExtensions: []string{".md", ".txt", ".pdf"},
 	}
 }
 
@@ -109,8 +111,14 @@ func (i *Ingester) isSupportedFile(path string) bool {
 	return false
 }
 
-// readFile reads the entire content of a file.
+// readFile reads the entire content of a file, with special handling for PDFs.
 func (i *Ingester) readFile(path string) (string, error) {
+	// Check if it's a PDF file
+	if strings.ToLower(filepath.Ext(path)) == ".pdf" {
+		return i.extractPDFText(path)
+	}
+
+	// Regular file reading for non-PDF files
 	file, err := os.Open(path)
 	if err != nil {
 		return "", err
@@ -123,6 +131,40 @@ func (i *Ingester) readFile(path string) (string, error) {
 	}
 
 	return string(content), nil
+}
+
+// extractPDFText extracts text from a PDF file using pdftotext.
+func (i *Ingester) extractPDFText(path string) (string, error) {
+	// Check if pdftotext is available
+	if _, err := exec.LookPath("pdftotext"); err != nil {
+		log.Warn().Str("file", path).Msg("pdftotext not found in PATH, attempting basic extraction")
+		// Fall back to reading the file as-is (will likely produce garbled output)
+		// In a production system, we might want to use a Go PDF library here
+		return "", fmt.Errorf("pdftotext not available: install poppler-utils to enable PDF extraction")
+	}
+
+	// Use pdftotext to extract text from PDF
+	cmd := exec.Command("pdftotext", "-layout", "-nopgbrk", path, "-")
+	
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	
+	if err := cmd.Run(); err != nil {
+		log.Error().
+			Err(err).
+			Str("file", path).
+			Str("stderr", stderr.String()).
+			Msg("Failed to extract text from PDF")
+		return "", fmt.Errorf("failed to extract PDF text: %w (stderr: %s)", err, stderr.String())
+	}
+
+	text := stdout.String()
+	if text == "" {
+		log.Warn().Str("file", path).Msg("PDF extraction produced empty text")
+	}
+
+	return text, nil
 }
 
 // AddSupportedExtension adds a new supported file extension.

@@ -1,0 +1,6 @@
+=== RUN   TestIngester_ExtractPDFText
+{"level":"debug","file":"/tmp/TestIngester_ExtractPDFText3261569325/001/test.pdf","bytes":148,"time":"2025-09-05T19:05:33-06:00","message":"Ingested file"}
+{"level":"info","files":1,"total_bytes":218,"time":"2025-09-05T19:05:33-06:00","message":"Ingestion complete"}
+--- PASS: TestIngester_ExtractPDFText (0.01s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/ingest	0.010s

@@ -1,0 +1,6 @@
+=== RUN   TestChunker_SimpleChunking
+{"level":"debug","estimated_tokens":1150,"max_tokens":50,"content_length":5600,"time":"2025-09-05T19:07:01-06:00","message":"Processing content for chunking"}
+{"level":"info","original_length":5600,"truncated_length":207,"original_tokens":1150,"truncated_tokens":42,"time":"2025-09-05T19:07:01-06:00","message":"Content truncated to fit token limit"}
+--- PASS: TestChunker_SimpleChunking (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/chunk	0.003s

@@ -1,0 +1,11 @@
+Sample PDF Content
+
+This is a sample PDF document for testing PDF text extraction.
+It contains multiple lines of text that should be extracted by pdftotext.
+
+Key Features:
+- Line 1: Basic text extraction
+- Line 2: Multi-line support
+- Line 3: Special characters & symbols
+
+DocLoom should be able to extract this text content successfully.

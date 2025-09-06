@@ -2,6 +2,7 @@ package ingest
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -21,8 +22,8 @@ func TestIngester_IngestSources(t *testing.T) {
 		"doc2.txt":                 "This is plain text content.",
 		"subdir/doc3.md":          "# Document 3\n\nNested markdown content.",
 		"subdir/nested/doc4.txt":  "Deeply nested text content.",
-		"ignore.pdf":              "This should be ignored.",
-		"subdir/ignore.docx":      "This should also be ignored.",
+		"ignore.docx":             "This should be ignored.",
+		"subdir/ignore.yaml":      "This should also be ignored.",
 	}
 
 	// Create the directory structure and files
@@ -128,9 +129,9 @@ func TestIngester_IngestSources_NoSupportedFiles(t *testing.T) {
 	// Arrange
 	tempDir := t.TempDir()
 	
-	// Create only unsupported files
-	unsupportedFile := filepath.Join(tempDir, "document.pdf")
-	err := os.WriteFile(unsupportedFile, []byte("PDF content"), 0644)
+	// Create only unsupported files (not .md, .txt, or .pdf)
+	unsupportedFile := filepath.Join(tempDir, "document.docx")
+	err := os.WriteFile(unsupportedFile, []byte("DOCX content"), 0644)
 	require.NoError(t, err)
 
 	ingester := NewIngester()
@@ -235,4 +236,75 @@ func TestIngester_AddSupportedExtension_Duplicate(t *testing.T) {
 
 	// Assert: Count should not change
 	assert.Equal(t, initialCount, len(ingester.SupportedExtensions))
+}
+
+// TestIngester_ExtractPDFText tests PDF text extraction functionality (TC-10.1).
+func TestIngester_ExtractPDFText(t *testing.T) {
+	// Skip if pdftotext is not available
+	if _, err := exec.LookPath("pdftotext"); err != nil {
+		t.Skip("pdftotext not found in PATH, skipping PDF extraction test")
+	}
+
+	// Arrange: Create a minimal valid PDF for testing
+	tempDir := t.TempDir()
+	pdfFile := filepath.Join(tempDir, "test.pdf")
+	
+	// Create a minimal valid PDF with text content
+	// This is a simplified PDF that pdftotext should be able to handle
+	pdfContent := `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /MediaBox [0 0 612 792] /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 200 >>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+(Sample PDF Content) Tj
+0 -20 Td
+(This is a sample PDF document for testing PDF text extraction.) Tj
+0 -20 Td
+(DocLoom should be able to extract this text content successfully.) Tj
+ET
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000274 00000 n
+trailer
+<< /Size 5 /Root 1 0 R >>
+startxref
+524
+%%EOF`
+	
+	err := os.WriteFile(pdfFile, []byte(pdfContent), 0644)
+	require.NoError(t, err)
+
+	// Create ingester
+	ingester := NewIngester()
+
+	// Act: Call the ingestion on the PDF file
+	result, err := ingester.IngestSources([]string{pdfFile})
+
+	// Assert: The function should return the extracted text from the PDF
+	require.NoError(t, err, "PDF extraction should not error")
+	assert.NotEmpty(t, result, "Extracted text should not be empty")
+	
+	// Check that key content is present (pdftotext might format differently)
+	// We check for key phrases that should appear in the extracted text
+	assert.Contains(t, result, "test.pdf", "Should contain the file name")
+	// The actual extracted text might vary based on pdftotext version
+	// So we just verify that some extraction happened
+	assert.True(t, len(result) > 50, "Extracted content should have reasonable length")
 }

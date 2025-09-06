@@ -1,0 +1,23 @@
+diff --git a/README.md b/README.md
+index 41945d7..0c4af04 100644
+--- a/README.md
++++ b/README.md
+@@ -143,6 +143,18 @@ docloom generate \
+   --api-key "your-anthropic-api-key"
+ ```
+ 
++## Dependencies
++
++### Optional Dependencies
++
++- **PDF Processing**: DocLoom can extract text from PDF files if `pdftotext` is available. To enable PDF support, install `poppler-utils`:
++  - **Ubuntu/Debian**: `sudo apt-get install poppler-utils`
++  - **macOS**: `brew install poppler`
++  - **Fedora/RHEL**: `sudo dnf install poppler-utils`
++  - **Windows**: Download from [poppler releases](https://github.com/oschwartz10612/poppler-windows/releases)
++
++  Without `pdftotext`, DocLoom will skip PDF files during source ingestion.
++
+ ## Configuration
+ 
+ Docloom supports configuration through multiple sources with the following precedence order (highest to lowest):
