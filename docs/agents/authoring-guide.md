@@ -206,6 +206,93 @@ docloom generate --agent my-agent --source ./src --verbose
 
 Check the agent's stderr output for debugging information.
 
+## Building a Go-Native Analyzer with Tree-sitter
+
+For high-performance language analysis without external dependencies, you can build agents in Go using Tree-sitter. This approach provides fast, error-tolerant parsing of source code.
+
+### Example: Using Tree-sitter for C# Analysis
+
+Here's how to set up a Tree-sitter-based parser in Go:
+
+```go
+package parser
+
+import (
+    "context"
+    sitter "github.com/smacker/go-tree-sitter"
+    "github.com/smacker/go-tree-sitter/csharp"
+)
+
+type Parser struct {
+    parser *sitter.Parser
+}
+
+func New() *Parser {
+    parser := sitter.NewParser()
+    parser.SetLanguage(csharp.GetLanguage())
+    return &Parser{parser: parser}
+}
+
+func (p *Parser) Analyze(ctx context.Context, source string) (*Result, error) {
+    tree, err := p.parser.ParseCtx(ctx, nil, []byte(source))
+    if err != nil {
+        return nil, err
+    }
+    defer tree.Close()
+    
+    root := tree.RootNode()
+    // Traverse the syntax tree
+    return p.extractInfo(root, source), nil
+}
+```
+
+### Querying the Syntax Tree
+
+Tree-sitter provides powerful querying capabilities:
+
+```go
+func (p *Parser) extractClasses(node *sitter.Node, source string) []Class {
+    var classes []Class
+    
+    // Find all class declarations
+    if node.Type() == "class_declaration" {
+        class := Class{
+            Name: p.getIdentifier(node, source),
+            IsPublic: p.hasModifier(node, source, "public"),
+        }
+        classes = append(classes, class)
+    }
+    
+    // Recursively process children
+    for i := 0; i < int(node.ChildCount()); i++ {
+        child := node.Child(i)
+        classes = append(classes, p.extractClasses(child, source)...)
+    }
+    
+    return classes
+}
+```
+
+### Benefits of Tree-sitter
+
+1. **Language Agnostic**: Support multiple languages with the same parsing infrastructure
+2. **Error Recovery**: Continues parsing even with syntax errors
+3. **Incremental Parsing**: Efficiently reparse only changed portions
+4. **No Runtime Dependencies**: Pure Go implementation
+5. **High Performance**: C-speed parsing with Go bindings
+
+### Available Language Grammars
+
+Tree-sitter supports many languages through `github.com/smacker/go-tree-sitter`:
+
+- C# (`csharp`)
+- Go (`golang`)
+- JavaScript/TypeScript (`javascript`, `typescript`)
+- Python (`python`)
+- Java (`java`)
+- Rust (`rust`)
+- And many more...
+
 ## Advanced Features
 
 ### Placeholder Variables
