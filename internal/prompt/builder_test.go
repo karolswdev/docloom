@@ -133,10 +133,10 @@ func TestBuildGenerationPrompt(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				assert.NotEmpty(t, prompt)
-				
+
 				// Validate the structure of the prompt
 				assert.True(t, strings.HasPrefix(prompt, "You are a technical documentation generator"))
-				
+
 				// Run custom validation if provided
 				if tt.validatePrompt != nil {
 					tt.validatePrompt(t, prompt)
@@ -246,7 +246,7 @@ func TestBuildRepairPrompt(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				assert.NotEmpty(t, prompt)
-				
+
 				// Run custom validation if provided
 				if tt.validatePrompt != nil {
 					tt.validatePrompt(t, prompt)
@@ -261,10 +261,10 @@ func TestEstimateTokens(t *testing.T) {
 	builder := NewBuilder()
 
 	tests := []struct {
-		name          string
-		prompt        string
-		expectedMin   int
-		expectedMax   int
+		name        string
+		prompt      string
+		expectedMin int
+		expectedMax int
 	}{
 		{
 			name:        "Empty prompt",
@@ -275,19 +275,19 @@ func TestEstimateTokens(t *testing.T) {
 		{
 			name:        "Short prompt",
 			prompt:      "Hello world",
-			expectedMin: 2,  // 11 chars / 4 = 2.75, rounded down
+			expectedMin: 2, // 11 chars / 4 = 2.75, rounded down
 			expectedMax: 3,
 		},
 		{
 			name:        "Medium prompt",
 			prompt:      strings.Repeat("This is a test. ", 10),
-			expectedMin: 35,  // 160 chars / 4 = 40
+			expectedMin: 35, // 160 chars / 4 = 40
 			expectedMax: 45,
 		},
 		{
 			name:        "Long prompt",
 			prompt:      strings.Repeat("Generate a comprehensive technical document. ", 50),
-			expectedMin: 500,  // 2250 chars / 4 = 562
+			expectedMin: 500, // 2250 chars / 4 = 562
 			expectedMax: 600,
 		},
 	}
@@ -295,8 +295,8 @@ func TestEstimateTokens(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tokens := builder.EstimateTokens(tt.prompt)
-			
-			assert.GreaterOrEqual(t, tokens, tt.expectedMin, 
+
+			assert.GreaterOrEqual(t, tokens, tt.expectedMin,
 				"Token count should be at least %d", tt.expectedMin)
 			assert.LessOrEqual(t, tokens, tt.expectedMax,
 				"Token count should be at most %d", tt.expectedMax)
@@ -327,7 +327,7 @@ func TestPromptStructure(t *testing.T) {
 		lastIndex := -1
 		for _, section := range sections {
 			index := strings.Index(prompt, section)
-			assert.Greater(t, index, lastIndex, 
+			assert.Greater(t, index, lastIndex,
 				"Section '%s' should appear after previous sections", section)
 			lastIndex = index
 		}
@@ -374,15 +374,15 @@ func TestSchemaMarshaling(t *testing.T) {
 		type invalidType struct {
 			Channel chan int `json:"channel"`
 		}
-		
+
 		schema := invalidType{Channel: make(chan int)}
-		
+
 		_, err := builder.BuildGenerationPrompt(
 			"content",
 			"prompt",
 			schema,
 		)
-		
+
 		// Should get an error when trying to marshal the channel
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "failed to marshal schema")
@@ -394,11 +394,11 @@ func TestSchemaMarshaling(t *testing.T) {
 			"$schema": "http://json-schema.org/draft-07/schema#",
 			"type":    "object",
 			"properties": map[string]interface{}{
-				"id":      map[string]interface{}{"type": "integer"},
-				"name":    map[string]interface{}{"type": "string", "minLength": 1},
-				"email":   map[string]interface{}{"type": "string", "format": "email"},
-				"active":  map[string]interface{}{"type": "boolean"},
-				"tags":    map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}},
+				"id":     map[string]interface{}{"type": "integer"},
+				"name":   map[string]interface{}{"type": "string", "minLength": 1},
+				"email":  map[string]interface{}{"type": "string", "format": "email"},
+				"active": map[string]interface{}{"type": "boolean"},
+				"tags":   map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}},
 			},
 			"required": []string{"id", "name"},
 		}
@@ -418,13 +418,13 @@ func TestSchemaMarshaling(t *testing.T) {
 	t.Run("JSON RawMessage schema", func(t *testing.T) {
 		// Test with json.RawMessage (common in real usage)
 		rawSchema := json.RawMessage(`{"type": "object", "properties": {"test": {"type": "string"}}}`)
-		
+
 		prompt, err := builder.BuildGenerationPrompt(
 			"content",
 			"prompt",
 			rawSchema,
 		)
-		
+
 		require.NoError(t, err)
 		assert.Contains(t, prompt, `"test"`)
 		assert.Contains(t, prompt, `"type": "string"`)
@@ -434,7 +434,7 @@ func TestSchemaMarshaling(t *testing.T) {
 // TestPromptConsistency tests that prompts are consistent across calls
 func TestPromptConsistency(t *testing.T) {
 	builder := NewBuilder()
-	
+
 	sourceContent := "Test content"
 	templatePrompt := "Test template"
 	schema := map[string]interface{}{"type": "object"}
@@ -442,10 +442,10 @@ func TestPromptConsistency(t *testing.T) {
 	// Generate the same prompt multiple times
 	prompt1, err1 := builder.BuildGenerationPrompt(sourceContent, templatePrompt, schema)
 	prompt2, err2 := builder.BuildGenerationPrompt(sourceContent, templatePrompt, schema)
-	
+
 	require.NoError(t, err1)
 	require.NoError(t, err2)
-	
+
 	// Prompts should be identical for the same inputs
 	assert.Equal(t, prompt1, prompt2, "Prompts should be consistent for the same inputs")
 }
@@ -461,7 +461,7 @@ func BenchmarkBuildGenerationPrompt(b *testing.B) {
 			"title":   map[string]interface{}{"type": "string"},
 			"summary": map[string]interface{}{"type": "string"},
 			"sections": map[string]interface{}{
-				"type": "array",
+				"type":  "array",
 				"items": map[string]interface{}{"type": "string"},
 			},
 		},

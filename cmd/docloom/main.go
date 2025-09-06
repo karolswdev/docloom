@@ -16,7 +16,7 @@ func main() {
 			os.Exit(0)
 		}
 	}
-	
+
 	if err := cli.Execute(); err != nil {
 		os.Exit(1)
 	}

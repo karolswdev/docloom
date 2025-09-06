@@ -37,13 +37,13 @@ var listCmd = &cobra.Command{
 				Description: "Reference Architecture template",
 			},
 		}
-		
+
 		fmt.Println("Available templates:")
 		fmt.Println()
 		for _, tmpl := range templates {
 			fmt.Printf("  %s\n    %s\n\n", tmpl.Name, tmpl.Description)
 		}
-		
+
 		return nil
 	},
 }

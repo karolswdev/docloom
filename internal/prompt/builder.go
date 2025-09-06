@@ -34,26 +34,26 @@ func (b *Builder) BuildGenerationPrompt(sourceContent string, templatePrompt str
 
 	// Build the prompt with clear sections
 	var promptBuilder strings.Builder
-	
+
 	promptBuilder.WriteString("You are a technical documentation generator. ")
 	promptBuilder.WriteString("Your task is to generate structured JSON content based on the provided source documents and template requirements.\n\n")
-	
+
 	promptBuilder.WriteString("## Template Instructions\n")
 	promptBuilder.WriteString(templatePrompt)
 	promptBuilder.WriteString("\n\n")
-	
+
 	promptBuilder.WriteString("## JSON Schema\n")
 	promptBuilder.WriteString("Your response MUST conform to the following JSON schema:\n")
 	promptBuilder.WriteString("```json\n")
 	promptBuilder.WriteString(schemaJSON)
 	promptBuilder.WriteString("\n```\n\n")
-	
+
 	promptBuilder.WriteString("## Source Documents\n")
 	promptBuilder.WriteString("Use the following source content to generate the JSON fields:\n")
 	promptBuilder.WriteString("```\n")
 	promptBuilder.WriteString(sourceContent)
 	promptBuilder.WriteString("\n```\n\n")
-	
+
 	promptBuilder.WriteString("## Instructions\n")
 	promptBuilder.WriteString("1. Analyze the source documents carefully\n")
 	promptBuilder.WriteString("2. Generate JSON that matches the schema exactly\n")
@@ -82,31 +82,31 @@ func (b *Builder) BuildRepairPrompt(originalPrompt string, invalidJSON string, v
 	}
 
 	var promptBuilder strings.Builder
-	
+
 	promptBuilder.WriteString("The previously generated JSON failed validation. Please fix the issues and generate valid JSON.\n\n")
-	
+
 	promptBuilder.WriteString("## Validation Error\n")
 	promptBuilder.WriteString("The following validation error occurred:\n")
 	promptBuilder.WriteString("```\n")
 	promptBuilder.WriteString(validationError)
 	promptBuilder.WriteString("\n```\n\n")
-	
+
 	promptBuilder.WriteString("## Invalid JSON\n")
 	promptBuilder.WriteString("This was the invalid JSON that was generated:\n")
 	promptBuilder.WriteString("```json\n")
 	promptBuilder.WriteString(invalidJSON)
 	promptBuilder.WriteString("\n```\n\n")
-	
+
 	promptBuilder.WriteString("## Required Schema\n")
 	promptBuilder.WriteString("The JSON MUST conform to this schema:\n")
 	promptBuilder.WriteString("```json\n")
 	promptBuilder.WriteString(schemaJSON)
 	promptBuilder.WriteString("\n```\n\n")
-	
+
 	promptBuilder.WriteString("## Original Context\n")
 	promptBuilder.WriteString(originalPrompt)
 	promptBuilder.WriteString("\n\n")
-	
+
 	promptBuilder.WriteString("## Repair Instructions\n")
 	promptBuilder.WriteString("1. Identify the validation error in the JSON\n")
 	promptBuilder.WriteString("2. Fix the specific issue mentioned in the error\n")

@@ -145,11 +145,11 @@ func (i *Ingester) extractPDFText(path string) (string, error) {
 
 	// Use pdftotext to extract text from PDF
 	cmd := exec.Command("pdftotext", "-layout", "-nopgbrk", path, "-")
-	
+
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	
+
 	if err := cmd.Run(); err != nil {
 		log.Error().
 			Err(err).
@@ -173,13 +173,13 @@ func (i *Ingester) AddSupportedExtension(ext string) {
 		ext = "." + ext
 	}
 	ext = strings.ToLower(ext)
-	
+
 	// Check if already exists
 	for _, existing := range i.SupportedExtensions {
 		if existing == ext {
 			return
 		}
 	}
-	
+
 	i.SupportedExtensions = append(i.SupportedExtensions, ext)
 }

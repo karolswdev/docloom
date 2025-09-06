@@ -18,22 +18,22 @@ func TestIngester_IngestSources(t *testing.T) {
 
 	// Create test files
 	testFiles := map[string]string{
-		"doc1.md":                  "# Document 1\n\nThis is markdown content.",
-		"doc2.txt":                 "This is plain text content.",
-		"subdir/doc3.md":          "# Document 3\n\nNested markdown content.",
-		"subdir/nested/doc4.txt":  "Deeply nested text content.",
-		"ignore.docx":             "This should be ignored.",
-		"subdir/ignore.yaml":      "This should also be ignored.",
+		"doc1.md":                "# Document 1\n\nThis is markdown content.",
+		"doc2.txt":               "This is plain text content.",
+		"subdir/doc3.md":         "# Document 3\n\nNested markdown content.",
+		"subdir/nested/doc4.txt": "Deeply nested text content.",
+		"ignore.docx":            "This should be ignored.",
+		"subdir/ignore.yaml":     "This should also be ignored.",
 	}
 
 	// Create the directory structure and files
 	for path, content := range testFiles {
 		fullPath := filepath.Join(tempDir, path)
 		dir := filepath.Dir(fullPath)
-		
+
 		err := os.MkdirAll(dir, 0755)
 		require.NoError(t, err)
-		
+
 		err = os.WriteFile(fullPath, []byte(content), 0644)
 		require.NoError(t, err)
 	}
@@ -79,7 +79,7 @@ func TestIngester_IngestSources_SingleFile(t *testing.T) {
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "single.md")
 	content := "# Single Document\n\nThis is the content."
-	
+
 	err := os.WriteFile(testFile, []byte(content), 0644)
 	require.NoError(t, err)
 
@@ -99,7 +99,7 @@ func TestIngester_IngestSources_SingleFile(t *testing.T) {
 func TestIngester_IngestSources_MultiplePaths(t *testing.T) {
 	// Arrange
 	tempDir := t.TempDir()
-	
+
 	// Create files in different locations
 	file1 := filepath.Join(tempDir, "file1.txt")
 	err := os.WriteFile(file1, []byte("Content from file 1"), 0644)
@@ -108,7 +108,7 @@ func TestIngester_IngestSources_MultiplePaths(t *testing.T) {
 	subdir := filepath.Join(tempDir, "subdir")
 	err = os.MkdirAll(subdir, 0755)
 	require.NoError(t, err)
-	
+
 	file2 := filepath.Join(subdir, "file2.md")
 	err = os.WriteFile(file2, []byte("# Content from file 2"), 0644)
 	require.NoError(t, err)
@@ -128,7 +128,7 @@ func TestIngester_IngestSources_MultiplePaths(t *testing.T) {
 func TestIngester_IngestSources_NoSupportedFiles(t *testing.T) {
 	// Arrange
 	tempDir := t.TempDir()
-	
+
 	// Create only unsupported files (not .md, .txt, or .pdf)
 	unsupportedFile := filepath.Join(tempDir, "document.docx")
 	err := os.WriteFile(unsupportedFile, []byte("DOCX content"), 0644)
@@ -163,7 +163,7 @@ func TestIngester_IngestSources_EmptyFile(t *testing.T) {
 	// Arrange
 	tempDir := t.TempDir()
 	emptyFile := filepath.Join(tempDir, "empty.md")
-	
+
 	err := os.WriteFile(emptyFile, []byte(""), 0644)
 	require.NoError(t, err)
 
@@ -231,9 +231,9 @@ func TestIngester_AddSupportedExtension_Duplicate(t *testing.T) {
 	initialCount := len(ingester.SupportedExtensions)
 
 	// Act: Add the same extension multiple times
-	ingester.AddSupportedExtension(".md")  // Already exists
-	ingester.AddSupportedExtension("md")   // Same, without dot
-	ingester.AddSupportedExtension(".MD")  // Same, different case
+	ingester.AddSupportedExtension(".md") // Already exists
+	ingester.AddSupportedExtension("md")  // Same, without dot
+	ingester.AddSupportedExtension(".MD") // Same, different case
 
 	// Assert: Count should not change
 	assert.Equal(t, initialCount, len(ingester.SupportedExtensions))
@@ -249,7 +249,7 @@ func TestIngester_ExtractPDFText(t *testing.T) {
 	// Arrange: Create a minimal valid PDF for testing
 	tempDir := t.TempDir()
 	pdfFile := filepath.Join(tempDir, "test.pdf")
-	
+
 	// Create a minimal valid PDF with text content
 	// This is a simplified PDF that pdftotext should be able to handle
 	pdfContent := `%PDF-1.4
@@ -288,7 +288,7 @@ trailer
 startxref
 524
 %%EOF`
-	
+
 	err := os.WriteFile(pdfFile, []byte(pdfContent), 0644)
 	require.NoError(t, err)
 
@@ -301,7 +301,7 @@ startxref
 	// Assert: The function should return the extracted text from the PDF
 	require.NoError(t, err, "PDF extraction should not error")
 	assert.NotEmpty(t, result, "Extracted text should not be empty")
-	
+
 	// Check that key content is present (pdftotext might format differently)
 	// We check for key phrases that should appear in the extracted text
 	assert.Contains(t, result, "test.pdf", "Should contain the file name")

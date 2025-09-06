@@ -21,7 +21,7 @@ var versionFlag bool
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-	
+
 	// Also add --version flag to root command
 	rootCmd.Flags().BoolVarP(&versionFlag, "version", "", false, "Display version information")
 }

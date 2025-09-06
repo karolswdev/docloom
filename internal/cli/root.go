@@ -24,19 +24,19 @@ and iterate on quickly.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Configure logging based on verbose flag
 		zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-		
+
 		if verbose {
 			zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		} else {
 			zerolog.SetGlobalLevel(zerolog.InfoLevel)
 		}
-		
+
 		// Human-readable console output
 		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).
 			With().
 			Timestamp().
 			Logger()
-		
+
 		log.Logger = logger
 	},
 }

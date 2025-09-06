@@ -29,13 +29,13 @@ func (v *Validator) Validate(jsonStr string, schemaStr string) error {
 	// Create a new compiler for this validation
 	compiler := jsonschema.NewCompiler()
 	compiler.Draft = jsonschema.Draft7
-	
+
 	// Add the schema to the compiler using a reader
 	schemaReader := bytes.NewReader([]byte(schemaStr))
 	if err := compiler.AddResource("schema.json", schemaReader); err != nil {
 		return fmt.Errorf("failed to add schema resource: %w", err)
 	}
-	
+
 	// Compile the schema
 	schema, err := compiler.Compile("schema.json")
 	if err != nil {
@@ -74,16 +74,16 @@ func newValidationError(err error) error {
 	// The jsonschema library returns detailed validation errors
 	// We'll extract the relevant information
 	errStr := err.Error()
-	
+
 	// Try to extract field path and message
 	validationErr := &ValidationError{
 		Message: errStr,
 	}
-	
+
 	// The error format is typically like:
 	// "jsonschema: '/field/path' does not validate with schema: error details"
 	// or "doesn't validate with" followed by the error
-	
+
 	if strings.Contains(errStr, "doesn't validate with") {
 		parts := strings.SplitN(errStr, "doesn't validate with", 2)
 		if len(parts) >= 1 {
@@ -101,7 +101,7 @@ func newValidationError(err error) error {
 			validationErr.Message = strings.TrimSpace(parts[1])
 		}
 	}
-	
+
 	return validationErr
 }
 
@@ -125,13 +125,13 @@ func (v *Validator) ValidateWithDetails(jsonStr string, schemaStr string) (*Vali
 	// Create a new compiler for this validation
 	compiler := jsonschema.NewCompiler()
 	compiler.Draft = jsonschema.Draft7
-	
+
 	// Add the schema to the compiler using a reader
 	schemaReader := bytes.NewReader([]byte(schemaStr))
 	if err := compiler.AddResource("schema.json", schemaReader); err != nil {
 		return nil, fmt.Errorf("failed to add schema resource: %w", err)
 	}
-	
+
 	// Compile the schema
 	schema, err := compiler.Compile("schema.json")
 	if err != nil {
@@ -146,12 +146,12 @@ func (v *Validator) ValidateWithDetails(jsonStr string, schemaStr string) (*Vali
 			Type:    "validation_error",
 			Message: err.Error(),
 		}
-		
+
 		// Try to extract field information
 		if validErr, ok := err.(*ValidationError); ok {
 			issue.Field = validErr.Field
 		}
-		
+
 		result.Errors = append(result.Errors, issue)
 	}
 

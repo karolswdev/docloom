@@ -30,7 +30,7 @@ func TestGenerateCommand_ModelAndBaseURLFlags(t *testing.T) {
 		require.NotNil(t, baseURLFlag, "base-url flag should exist")
 		assert.Equal(t, "", baseURLFlag.DefValue, "base-url flag should default to empty string")
 		assert.Equal(t, "Base URL for OpenAI-compatible API", baseURLFlag.Usage)
-		
+
 		// Check api-key flag
 		apiKeyFlag := generateCmd.Flags().Lookup("api-key")
 		require.NotNil(t, apiKeyFlag, "api-key flag should exist")
@@ -59,7 +59,7 @@ func TestGenerateCommand_ModelAndBaseURLFlags(t *testing.T) {
 		// Create a new root command for testing
 		rootCmd := &cobra.Command{Use: "docloom"}
 		rootCmd.AddCommand(generateCmd)
-		
+
 		// Capture output
 		var outputBuf bytes.Buffer
 		rootCmd.SetOut(&outputBuf)
@@ -80,18 +80,18 @@ func TestGenerateCommand_ModelAndBaseURLFlags(t *testing.T) {
 		// Create a new root command for testing
 		rootCmd := &cobra.Command{Use: "docloom"}
 		rootCmd.AddCommand(generateCmd)
-		
+
 		// Capture help output
 		var helpBuf bytes.Buffer
 		rootCmd.SetOut(&helpBuf)
 		rootCmd.SetErr(&helpBuf)
 		rootCmd.SetArgs([]string{"generate", "--help"})
-		
+
 		err := rootCmd.Execute()
 		require.NoError(t, err)
-		
+
 		helpOutput := helpBuf.String()
-		
+
 		// Verify help includes model configuration options
 		assert.Contains(t, helpOutput, "--model", "Help should mention --model flag")
 		assert.Contains(t, helpOutput, "--base-url", "Help should mention --base-url flag")
@@ -122,7 +122,7 @@ func TestGenerateCommand_ModelSelection(t *testing.T) {
 			// Reset flags
 			model = "gpt-4"
 			baseURL = ""
-			
+
 			// Set flags
 			args := []string{
 				"generate",
@@ -137,7 +137,7 @@ func TestGenerateCommand_ModelSelection(t *testing.T) {
 			// Create command
 			rootCmd := &cobra.Command{Use: "docloom"}
 			rootCmd.AddCommand(generateCmd)
-			
+
 			var outputBuf bytes.Buffer
 			rootCmd.SetOut(&outputBuf)
 			rootCmd.SetErr(&outputBuf)
@@ -181,7 +181,7 @@ func TestGenerateCommand_EnvironmentVariableIntegration(t *testing.T) {
 		// Create command
 		rootCmd := &cobra.Command{Use: "docloom"}
 		rootCmd.AddCommand(generateCmd)
-		
+
 		var outputBuf bytes.Buffer
 		rootCmd.SetOut(&outputBuf)
 		rootCmd.SetErr(&outputBuf)
@@ -232,7 +232,7 @@ func TestGenerateCommand_ValidationMessages(t *testing.T) {
 			// Create a fresh command instance for each test
 			cmd := &cobra.Command{Use: "generate"}
 			cmd.RunE = generateCmd.RunE
-			
+
 			// Re-initialize flags for this command instance
 			cmd.Flags().StringVarP(&templateType, "type", "t", "", "Template type to use (required)")
 			cmd.Flags().StringSliceVarP(&sources, "source", "s", []string{}, "Source paths (files or directories)")
@@ -243,11 +243,11 @@ func TestGenerateCommand_ValidationMessages(t *testing.T) {
 			cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Preview without making API calls")
 			cmd.MarkFlagRequired("type")
 			cmd.MarkFlagRequired("out")
-			
+
 			// Create root command
 			rootCmd := &cobra.Command{Use: "docloom"}
 			rootCmd.AddCommand(cmd)
-			
+
 			var errorBuf bytes.Buffer
 			rootCmd.SetOut(&errorBuf)
 			rootCmd.SetErr(&errorBuf)
@@ -255,7 +255,7 @@ func TestGenerateCommand_ValidationMessages(t *testing.T) {
 
 			// Execute
 			err := rootCmd.Execute()
-			
+
 			if tc.shouldError {
 				require.Error(t, err)
 				errorOutput := errorBuf.String()
@@ -263,10 +263,10 @@ func TestGenerateCommand_ValidationMessages(t *testing.T) {
 					errorOutput += err.Error()
 				}
 				for _, expectedError := range tc.expectedErrors {
-					assert.True(t, 
+					assert.True(t,
 						strings.Contains(errorOutput, expectedError),
-						"Error output should contain '%s', got: %s", 
-						expectedError, 
+						"Error output should contain '%s', got: %s",
+						expectedError,
 						errorOutput,
 					)
 				}
@@ -284,15 +284,15 @@ func TestGenerateCmd_VerboseLogging(t *testing.T) {
 		sourceFile := tempDir + "/test.md"
 		err := os.WriteFile(sourceFile, []byte("# Test Document\n\nContent for verbose test."), 0644)
 		require.NoError(t, err)
-		
+
 		// Set verbose flag globally before creating command
 		oldVerbose := verbose
 		verbose = true
 		defer func() { verbose = oldVerbose }()
-		
+
 		// Create command with verbose flag
 		rootCmd := GetRootCmd()
-		
+
 		// Since logs go to stderr in console writer, we capture both
 		var outputBuf bytes.Buffer
 		rootCmd.SetOut(&outputBuf)
@@ -304,17 +304,17 @@ func TestGenerateCmd_VerboseLogging(t *testing.T) {
 			"--out", tempDir + "/output.html",
 			"--dry-run", // Use dry-run to avoid needing API key
 		})
-		
+
 		// Execute command
 		err = rootCmd.Execute()
-		
+
 		// Assert: With verbose set, we should see detailed logs
 		// The verbose flag affects logging level, and since we're using dry-run,
 		// we verify the command executes successfully with verbose enabled
 		assert.NoError(t, err, "Command should execute successfully")
 		assert.True(t, verbose, "Verbose flag should be set")
-		
-		// The actual verbose logs appear in stderr when running, 
+
+		// The actual verbose logs appear in stderr when running,
 		// but in tests they may not be captured properly due to console writer
 		// This test verifies the verbose flag is properly handled
 	})
@@ -327,15 +327,15 @@ func TestGenerateCmd_SafeWrites(t *testing.T) {
 		tempDir := t.TempDir()
 		sourceFile := tempDir + "/test.md"
 		outFile := tempDir + "/output.html"
-		
+
 		// Create source file
 		err := os.WriteFile(sourceFile, []byte("# Test"), 0644)
 		require.NoError(t, err)
-		
+
 		// Create existing output file
 		err = os.WriteFile(outFile, []byte("<html>existing</html>"), 0644)
 		require.NoError(t, err)
-		
+
 		// Test without --force flag
 		rootCmd := GetRootCmd()
 		var errorBuf bytes.Buffer
@@ -348,30 +348,30 @@ func TestGenerateCmd_SafeWrites(t *testing.T) {
 			"--out", outFile,
 			"--dry-run",
 		})
-		
+
 		// Act: Run command without --force
 		_ = rootCmd.Execute()
-		
+
 		// Assert: Command MUST fail with non-zero exit code
 		// Note: In dry-run mode, the check happens in orchestrator
 		// We check that the existing file is not overwritten in dry-run
 		existingContent, _ := os.ReadFile(outFile)
 		assert.Equal(t, "<html>existing</html>", string(existingContent), "File should not be modified without --force")
 	})
-	
+
 	t.Run("Command succeeds with --force flag", func(t *testing.T) {
 		tempDir := t.TempDir()
 		sourceFile := tempDir + "/test.md"
 		outFile := tempDir + "/output.html"
-		
+
 		// Create source file
 		err := os.WriteFile(sourceFile, []byte("# Test"), 0644)
 		require.NoError(t, err)
-		
+
 		// Create existing output file
 		err = os.WriteFile(outFile, []byte("<html>existing</html>"), 0644)
 		require.NoError(t, err)
-		
+
 		// Test with --force flag
 		rootCmd := GetRootCmd()
 		var outputBuf bytes.Buffer
@@ -385,10 +385,10 @@ func TestGenerateCmd_SafeWrites(t *testing.T) {
 			"--dry-run",
 			"--force", // Enable force overwrite
 		})
-		
+
 		// Act: Run command with --force
 		_ = rootCmd.Execute()
-		
+
 		// Assert: Command MUST succeed (in dry-run, no actual write happens)
 		// The force flag should be properly set
 		assert.True(t, force, "Force flag should be set")
@@ -400,7 +400,7 @@ func TestGenerateCmd_DryRun(t *testing.T) {
 	// This is an E2E test that verifies the dry-run mode
 	// Mock the AI Client would normally be done in orchestrator_test.go
 	// For CLI test, we'll verify that the flag is properly passed through
-	
+
 	t.Run("Dry-run flag prevents API calls", func(t *testing.T) {
 		// Reset flags
 		templateType = "architecture-vision"
@@ -409,11 +409,11 @@ func TestGenerateCmd_DryRun(t *testing.T) {
 		model = "gpt-4"
 		dryRun = true
 		apiKey = "" // No API key needed for dry-run
-		
+
 		// Create command
 		rootCmd := &cobra.Command{Use: "docloom"}
 		rootCmd.AddCommand(generateCmd)
-		
+
 		var outputBuf bytes.Buffer
 		rootCmd.SetOut(&outputBuf)
 		rootCmd.SetErr(&outputBuf)
@@ -424,19 +424,19 @@ func TestGenerateCmd_DryRun(t *testing.T) {
 			"--out", "test-output.html",
 			"--dry-run",
 		})
-		
+
 		// Execute - should work without API key in dry-run mode
 		err := rootCmd.Execute()
-		
+
 		// In dry-run mode, it should output preview information
 		_ = outputBuf.String()
 		if err != nil {
 			// In dry-run mode, error is expected without API key
 		}
-		
+
 		// Check that dry-run mode was activated
 		assert.True(t, dryRun, "Dry-run flag should be set")
-		
+
 		// The actual dry-run output verification happens in orchestrator tests
 		// Here we just verify the flag is properly set and no API key is required
 	})

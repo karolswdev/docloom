@@ -18,12 +18,12 @@ import (
 func TestAIClient_GenerateJSON_Success(t *testing.T) {
 	// Arrange: Create a mock server that returns a valid OpenAI-compatible JSON response
 	expectedContent := `{"title": "Test Document", "summary": "This is a test"}`
-	
+
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Verify the request
 		assert.Equal(t, "/v1/chat/completions", r.URL.Path)
 		assert.Equal(t, "Bearer test-api-key", r.Header.Get("Authorization"))
-		
+
 		// Return a valid OpenAI response
 		response := map[string]interface{}{
 			"id":      "test-id",
@@ -41,7 +41,7 @@ func TestAIClient_GenerateJSON_Success(t *testing.T) {
 				},
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(response)
@@ -55,7 +55,7 @@ func TestAIClient_GenerateJSON_Success(t *testing.T) {
 		Model:      "gpt-3.5-turbo",
 		MaxRetries: 0, // No retries for this test
 	}
-	
+
 	client, err := NewOpenAIClient(config)
 	require.NoError(t, err)
 
@@ -66,7 +66,7 @@ func TestAIClient_GenerateJSON_Success(t *testing.T) {
 	// Assert: The client correctly parses the response and returns the content string without error
 	require.NoError(t, err)
 	assert.Equal(t, expectedContent, result)
-	
+
 	// Verify the returned content is valid JSON
 	var jsonCheck interface{}
 	err = json.Unmarshal([]byte(result), &jsonCheck)
@@ -78,10 +78,10 @@ func TestAIClient_GenerateJSON_RetriesOn503(t *testing.T) {
 	// Arrange: Create a mock server that returns 503 twice, then 200 OK on the third call
 	requestCount := int32(0)
 	expectedContent := `{"status": "success"}`
-	
+
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		count := atomic.AddInt32(&requestCount, 1)
-		
+
 		if count <= 2 {
 			// First two requests return 503
 			w.Header().Set("Content-Type", "application/json")
@@ -95,7 +95,7 @@ func TestAIClient_GenerateJSON_RetriesOn503(t *testing.T) {
 			})
 			return
 		}
-		
+
 		// Third request succeeds
 		response := map[string]interface{}{
 			"id":      "test-id",
@@ -113,7 +113,7 @@ func TestAIClient_GenerateJSON_RetriesOn503(t *testing.T) {
 				},
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(response)
@@ -125,10 +125,10 @@ func TestAIClient_GenerateJSON_RetriesOn503(t *testing.T) {
 		BaseURL:    mockServer.URL + "/v1",
 		APIKey:     "test-api-key",
 		Model:      "gpt-3.5-turbo",
-		MaxRetries: 2, // Allow up to 2 retries (3 total attempts)
+		MaxRetries: 2,                     // Allow up to 2 retries (3 total attempts)
 		RetryDelay: 10 * time.Millisecond, // Short delay for testing
 	}
-	
+
 	client, err := NewOpenAIClient(config)
 	require.NoError(t, err)
 
@@ -194,7 +194,7 @@ func TestOpenAIClient_GenerateJSON_InvalidJSON(t *testing.T) {
 				},
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(response)
@@ -207,7 +207,7 @@ func TestOpenAIClient_GenerateJSON_InvalidJSON(t *testing.T) {
 		Model:      "gpt-3.5-turbo",
 		MaxRetries: 0,
 	}
-	
+
 	client, err := NewOpenAIClient(config)
 	require.NoError(t, err)
 
@@ -224,7 +224,7 @@ func TestOpenAIClient_GenerateJSON_InvalidJSON(t *testing.T) {
 // TestOpenAIClient_GenerateJSON_ContextCancellation tests that context cancellation stops retries.
 func TestOpenAIClient_GenerateJSON_ContextCancellation(t *testing.T) {
 	requestCount := int32(0)
-	
+
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&requestCount, 1)
 		// Always return 503 to trigger retries
@@ -247,13 +247,13 @@ func TestOpenAIClient_GenerateJSON_ContextCancellation(t *testing.T) {
 		MaxRetries: 5,
 		RetryDelay: 100 * time.Millisecond,
 	}
-	
+
 	client, err := NewOpenAIClient(config)
 	require.NoError(t, err)
 
 	// Create a context that will be cancelled after first request
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	// Cancel context after a short delay
 	go func() {
 		time.Sleep(50 * time.Millisecond)
@@ -274,11 +274,11 @@ func TestOpenAIClient_GenerateJSON_ContextCancellation(t *testing.T) {
 // TestOpenAIClient_ConfigIntegration tests that model and base URL configuration are properly used.
 func TestOpenAIClient_ConfigIntegration(t *testing.T) {
 	tests := []struct {
-		name           string
-		config         Config
-		expectedModel  string
-		expectedPath   string
-		expectedAuth   string
+		name          string
+		config        Config
+		expectedModel string
+		expectedPath  string
+		expectedAuth  string
 	}{
 		{
 			name: "OpenAI default configuration",
@@ -332,11 +332,11 @@ func TestOpenAIClient_ConfigIntegration(t *testing.T) {
 			var capturedModel string
 			var capturedPath string
 			var capturedAuth string
-			
+
 			mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				capturedPath = r.URL.Path
 				capturedAuth = r.Header.Get("Authorization")
-				
+
 				// Parse request body to get the model
 				var reqBody map[string]interface{}
 				if err := json.NewDecoder(r.Body).Decode(&reqBody); err == nil {
@@ -344,7 +344,7 @@ func TestOpenAIClient_ConfigIntegration(t *testing.T) {
 						capturedModel = model
 					}
 				}
-				
+
 				// Return a valid response
 				response := map[string]interface{}{
 					"id":      "test-id",
@@ -362,25 +362,25 @@ func TestOpenAIClient_ConfigIntegration(t *testing.T) {
 						},
 					},
 				}
-				
+
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 				json.NewEncoder(w).Encode(response)
 			}))
 			defer mockServer.Close()
-			
+
 			// Update config to use mock server, preserving the path structure
 			tt.config.BaseURL = mockServer.URL + strings.TrimPrefix(tt.config.BaseURL, strings.Split(tt.config.BaseURL, "/")[0]+"//"+strings.Split(tt.config.BaseURL, "/")[2])
-			
+
 			// Create client
 			client, err := NewOpenAIClient(tt.config)
 			require.NoError(t, err)
-			
+
 			// Make a request
 			ctx := context.Background()
 			_, err = client.GenerateJSON(ctx, "Test prompt")
 			require.NoError(t, err)
-			
+
 			// Verify the request used the correct configuration
 			assert.Equal(t, tt.expectedModel, capturedModel, "Model mismatch")
 			assert.Equal(t, tt.expectedPath, capturedPath, "Path mismatch")
@@ -396,11 +396,11 @@ func TestOpenAIClient_DefaultBaseURL(t *testing.T) {
 		APIKey: "test-key",
 		Model:  "gpt-4",
 	}
-	
+
 	client, err := NewOpenAIClient(config)
 	require.NoError(t, err)
 	require.NotNil(t, client)
-	
+
 	// Verify the default BaseURL was set
 	assert.Equal(t, "https://api.openai.com/v1", client.config.BaseURL)
 }
