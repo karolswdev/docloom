@@ -28,7 +28,7 @@
 
 ### **3. Implementation Plan (The Execution)**
 
-#### [ ] STORY-9.1: Defining the Claude Code Agent Contract
+#### [x] STORY-9.1: Defining the Claude Code Agent Contract
 
 1.  **Task:** Design and document the **Claude Code CLI (`cc-cli`)** Artifact Specification.
     *   **Instruction:** `Create a new document at docs/agents/artifact-spec-claude-code.md. This is the official contract. Define the expected output structure of the Claude Code CLI, including filenames (e.g., overview.md, dependencies.json) and their content schemas.`
