@@ -1,0 +1,10 @@
+=== RUN   TestGenerateCmd_DryRun
+{"level":"debug","time":"2025-09-05T19:09:50-06:00","message":"Loading default embedded templates"}
+{"level":"info","sources":["/tmp/TestGenerateCmd_DryRun1997243822/001/test.md"],"time":"2025-09-05T19:09:50-06:00","message":"Ingesting source documents"}
+{"level":"debug","file":"/tmp/TestGenerateCmd_DryRun1997243822/001/test.md","bytes":50,"time":"2025-09-05T19:09:50-06:00","message":"Ingested file"}
+{"level":"info","files":1,"total_bytes":114,"time":"2025-09-05T19:09:50-06:00","message":"Ingestion complete"}
+{"level":"info","bytes":114,"time":"2025-09-05T19:09:50-06:00","message":"Source ingestion complete"}
+{"level":"info","time":"2025-09-05T19:09:50-06:00","message":"Building generation prompt"}
+--- PASS: TestGenerateCmd_DryRun (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/generate	0.006s

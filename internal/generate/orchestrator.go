@@ -87,18 +87,24 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 
 	// Step 1: Ingest source documents
 	log.Info().Strs("sources", opts.Sources).Msg("Ingesting source documents")
+	log.Debug().Str("template", opts.TemplateType).Msg("Using template for generation")
+	log.Debug().Str("model", opts.Model).Msg("Selected AI model")
+	log.Debug().Int("max_repairs", opts.MaxRepairs).Msg("Maximum repair attempts configured")
 	sourceContent, err := o.ingester.IngestSources(opts.Sources)
 	if err != nil {
 		return fmt.Errorf("failed to ingest sources: %w", err)
 	}
 	log.Info().Int("bytes", len(sourceContent)).Msg("Source ingestion complete")
+	log.Debug().Int("source_files", len(opts.Sources)).Msg("Total source files processed")
 
 	// Step 2: Build generation prompt
 	log.Info().Msg("Building generation prompt")
+	log.Debug().Str("template_prompt", tmpl.Prompt[:min(100, len(tmpl.Prompt))]).Msg("Template prompt preview")
 	generationPrompt, err := o.builder.BuildGenerationPrompt(sourceContent, tmpl.Prompt, tmpl.Schema)
 	if err != nil {
 		return fmt.Errorf("failed to build prompt: %w", err)
 	}
+	log.Debug().Int("prompt_length", len(generationPrompt)).Msg("Generation prompt built")
 	
 	if opts.DryRun {
 		fmt.Println("\n=== DRY RUN MODE ===")
@@ -131,12 +137,14 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 			// First attempt - use the original prompt
 			currentPrompt = generationPrompt
 			log.Info().Msg("Calling AI model for initial generation")
+			log.Debug().Str("model", opts.Model).Float32("temperature", opts.Temperature).Msg("Model parameters")
 		} else {
 			// Repair attempt - build repair prompt
 			log.Info().
 				Int("attempt", attempt).
 				Int("max_attempts", maxAttempts).
 				Msg("Validation failed, attempting repair")
+			log.Debug().Str("validation_error", lastError.Error()).Msg("Previous validation error")
 			
 			repairPrompt, err := o.builder.BuildRepairPrompt(
 				generationPrompt, 
@@ -151,9 +159,11 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 		}
 
 		// Call AI model
+		log.Debug().Msg("Sending request to AI model")
 		startTime := time.Now()
 		generatedJSON, err = o.aiClient.GenerateJSON(ctx, currentPrompt)
 		if err != nil {
+			log.Error().Err(err).Msg("AI model call failed")
 			return fmt.Errorf("AI generation failed: %w", err)
 		}
 		duration := time.Since(startTime)
@@ -162,6 +172,7 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 			Dur("duration", duration).
 			Int("response_bytes", len(generatedJSON)).
 			Msg("Received AI response")
+		log.Debug().Str("response_preview", generatedJSON[:min(200, len(generatedJSON))]).Msg("AI response preview")
 
 		// Validate the generated JSON
 		schemaStr, err := json.Marshal(tmpl.Schema)
@@ -197,14 +208,17 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 
 	// Step 5: Render HTML output
 	log.Info().Msg("Rendering HTML output")
+	log.Debug().Msg("Parsing generated JSON for rendering")
 	
 	// Parse the JSON into a map for rendering
 	var fields map[string]interface{}
 	if err := json.Unmarshal([]byte(generatedJSON), &fields); err != nil {
 		return fmt.Errorf("failed to parse generated JSON: %w", err)
 	}
+	log.Debug().Int("field_count", len(fields)).Msg("Parsed JSON fields")
 	
 	// Use the renderer to render and save both HTML and JSON
+	log.Debug().Str("output_file", opts.OutputFile).Msg("Writing rendered HTML")
 	if err := o.renderer.Render(tmpl.HTMLContent, fields, opts.OutputFile); err != nil {
 		return fmt.Errorf("failed to render output: %w", err)
 	}
@@ -213,6 +227,7 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 		Str("html_file", opts.OutputFile).
 		Str("json_file", jsonFile).
 		Msg("Document generation complete")
+	log.Debug().Msg("Generation workflow completed successfully")
 	
 	return nil
 }

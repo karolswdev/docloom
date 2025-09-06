@@ -1,0 +1,9 @@
+=== RUN   TestGenerateCmd_SafeWrites
+=== RUN   TestGenerateCmd_SafeWrites/Command_fails_when_output_file_exists_without_--force
+=== RUN   TestGenerateCmd_SafeWrites/Command_succeeds_with_--force_flag
+[90m7:12PM[0m [32mINF[0m [1mIngesting source documents[0m [36msources=[0m["/tmp/TestGenerateCmd_SafeWritesCommand_fails_when_output_file_exists_without_--force1865411383/001/test.md","/tmp/TestGenerateCmd_SafeWritesCommand_succeeds_with_--force_flag4092817540/001/test.md"]
+--- PASS: TestGenerateCmd_SafeWrites (0.00s)
+    --- PASS: TestGenerateCmd_SafeWrites/Command_fails_when_output_file_exists_without_--force (0.00s)
+    --- PASS: TestGenerateCmd_SafeWrites/Command_succeeds_with_--force_flag (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/cli	0.006s

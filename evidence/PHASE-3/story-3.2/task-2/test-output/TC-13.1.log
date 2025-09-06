@@ -1,0 +1,84 @@
+=== RUN   TestGenerateCmd_VerboseLogging
+=== RUN   TestGenerateCmd_VerboseLogging/Verbose_flag_produces_detailed_debug_messages
+[90m7:12PM[0m DBG Loading default embedded templates
+[90m7:12PM[0m [32mINF[0m [1mIngesting source documents[0m [36msources=[0m["/tmp/TestGenerateCmd_VerboseLoggingVerbose_flag_produces_detailed_debug_messages3011862844/001/test.md"]
+[90m7:12PM[0m DBG Using template for generation [36mtemplate=[0marchitecture-vision
+[90m7:12PM[0m DBG Selected AI model [36mmodel=[0mgpt-4
+[90m7:12PM[0m DBG Maximum repair attempts configured [36mmax_repairs=[0m3
+[90m7:12PM[0m DBG Ingested file [36mbytes=[0m42 [36mfile=[0m/tmp/TestGenerateCmd_VerboseLoggingVerbose_flag_produces_detailed_debug_messages3011862844/001/test.md
+[90m7:12PM[0m [32mINF[0m [1mIngestion complete[0m [36mfiles=[0m1 [36mtotal_bytes=[0m159
+[90m7:12PM[0m [32mINF[0m [1mSource ingestion complete[0m [36mbytes=[0m159
+[90m7:12PM[0m DBG Total source files processed [36msource_files=[0m1
+[90m7:12PM[0m [32mINF[0m [1mBuilding generation prompt[0m
+[90m7:12PM[0m DBG Template prompt preview [36mtemplate_prompt=[0m"Generate an architecture vision document based on the provided sources."
+[90m7:12PM[0m DBG Generation prompt built [36mprompt_length=[0m1120
+
+=== DRY RUN MODE ===
+Template: architecture-vision
+Sources: [/tmp/TestGenerateCmd_VerboseLoggingVerbose_flag_produces_detailed_debug_messages3011862844/001/test.md]
+Output: /tmp/TestGenerateCmd_VerboseLoggingVerbose_flag_produces_detailed_debug_messages3011862844/001/output.html
+Model: gpt-4
+Estimated tokens: 280
+
+=== PROMPT PREVIEW (first 1000 chars) ===
+You are a technical documentation generator. Your task is to generate structured JSON content based on the provided source documents and template requirements.
+
+## Template Instructions
+Generate an architecture vision document based on the provided sources.
+
+## JSON Schema
+Your response MUST conform to the following JSON schema:
+```json
+{
+  "type": "object",
+  "properties": {
+    "document": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+```
+
+## Source Documents
+Use the following source content to generate the JSON fields:
+```
+--- File: /tmp/TestGenerateCmd_VerboseLoggingVerbose_flag_produces_detailed_debug_messages3011862844/001/test.md ---
+# Test Document
+
+Content for verbose test.
+```
+
+## Instructions
+1. Analyze the source documents carefully
+2. Generate JSON that matches the schema exactly
+3. Use information from the source documents to populate th...
+
+=== SCHEMA ===
+{
+  "type": "object",
+  "properties": {
+    "document": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+--- PASS: TestGenerateCmd_VerboseLogging (0.00s)
+    --- PASS: TestGenerateCmd_VerboseLogging/Verbose_flag_produces_detailed_debug_messages (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/cli	0.006s

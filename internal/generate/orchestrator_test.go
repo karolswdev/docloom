@@ -256,7 +256,95 @@ func TestOrchestrator_ValidateOptions(t *testing.T) {
 	}
 }
 
-// TestOrchestrator_Generate_DryRun tests dry-run mode.
+// TestGenerateCmd_DryRun tests the dry-run functionality (TC-12.1).
+// This is an E2E test that verifies dry-run mode behavior.
+func TestGenerateCmd_DryRun(t *testing.T) {
+	// Arrange: Create test environment
+	tempDir := t.TempDir()
+	sourceFile := filepath.Join(tempDir, "test.md")
+	err := os.WriteFile(sourceFile, []byte("# Test Document\n\nThis is test content for dry-run."), 0644)
+	require.NoError(t, err)
+	
+	// Create test template with schema
+	testSchema := map[string]interface{}{
+		"type": "object",
+		"properties": map[string]interface{}{
+			"title": map[string]interface{}{
+				"type": "string",
+			},
+			"content": map[string]interface{}{
+				"type": "string",
+			},
+		},
+		"required": []string{"title", "content"},
+	}
+	
+	schemaBytes, err := json.Marshal(testSchema)
+	require.NoError(t, err)
+	
+	dryTemplate := &templates.Template{
+		Name:        "dry-test",
+		Description: "Template for dry-run testing",
+		Schema:      json.RawMessage(schemaBytes),
+		Prompt:      "Generate a document with title and content",
+		HTMLContent: `<!DOCTYPE html><html><body><!-- data-field="title" --><!-- data-field="content" --></body></html>`,
+	}
+	
+	// Create a mock AI client that should NOT be called
+	mockClient := &MockAIClient{
+		responses: []string{},
+		errors:    []error{assert.AnError}, // Will error if called
+	}
+	
+	// Create orchestrator with mock client
+	orchestrator := NewOrchestrator(mockClient)
+	err = orchestrator.registry.Register("dry-test", dryTemplate)
+	require.NoError(t, err)
+	
+	outputFile := filepath.Join(tempDir, "output.html")
+	
+	// Capture output to verify dry-run prints prompt
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	
+	opts := Options{
+		TemplateType: "dry-test",
+		Sources:      []string{sourceFile},
+		OutputFile:   outputFile,
+		Model:        "gpt-4",
+		DryRun:       true, // Enable dry-run mode
+	}
+	
+	// Act: Run the generation with dry-run flag
+	ctx := context.Background()
+	err = orchestrator.Generate(ctx, opts)
+	
+	// Restore stdout
+	w.Close()
+	outputBytes := make([]byte, 10000)
+	n, _ := r.Read(outputBytes)
+	os.Stdout = oldStdout
+	output := string(outputBytes[:n])
+	
+	// Assert: Should exit successfully (code 0)
+	assert.NoError(t, err, "Dry-run should complete without error")
+	
+	// Assert: The command should print the assembled prompt and schema
+	assert.Contains(t, output, "DRY RUN MODE", "Should indicate dry-run mode")
+	assert.Contains(t, output, "Template: dry-test", "Should show template name")
+	assert.Contains(t, output, "PROMPT PREVIEW", "Should show prompt preview")
+	assert.Contains(t, output, "SCHEMA", "Should show schema")
+	
+	// Assert: AI client must not have been called
+	assert.Equal(t, 0, mockClient.callCount, "AI client should not be called in dry-run mode")
+	
+	// Assert: Output files should NOT be created in dry-run mode
+	assert.NoFileExists(t, outputFile, "HTML file should not be created in dry-run")
+	assert.NoFileExists(t, filepath.Join(tempDir, "output.json"), "JSON file should not be created in dry-run")
+}
+
+// TestOrchestrator_Generate_DryRun tests dry-run mode validation.
 func TestOrchestrator_Generate_DryRun(t *testing.T) {
 	// Arrange
 	tempDir := t.TempDir()

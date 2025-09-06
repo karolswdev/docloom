@@ -95,18 +95,28 @@ docloom generate \
   --out debt-report.html
 
 # Dry-run mode to preview without API calls
+# Shows the assembled prompt, selected source chunks, and target JSON schema
 docloom generate \
   --type architecture-vision \
   --source ./docs \
   --out output.html \
   --dry-run
 
-# Force overwrite existing output
+# Force overwrite existing output files
+# Without --force, the command will fail if output.html already exists
 docloom generate \
   --type architecture-vision \
   --source ./docs \
   --out output.html \
   --force
+
+# Enable verbose logging for detailed debug output
+# Shows file ingestion details, model parameters, and processing steps
+docloom generate \
+  --type architecture-vision \
+  --source ./docs \
+  --out output.html \
+  --verbose
 
 # Using different AI models
 docloom generate \
