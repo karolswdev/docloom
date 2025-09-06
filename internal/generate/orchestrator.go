@@ -20,22 +20,18 @@ import (
 
 // Options contains configuration for the generation process.
 type Options struct {
+	Seed         *int
 	TemplateType string
-	Sources      []string
 	OutputFile   string
-	
-	// AI Configuration
-	Model       string
-	BaseURL     string
-	APIKey      string
-	Temperature float32
-	Seed        *int
-	MaxRetries  int
-	
-	// Behavior
-	DryRun      bool
-	Force       bool
-	MaxRepairs  int
+	Model        string
+	BaseURL      string
+	APIKey       string
+	Sources      []string
+	MaxRetries   int
+	MaxRepairs   int
+	Temperature  float32
+	DryRun       bool
+	Force        bool
 }
 
 // Orchestrator coordinates the document generation workflow.
@@ -56,7 +52,7 @@ func NewOrchestrator(aiClient ai.Client) *Orchestrator {
 		// Log warning but continue - templates can be loaded later
 		log.Warn().Err(err).Msg("Failed to load default templates")
 	}
-	
+
 	return &Orchestrator{
 		aiClient:  aiClient,
 		ingester:  ingest.NewIngester(),
@@ -108,7 +104,7 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 		return fmt.Errorf("failed to build prompt: %w", err)
 	}
 	log.Debug().Int("prompt_length", len(generationPrompt)).Msg("Generation prompt built")
-	
+
 	if opts.DryRun {
 		fmt.Println("\n=== DRY RUN MODE ===")
 		fmt.Printf("Template: %s\n", opts.TemplateType)
@@ -123,9 +119,9 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 			fmt.Println(generationPrompt)
 		}
 		fmt.Println("\n=== SCHEMA ===")
-		schemaBytes, err := json.MarshalIndent(tmpl.Schema, "", "  ")
-		if err != nil {
-			log.Warn().Err(err).Msg("Failed to marshal schema for display")
+		schemaBytes, schemaErr := json.MarshalIndent(tmpl.Schema, "", "  ")
+		if schemaErr != nil {
+			log.Warn().Err(schemaErr).Msg("Failed to marshal schema for display")
 			schemaBytes = []byte("{}")
 		}
 		fmt.Println(string(schemaBytes))
@@ -136,10 +132,10 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 	var generatedJSON string
 	var lastError error
 	maxAttempts := opts.MaxRepairs + 1 // Initial attempt + repairs
-	
+
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		var currentPrompt string
-		
+
 		if attempt == 1 {
 			// First attempt - use the original prompt
 			currentPrompt = generationPrompt
@@ -152,15 +148,15 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 				Int("max_attempts", maxAttempts).
 				Msg("Validation failed, attempting repair")
 			log.Debug().Str("validation_error", lastError.Error()).Msg("Previous validation error")
-			
-			repairPrompt, err := o.builder.BuildRepairPrompt(
-				generationPrompt, 
-				generatedJSON, 
+
+			repairPrompt, repairErr := o.builder.BuildRepairPrompt(
+				generationPrompt,
+				generatedJSON,
 				lastError.Error(),
 				tmpl.Schema,
 			)
-			if err != nil {
-				return fmt.Errorf("failed to build repair prompt: %w", err)
+			if repairErr != nil {
+				return fmt.Errorf("failed to build repair prompt: %w", repairErr)
 			}
 			currentPrompt = repairPrompt
 		}
@@ -174,7 +170,7 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 			return fmt.Errorf("AI generation failed: %w", err)
 		}
 		duration := time.Since(startTime)
-		
+
 		log.Info().
 			Dur("duration", duration).
 			Int("response_bytes", len(generatedJSON)).
@@ -186,21 +182,21 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 		if err != nil {
 			return fmt.Errorf("failed to marshal schema: %w", err)
 		}
-		
+
 		validationErr := o.validator.Validate(generatedJSON, string(schemaStr))
 		if validationErr == nil {
 			// Validation passed!
 			log.Info().Msg("JSON validation successful")
 			break
 		}
-		
+
 		// Validation failed
 		lastError = validationErr
 		log.Warn().
 			Err(validationErr).
 			Int("attempt", attempt).
 			Msg("JSON validation failed")
-		
+
 		if attempt == maxAttempts {
 			return fmt.Errorf("failed to generate valid JSON after %d attempts: %w", maxAttempts, lastError)
 		}
@@ -208,7 +204,7 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 
 	// Step 4: Save JSON sidecar file
 	jsonFile := strings.TrimSuffix(opts.OutputFile, ".html") + ".json"
-	if err := os.WriteFile(jsonFile, []byte(generatedJSON), 0644); err != nil {
+	if err := os.WriteFile(jsonFile, []byte(generatedJSON), 0600); err != nil {
 		return fmt.Errorf("failed to write JSON file: %w", err)
 	}
 	log.Info().Str("file", jsonFile).Msg("Saved JSON sidecar file")
@@ -216,26 +212,26 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 	// Step 5: Render HTML output
 	log.Info().Msg("Rendering HTML output")
 	log.Debug().Msg("Parsing generated JSON for rendering")
-	
+
 	// Parse the JSON into a map for rendering
 	var fields map[string]interface{}
 	if err := json.Unmarshal([]byte(generatedJSON), &fields); err != nil {
 		return fmt.Errorf("failed to parse generated JSON: %w", err)
 	}
 	log.Debug().Int("field_count", len(fields)).Msg("Parsed JSON fields")
-	
+
 	// Use the renderer to render and save both HTML and JSON
 	log.Debug().Str("output_file", opts.OutputFile).Msg("Writing rendered HTML")
 	if err := o.renderer.Render(tmpl.HTMLContent, fields, opts.OutputFile); err != nil {
 		return fmt.Errorf("failed to render output: %w", err)
 	}
-	
+
 	log.Info().
 		Str("html_file", opts.OutputFile).
 		Str("json_file", jsonFile).
 		Msg("Document generation complete")
 	log.Debug().Msg("Generation workflow completed successfully")
-	
+
 	return nil
 }
 

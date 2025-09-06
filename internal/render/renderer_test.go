@@ -27,8 +27,8 @@ func TestRenderer_RenderHTML_Golden(t *testing.T) {
 	
 	// Parse the fields
 	var fields map[string]interface{}
-	if err := json.Unmarshal(fieldsBytes, &fields); err != nil {
-		t.Fatalf("Failed to parse fields JSON: %v", err)
+	if unmarshalErr := json.Unmarshal(fieldsBytes, &fields); unmarshalErr != nil {
+		t.Fatalf("Failed to parse fields JSON: %v", unmarshalErr)
 	}
 	
 	// Read the expected output (golden file)
@@ -84,13 +84,13 @@ func TestRenderer_RenderHTML_Golden(t *testing.T) {
 		}
 		
 		// Check that HTML file exists
-		if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+		if _, statErr := os.Stat(outputPath); os.IsNotExist(statErr) {
 			t.Error("HTML output file was not created")
 		}
 		
 		// Check that JSON sidecar exists
 		jsonPath := filepath.Join(tmpDir, "output.json")
-		if _, err := os.Stat(jsonPath); os.IsNotExist(err) {
+		if _, statErr := os.Stat(jsonPath); os.IsNotExist(statErr) {
 			t.Error("JSON sidecar file was not created")
 		}
 		

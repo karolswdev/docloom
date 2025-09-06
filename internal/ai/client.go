@@ -20,14 +20,14 @@ type Client interface {
 
 // Config holds the configuration for the AI client.
 type Config struct {
-	BaseURL     string        // Base URL for the OpenAI-compatible API
-	APIKey      string        // API key for authentication
-	Model       string        // Model name to use
-	Temperature float32       // Temperature for generation (0.0-1.0)
-	MaxTokens   int           // Maximum tokens to generate
-	Seed        *int          // Optional seed for deterministic generation
-	MaxRetries  int           // Maximum number of retry attempts
-	RetryDelay  time.Duration // Initial delay between retries
+	Seed        *int
+	BaseURL     string
+	APIKey      string
+	Model       string
+	MaxTokens   int
+	MaxRetries  int
+	RetryDelay  time.Duration
+	Temperature float32
 }
 
 // OpenAIClient implements the Client interface using the go-openai library.
@@ -77,14 +77,14 @@ func (c *OpenAIClient) GenerateJSON(ctx context.Context, prompt string) (string,
 				Int("attempt", attempt).
 				Dur("delay", delay).
 				Msg("Retrying AI request after delay")
-			
+
 			select {
 			case <-time.After(delay):
 				// Continue with retry
 			case <-ctx.Done():
 				return "", ctx.Err()
 			}
-			
+
 			// Exponential backoff
 			delay *= 2
 		}
@@ -95,7 +95,7 @@ func (c *OpenAIClient) GenerateJSON(ctx context.Context, prompt string) (string,
 		}
 
 		lastErr = err
-		
+
 		// Check if error is retryable
 		if !isRetryableError(err) {
 			return "", err

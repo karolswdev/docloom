@@ -1,7 +1,7 @@
 package templates
 
 import (
-	"embed"
+	// "embed" // Currently using programmatic templates
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -13,23 +13,23 @@ import (
 
 // Template represents a document template with its assets
 type Template struct {
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	HTMLContent string          `json:"-"` // HTML template content
-	Schema      json.RawMessage `json:"schema"` // JSON schema for validation
-	Prompt      string          `json:"prompt"` // Prompt template for AI generation
-	Assets      map[string][]byte `json:"-"` // Additional assets (CSS, images, etc.)
+	Assets      map[string][]byte `json:"-"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	HTMLContent string            `json:"-"`
+	Prompt      string            `json:"prompt"`
+	Schema      json.RawMessage   `json:"schema"`
 }
 
 // Registry manages available templates
 type Registry struct {
 	templates map[string]*Template
-	embedFS   fs.FS
 }
 
 // Embed default templates into the binary
-//go:embed defaults/*
-var defaultTemplatesFS embed.FS
+// Note: Currently using programmatic templates
+// //go:embed defaults/*
+// var defaultTemplatesFS embed.FS
 
 // NewRegistry creates a new template registry
 func NewRegistry() *Registry {
@@ -41,29 +41,29 @@ func NewRegistry() *Registry {
 // LoadDefaults loads the default embedded templates
 func (r *Registry) LoadDefaults() error {
 	log.Debug().Msg("Loading default embedded templates")
-	
+
 	// For now, we'll create sample templates programmatically
 	// In production, these would be loaded from the embedded FS
 	r.registerDefaultTemplates()
-	
+
 	return nil
 }
 
 // LoadFromDirectory loads templates from a directory
 func (r *Registry) LoadFromDirectory(dir string) error {
 	log.Debug().Str("dir", dir).Msg("Loading templates from directory")
-	
+
 	// Walk the directory looking for template definitions
 	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Skip directories and non-template files
 		if info.IsDir() {
 			return nil
 		}
-		
+
 		// Look for template directories with required files
 		if strings.HasSuffix(path, "template.json") {
 			templateDir := filepath.Dir(path)
@@ -71,28 +71,28 @@ func (r *Registry) LoadFromDirectory(dir string) error {
 				log.Warn().Err(err).Str("path", path).Msg("Failed to load template")
 			}
 		}
-		
+
 		return nil
 	})
-	
+
 	return err
 }
 
 // loadTemplate loads a single template from a directory
 func (r *Registry) loadTemplate(dir string) error {
 	templateName := filepath.Base(dir)
-	
+
 	// Initialize template
 	tmpl := &Template{
 		Name:   templateName,
 		Assets: make(map[string][]byte),
 	}
-	
+
 	// Check for required files
 	htmlPath := filepath.Join(dir, templateName+".html")
 	schemaPath := filepath.Join(dir, "schema.json")
 	promptPath := filepath.Join(dir, "prompt.txt")
-	
+
 	// For testing purposes, we'll accept templates even if files don't exist yet
 	// In production, we would read these files
 	log.Debug().
@@ -101,11 +101,11 @@ func (r *Registry) loadTemplate(dir string) error {
 		Str("schema", schemaPath).
 		Str("prompt", promptPath).
 		Msg("Loading template")
-	
+
 	// Register the template
 	r.templates[templateName] = tmpl
-	
-	return nil
+
+	return nil // Currently always succeeds; will return errors when file reading is implemented
 }
 
 // registerDefaultTemplates registers the built-in templates
@@ -119,7 +119,7 @@ func (r *Registry) registerDefaultTemplates() {
 		Prompt:      architectureVisionPrompt,
 		Assets:      make(map[string][]byte),
 	}
-	
+
 	// Technical Debt Summary template
 	r.templates["technical-debt-summary"] = &Template{
 		Name:        "technical-debt-summary",
@@ -129,7 +129,7 @@ func (r *Registry) registerDefaultTemplates() {
 		Prompt:      technicalDebtPrompt,
 		Assets:      make(map[string][]byte),
 	}
-	
+
 	// Reference Architecture template
 	r.templates["reference-architecture"] = &Template{
 		Name:        "reference-architecture",

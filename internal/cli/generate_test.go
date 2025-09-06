@@ -326,14 +326,14 @@ func TestGenerateCmd_SafeWrites(t *testing.T) {
 	t.Run("Command fails when output file exists without --force", func(t *testing.T) {
 		tempDir := t.TempDir()
 		sourceFile := tempDir + "/test.md"
-		outputFile := tempDir + "/output.html"
+		outFile := tempDir + "/output.html"
 		
 		// Create source file
 		err := os.WriteFile(sourceFile, []byte("# Test"), 0644)
 		require.NoError(t, err)
 		
 		// Create existing output file
-		err = os.WriteFile(outputFile, []byte("<html>existing</html>"), 0644)
+		err = os.WriteFile(outFile, []byte("<html>existing</html>"), 0644)
 		require.NoError(t, err)
 		
 		// Test without --force flag
@@ -345,31 +345,31 @@ func TestGenerateCmd_SafeWrites(t *testing.T) {
 			"generate",
 			"--type", "architecture-vision",
 			"--source", sourceFile,
-			"--out", outputFile,
+			"--out", outFile,
 			"--dry-run",
 		})
 		
 		// Act: Run command without --force
-		err = rootCmd.Execute()
+		_ = rootCmd.Execute()
 		
 		// Assert: Command MUST fail with non-zero exit code
 		// Note: In dry-run mode, the check happens in orchestrator
 		// We check that the existing file is not overwritten in dry-run
-		existingContent, _ := os.ReadFile(outputFile)
+		existingContent, _ := os.ReadFile(outFile)
 		assert.Equal(t, "<html>existing</html>", string(existingContent), "File should not be modified without --force")
 	})
 	
 	t.Run("Command succeeds with --force flag", func(t *testing.T) {
 		tempDir := t.TempDir()
 		sourceFile := tempDir + "/test.md"
-		outputFile := tempDir + "/output.html"
+		outFile := tempDir + "/output.html"
 		
 		// Create source file
 		err := os.WriteFile(sourceFile, []byte("# Test"), 0644)
 		require.NoError(t, err)
 		
 		// Create existing output file
-		err = os.WriteFile(outputFile, []byte("<html>existing</html>"), 0644)
+		err = os.WriteFile(outFile, []byte("<html>existing</html>"), 0644)
 		require.NoError(t, err)
 		
 		// Test with --force flag
@@ -381,13 +381,13 @@ func TestGenerateCmd_SafeWrites(t *testing.T) {
 			"generate",
 			"--type", "architecture-vision",
 			"--source", sourceFile,
-			"--out", outputFile,
+			"--out", outFile,
 			"--dry-run",
 			"--force", // Enable force overwrite
 		})
 		
 		// Act: Run command with --force
-		err = rootCmd.Execute()
+		_ = rootCmd.Execute()
 		
 		// Assert: Command MUST succeed (in dry-run, no actual write happens)
 		// The force flag should be properly set
@@ -429,9 +429,9 @@ func TestGenerateCmd_DryRun(t *testing.T) {
 		err := rootCmd.Execute()
 		
 		// In dry-run mode, it should output preview information
-		output := outputBuf.String()
+		_ = outputBuf.String()
 		if err != nil {
-			output += err.Error()
+			// In dry-run mode, error is expected without API key
 		}
 		
 		// Check that dry-run mode was activated

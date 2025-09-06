@@ -85,12 +85,12 @@ func (r *Renderer) Render(templateHTML string, fields map[string]interface{}, ou
 	
 	// Ensure output directory exists
 	outputDir := filepath.Dir(outputPath)
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
+	if mkdirErr := os.MkdirAll(outputDir, 0755); mkdirErr != nil {
+		return fmt.Errorf("failed to create output directory: %w", mkdirErr)
 	}
 	
 	// Write the rendered HTML
-	if err := os.WriteFile(outputPath, []byte(renderedHTML), 0644); err != nil {
+	if err := os.WriteFile(outputPath, []byte(renderedHTML), 0600); err != nil {
 		return fmt.Errorf("failed to write HTML output: %w", err)
 	}
 	
@@ -104,7 +104,7 @@ func (r *Renderer) Render(templateHTML string, fields map[string]interface{}, ou
 	}
 	
 	// Write the JSON sidecar
-	if err := os.WriteFile(jsonPath, jsonData, 0644); err != nil {
+	if err := os.WriteFile(jsonPath, jsonData, 0600); err != nil {
 		return fmt.Errorf("failed to write JSON sidecar: %w", err)
 	}
 	

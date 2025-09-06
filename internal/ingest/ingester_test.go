@@ -191,13 +191,14 @@ func TestIngester_AddSupportedExtension(t *testing.T) {
 	ingester := NewIngester()
 
 	// Initially, .log files should not be supported
-	result, err := ingester.IngestSources([]string{customFile})
+	_, err = ingester.IngestSources([]string{customFile})
 	assert.Error(t, err)
 
 	// Act: Add .log as a supported extension
 	ingester.AddSupportedExtension(".log")
 
 	// Now it should work
+	var result string
 	result, err = ingester.IngestSources([]string{customFile})
 
 	// Assert

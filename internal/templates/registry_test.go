@@ -117,20 +117,20 @@ func TestTemplateRegistry_Load(t *testing.T) {
 		
 		// Create a test template directory
 		testTemplateDir := filepath.Join(tmpDir, "test-template")
-		if err := os.MkdirAll(testTemplateDir, 0755); err != nil {
-			t.Fatalf("Failed to create test template dir: %v", err)
+		if mkdirErr := os.MkdirAll(testTemplateDir, 0755); mkdirErr != nil {
+			t.Fatalf("Failed to create test template dir: %v", mkdirErr)
 		}
 		
 		// Create template.json to mark it as a template
 		templateJSON := filepath.Join(testTemplateDir, "template.json")
-		if err := os.WriteFile(templateJSON, []byte(`{"name": "test-template"}`), 0644); err != nil {
-			t.Fatalf("Failed to create template.json: %v", err)
+		if writeErr := os.WriteFile(templateJSON, []byte(`{"name": "test-template"}`), 0644); writeErr != nil {
+			t.Fatalf("Failed to create template.json: %v", writeErr)
 		}
 		
 		// Create other template files
 		htmlFile := filepath.Join(testTemplateDir, "test-template.html")
-		if err := os.WriteFile(htmlFile, []byte("<html></html>"), 0644); err != nil {
-			t.Fatalf("Failed to create HTML file: %v", err)
+		if writeErr := os.WriteFile(htmlFile, []byte("<html></html>"), 0644); writeErr != nil {
+			t.Fatalf("Failed to create HTML file: %v", writeErr)
 		}
 		
 		schemaFile := filepath.Join(testTemplateDir, "schema.json")

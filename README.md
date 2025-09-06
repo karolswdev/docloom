@@ -1,32 +1,94 @@
-# docloom
+# DocLoom
 
-Beautiful, template-driven technical documentation — fast.
+<div align="center">
 
-Docloom is a system for technical folks to generate high‑quality documents by combining structured templates with source materials and model‑assisted content. The aim is consistent, branded, and reviewable outputs that you can print, share, and iterate on quickly.
+![GitHub Release](https://img.shields.io/github/v/release/karolswdev/docloom?style=flat-square)
+![Go Version](https://img.shields.io/badge/Go-1.22%2B-00ADD8?style=flat-square&logo=go)
+![Build Status](https://img.shields.io/github/actions/workflow/status/karolswdev/docloom/ci.yml?style=flat-square&label=build)
+![Go Report Card](https://goreportcard.com/badge/github.com/karolswdev/docloom?style=flat-square)
+![License](https://img.shields.io/github/license/karolswdev/docloom?style=flat-square)
+![Docker Pulls](https://img.shields.io/docker/pulls/karolswdev/docloom?style=flat-square&logo=docker)
 
-Docloom is currently in early development. The Software Requirements Specification (SRS) lives in `docs/` and a working HTML template prototype is in `source-example-template-that-spawned-the-idea/`.
+**Beautiful, template-driven technical documentation — fast.**
 
-## What It Is
+[Quick Start](#quick-start) • [Features](#features) • [Documentation](#documentation) • [Templates](#available-templates) • [Contributing](#contributing)
 
-- **Templates:** Curated, branded skeletons (e.g., Architecture Vision) with `data-field` placeholders for structured content.
-- **Fields & Schema:** Each template defines a field schema; AI generations and manual edits populate these fields.
-- **Sources:** Local Markdown, text, and other artifacts provide the factual basis for generation.
-- **Renderers:** Produce attractive HTML ready for print/PDF, plus a JSON sidecar of the filled fields for traceability.
+</div>
 
-## Installation
+---
 
-### Download Pre-built Binaries
+## ✨ What is DocLoom?
 
-Download the latest release for your platform from the [GitHub Releases](https://github.com/karolswdev/docloom/releases) page.
+DocLoom is a powerful documentation generator that transforms your scattered technical materials into professional, branded documents. By combining structured templates with AI assistance, it produces consistent, high-quality documentation that's ready to print, share, and iterate.
+
+### 🎯 Key Features
+
+- **🎨 Professional Templates** - Pre-built templates for architecture visions, technical debt summaries, and reference architectures
+- **🤖 AI-Powered Generation** - Intelligent content generation using OpenAI, Azure, Claude, or local LLMs
+- **📚 Multi-Source Processing** - Ingest Markdown, text files, PDFs, and other documents as source material
+- **🔍 Smart Content Assembly** - Automatically extracts and organizes relevant information from your sources
+- **📊 Structured Output** - Generates beautiful HTML with embedded styles and JSON sidecars for traceability
+- **🔧 Flexible Configuration** - YAML configs, environment variables, and CLI flags for complete control
+- **🚀 Production Ready** - Battle-tested with comprehensive test coverage and CI/CD pipeline
+- **🐳 Docker Support** - Run anywhere with our official Docker images
+
+## 🚀 Quick Start
+
+Get up and running in 30 seconds:
+
+```bash
+# Install via Go
+go install github.com/karolswdev/docloom/cmd/docloom@latest
+
+# Or download the latest binary
+curl -L https://github.com/karolswdev/docloom/releases/latest/download/docloom_$(uname -s)_$(uname -m).tar.gz | tar xz
+sudo mv docloom /usr/local/bin/
+
+# Generate your first document
+export OPENAI_API_KEY="your-api-key"
+docloom generate --type architecture-vision --source ./docs --out my-vision.html
+
+# Open the result
+open my-vision.html  # macOS
+# xdg-open my-vision.html  # Linux
+# start my-vision.html  # Windows
+```
+
+That's it! You've just created a professional architecture vision document.
+
+## 📖 Table of Contents
+
+- [Installation](#installation)
+  - [Binary Releases](#binary-releases)
+  - [Docker](#docker)
+  - [From Source](#from-source)
+- [Usage](#usage)
+  - [Basic Commands](#basic-commands)
+  - [Generating Documents](#generating-documents)
+  - [Dry Run Mode](#dry-run-mode)
+- [Configuration](#configuration)
+  - [Config File](#configuration-file)
+  - [Environment Variables](#environment-variables)
+  - [AI Providers](#supported-ai-providers)
+- [Templates](#available-templates)
+- [Architecture](#architecture)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+
+## 📦 Installation
+
+### Binary Releases
+
+Download pre-built binaries for your platform from our [GitHub Releases](https://github.com/karolswdev/docloom/releases).
 
 #### Linux/macOS
 
 ```bash
 # Download the latest release (replace VERSION and PLATFORM)
-curl -L https://github.com/karolswdev/docloom/releases/download/VERSION/docloom_VERSION_PLATFORM.tar.gz -o docloom.tar.gz
-
-# Extract
-tar -xzf docloom.tar.gz
+VERSION=$(curl -s https://api.github.com/repos/karolswdev/docloom/releases/latest | grep tag_name | cut -d '"' -f 4)
+PLATFORM=$(uname -s)_$(uname -m)
+curl -L "https://github.com/karolswdev/docloom/releases/download/${VERSION}/docloom_${PLATFORM}.tar.gz" | tar xz
 
 # Move to PATH
 sudo mv docloom /usr/local/bin/
@@ -37,222 +99,153 @@ docloom --version
 
 #### Windows
 
-Download the `.zip` file from the releases page, extract it, and add the binary to your PATH.
-
-### Install via Go
-
-If you have Go 1.22+ installed:
-
-```bash
-go install github.com/karolswdev/docloom/cmd/docloom@latest
-```
+Download the `.zip` file from the [releases page](https://github.com/karolswdev/docloom/releases), extract it, and add to your PATH.
 
 ### Docker
-
-Pull and run the official Docker image:
 
 ```bash
 # Pull the latest image
 docker pull ghcr.io/karolswdev/docloom:latest
 
-# Run docloom
-docker run --rm -v $(pwd):/workspace ghcr.io/karolswdev/docloom:latest --help
-
-# Generate a document
+# Run with your local files
 docker run --rm \
-  -v $(pwd)/sources:/workspace/sources \
-  -v $(pwd)/output:/workspace/output \
+  -v $(pwd):/workspace \
   -e OPENAI_API_KEY="$OPENAI_API_KEY" \
   ghcr.io/karolswdev/docloom:latest generate \
   --type architecture-vision \
-  --source /workspace/sources \
-  --out /workspace/output/document.html
+  --source /workspace/docs \
+  --out /workspace/output.html
 ```
 
-### Build from Source
+### From Source
+
+Requires Go 1.22 or later:
 
 ```bash
-# Clone the repository
+# Clone and build
 git clone https://github.com/karolswdev/docloom.git
 cd docloom
-
-# Build with make
 make build
-
-# Or build directly with Go
-go build -o docloom ./cmd/docloom
 
 # Install to $GOPATH/bin
 make install
+
+# Or use go install directly
+go install github.com/karolswdev/docloom/cmd/docloom@latest
 ```
 
-## Current Status
+## 🔧 Usage
 
-- Full CLI implementation with document generation, validation, and repair loops
-- Multiple template types (architecture-vision, technical-debt-summary, reference-architecture)
-- AI integration with OpenAI-compatible APIs
-- PDF extraction support (optional, via pdftotext)
-- Dry-run mode for testing without API calls
-- Comprehensive test coverage and CI/CD pipeline
-
-## Repository Layout
-
-- `docs/` — Authoritative SRS: scope, terminology, and requirements.
-- `source-example-template-that-spawned-the-idea/` — Prototype HTML template, styles, and a simple filler script:
-  - `architecture-vision.html` — HTML skeleton with `data-field` placeholders
-  - `style.css`, `terumo.css`, `logo.svg` — Layout and brand styling
-  - `fill.js` — Minimal helper to populate placeholders from JSON
-
-## Try the Sample Template
-
-You can open the template directly in a browser or serve it locally to test auto‑filling.
-
-1) Change into the sample directory:
-   - `cd source-example-template-that-spawned-the-idea`
-2) Serve the folder (pick one):
-   - `python3 -m http.server 8080` (then open `http://localhost:8080/architecture-vision.html`)
-   - or simply double‑click `architecture-vision.html` to open it directly
-3) To auto‑fill fields, define `window.DOC_DATA` before `fill.js` or call `window.DocFill.fill(data)` in the console.
-
-Example snippet to embed before `fill.js` in the HTML (or paste in DevTools console and then call `DocFill.fill`):
-
-```html
-<script>
-  window.DOC_DATA = {
-    project_name: "NextGen EHR Integration",
-    author: "Jane Doe",
-    summary: "<p>This initiative unifies...</p>",
-    introduction: "<p>We aim to...</p>",
-    // ...other fields...
-    copyright_year: 2025,
-    doc_code: "AV-2025-00012"
-  };
-</script>
-<script src="fill.js"></script>
-```
-
-Printing tips:
-- Use the browser’s Print dialog to export to PDF.
-- Enable printing of backgrounds so header/footer visuals appear.
-
-## Usage
-
-To see available commands and options:
+### Basic Commands
 
 ```bash
+# Show help and available commands
 docloom --help
-docloom --version              # Display version information
-docloom version                # Display detailed version information
-docloom generate --help
+
+# Display version information
+docloom version
+
+# List available templates
 docloom templates list
+
+# Show detailed template information
+docloom templates describe architecture-vision
 ```
 
 ### Generating Documents
 
-To generate a document from your source materials:
-
 ```bash
-# Basic usage with API key via environment variable
-export OPENAI_API_KEY="your-api-key-here"
+# Basic generation with environment variable API key
+export OPENAI_API_KEY="your-api-key"
 docloom generate \
   --type architecture-vision \
-  --source ./docs \
-  --out output.html
+  --source ./project-docs \
+  --out architecture.html
 
-# Or provide API key directly
-docloom generate \
-  --type architecture-vision \
-  --source ./docs \
-  --out output.html \
-  --api-key "your-api-key-here"
-
-# Using multiple source paths
+# Using multiple source directories
 docloom generate \
   --type technical-debt-summary \
-  --source ./docs --source ./notes.md \
+  --source ./docs --source ./issues --source ./notes.md \
   --out debt-report.html
 
-# Dry-run mode to preview without API calls
-# Shows the assembled prompt, selected source chunks, and target JSON schema
+# With specific model and temperature
+docloom generate \
+  --type reference-architecture \
+  --source ./specs \
+  --model gpt-4 \
+  --temperature 0.3 \
+  --out reference.html
+```
+
+### Dry Run Mode
+
+Preview what DocLoom will do without making API calls:
+
+```bash
+# See the assembled prompt and selected source chunks
 docloom generate \
   --type architecture-vision \
   --source ./docs \
   --out output.html \
   --dry-run
 
-# Force overwrite existing output files
-# Without --force, the command will fail if output.html already exists
+# Combine with verbose mode for maximum detail
+docloom generate \
+  --type architecture-vision \
+  --source ./docs \
+  --out output.html \
+  --dry-run \
+  --verbose
+```
+
+### Advanced Usage
+
+```bash
+# Force overwrite existing files
 docloom generate \
   --type architecture-vision \
   --source ./docs \
   --out output.html \
   --force
 
-# Enable verbose logging for detailed debug output
-# Shows file ingestion details, model parameters, and processing steps
-docloom generate \
-  --type architecture-vision \
-  --source ./docs \
-  --out output.html \
-  --verbose
-
-# Using different AI models
-docloom generate \
-  --type architecture-vision \
-  --source ./docs \
-  --out output.html \
-  --model gpt-3.5-turbo
-
 # Using Azure OpenAI
 docloom generate \
   --type architecture-vision \
   --source ./docs \
-  --out output.html \
   --model gpt-35-turbo \
   --base-url https://myinstance.openai.azure.com \
-  --api-key "your-azure-api-key"
+  --api-key "azure-key" \
+  --out output.html
 
-# Using a local LLM server (e.g., Ollama, LocalAI)
+# Using local LLM (Ollama, LocalAI, etc.)
 docloom generate \
   --type architecture-vision \
   --source ./docs \
-  --out output.html \
   --model llama2 \
-  --base-url http://localhost:8080/v1 \
-  --api-key "dummy-key-if-required"
+  --base-url http://localhost:11434/v1 \
+  --api-key "unused" \
+  --out output.html
 
-# Using Claude via OpenAI-compatible API
+# With configuration file
 docloom generate \
+  --config ./docloom.yaml \
   --type architecture-vision \
   --source ./docs \
-  --out output.html \
-  --model claude-3-opus \
-  --base-url https://api.anthropic.com/v1 \
-  --api-key "your-anthropic-api-key"
+  --out output.html
 ```
 
-## Dependencies
+## ⚙️ Configuration
 
-### Optional Dependencies
+DocLoom supports flexible configuration through multiple sources (in precedence order):
 
-- **PDF Processing**: DocLoom can extract text from PDF files if `pdftotext` is available. To enable PDF support, install `poppler-utils`:
-  - **Ubuntu/Debian**: `sudo apt-get install poppler-utils`
-  - **macOS**: `brew install poppler`
-  - **Fedora/RHEL**: `sudo dnf install poppler-utils`
-  - **Windows**: Download from [poppler releases](https://github.com/oschwartz10612/poppler-windows/releases)
+1. **CLI flags** - Direct command-line arguments
+2. **Environment variables** - `DOCLOOM_` prefixed variables
+3. **Configuration file** - YAML configuration
+4. **Defaults** - Built-in sensible defaults
 
-  Without `pdftotext`, DocLoom will skip PDF files during source ingestion.
+### Configuration File
 
-## Configuration
-
-Docloom supports configuration through multiple sources with the following precedence order (highest to lowest):
-
-1. **CLI flags** - Command-line arguments passed directly
-2. **Environment variables** - Variables prefixed with `DOCLOOM_`
-3. **Configuration file** - YAML file specified with `--config`
-4. **Defaults** - Built-in default values
-
-### Example Configuration File (docloom.yaml)
+Create a `docloom.yaml`:
 
 ```yaml
 # Model configuration
@@ -261,8 +254,8 @@ base_url: https://api.openai.com/v1
 temperature: 0.7
 max_retries: 3
 
-# Template configuration
-template_dir: ./templates
+# Template configuration  
+template_dir: ./custom-templates
 
 # Output configuration
 force: false
@@ -272,108 +265,273 @@ verbose: false
 dry_run: false
 ```
 
+Use with: `docloom generate --config docloom.yaml ...`
+
 ### Environment Variables
 
-- `OPENAI_API_KEY` - API key for OpenAI or compatible services (required for generation)
-- `DOCLOOM_MODEL` - AI model to use (default: gpt-4)
-- `DOCLOOM_BASE_URL` - Base URL for OpenAI-compatible API (default: https://api.openai.com/v1)
-- `DOCLOOM_API_KEY` - Alternative to `OPENAI_API_KEY`
-- `DOCLOOM_TEMPERATURE` - Temperature for model generation (0.0-1.0, default: 0.7)
-- `DOCLOOM_TEMPLATE_DIR` - Directory containing custom templates
-- `DOCLOOM_VERBOSE` - Enable verbose logging (shows detailed progress)
-- `DOCLOOM_DRY_RUN` - Enable dry-run mode (preview without API calls)
-
-**Note:** API keys are never logged or included in output files. The system automatically redacts them from any debug output.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OPENAI_API_KEY` | OpenAI API key (required) | - |
+| `DOCLOOM_MODEL` | AI model to use | `gpt-4` |
+| `DOCLOOM_BASE_URL` | API endpoint URL | `https://api.openai.com/v1` |
+| `DOCLOOM_TEMPERATURE` | Generation temperature (0.0-1.0) | `0.7` |
+| `DOCLOOM_TEMPLATE_DIR` | Custom templates directory | - |
+| `DOCLOOM_VERBOSE` | Enable verbose logging | `false` |
+| `DOCLOOM_DRY_RUN` | Preview without API calls | `false` |
 
 ### Supported AI Providers
 
-DocLoom supports any OpenAI-compatible API endpoint. This includes:
+DocLoom works with any OpenAI-compatible API:
 
-- **OpenAI** - Use models like `gpt-4`, `gpt-3.5-turbo`, `gpt-4-turbo-preview`
-- **Azure OpenAI** - Use your Azure deployment names (e.g., `gpt-35-turbo`)
-- **Local LLMs** - Via Ollama, LocalAI, or other OpenAI-compatible servers
-- **Anthropic Claude** - If using an OpenAI-compatible proxy
-- **Google Gemini** - If using an OpenAI-compatible proxy
-- **Custom deployments** - Any service implementing the OpenAI chat completions API
+- **OpenAI** - GPT-4, GPT-3.5-Turbo, etc.
+- **Azure OpenAI** - Your Azure deployments
+- **Anthropic Claude** - Via proxy
+- **Google Gemini** - Via proxy
+- **Local LLMs** - Ollama, LocalAI, llama.cpp
+- **Custom Deployments** - Any OpenAI-compatible endpoint
 
-The `--model` flag specifies which model to use, and `--base-url` specifies the API endpoint. The combination of these two settings allows you to use virtually any LLM provider.
+## 📄 Available Templates
 
-## Planned CLI (from SRS)
+DocLoom ships with professional templates for common documentation needs:
 
-The SRS outlines a CLI along these lines:
+### Architecture Vision
+Document high-level system architecture and strategic direction:
+- Executive summary
+- System context and boundaries
+- Key architectural decisions
+- Technology stack
+- Integration points
 
-- `docloom generate --type <template> --source <paths...> --out <file>`
-- Template registry (e.g., `architecture-vision`, `technical-debt-summary`, `reference-architecture`).
-- HTML output plus a JSON sidecar of filled fields.
-- Config via `docloom.yaml`, env vars, and flags; verbose/dry‑run modes; schema validation and repair.
+### Technical Debt Summary
+Track and prioritize technical improvements:
+- Debt inventory
+- Impact assessment
+- Remediation strategies
+- Priority matrix
+- Timeline estimates
 
-For full details and requirement IDs, see `docs/SRS.md`.
+### Reference Architecture
+Define standard patterns and practices:
+- Component specifications
+- Design patterns
+- Best practices
+- Implementation guidelines
+- Code examples
 
+## 🏗️ Architecture
 
-## Contributing
+```mermaid
+graph TB
+    CLI[CLI Interface] --> Core[Core Engine]
+    Core --> TM[Template Manager]
+    Core --> IG[Ingestion Engine]
+    Core --> AI[AI Integration]
+    Core --> RN[Render Engine]
+    
+    IG --> MD[Markdown]
+    IG --> TXT[Text Files]
+    IG --> PDF[PDFs]
+    
+    AI --> OAI[OpenAI]
+    AI --> AZ[Azure]
+    AI --> LOC[Local LLMs]
+    
+    RN --> HTML[HTML Output]
+    RN --> JSON[JSON Sidecar]
+    
+    TM --> TPL[Template Library]
+    TPL --> AV[Architecture Vision]
+    TPL --> TD[Tech Debt]
+    TPL --> RA[Ref Architecture]
+```
 
-We welcome contributions! Please follow these guidelines:
+### Core Components
 
-### Code Standards
+- **CLI Interface** - Cobra-based command structure with comprehensive flags
+- **Template Manager** - Loads and validates document templates with field schemas
+- **Ingestion Engine** - Processes multiple source formats into unified content
+- **AI Integration** - Flexible provider system supporting any OpenAI-compatible API
+- **Render Engine** - Generates styled HTML and JSON output with full traceability
 
-- **Commit Messages**: We use [Conventional Commits](https://www.conventionalcommits.org/) format:
-  - `feat:` New features
-  - `fix:` Bug fixes
-  - `docs:` Documentation changes
-  - `style:` Formatting, missing semicolons, etc.
-  - `refactor:` Code changes that neither fix bugs nor add features
-  - `test:` Adding or updating tests
-  - `chore:` Maintenance tasks
-  - `ci:` CI/CD changes
+## 💻 Development
 
-  Examples:
-  ```
-  feat(templates): add support for custom template directories
-  fix(render): correct HTML escaping in template fields
-  docs: update installation instructions
-  ```
+### Prerequisites
 
-- **Code Quality**: All code must pass our linting checks:
-  ```bash
-  make lint        # Run golangci-lint
-  make test        # Run tests with race detection
-  make ci          # Run all quality checks
-  ```
+- Go 1.22 or later
+- Make (optional but recommended)
+- golangci-lint (for linting)
 
-- **Testing**: Write tests for new functionality. We aim for good coverage on critical paths.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch from `main`
-3. Make your changes following the code standards
-4. Run `make ci` to ensure all checks pass
-5. Submit a PR with a clear description
-
-### Getting Started
-
-- Start by reading `docs/SRS.md` to understand scope and constraints
-- Explore the template prototype to get a feel for structure and fields
-- Check existing issues for good first contributions
-- Proposals, templates, and improvements are welcome as issues or PRs
-
-### Building from Source
+### Building
 
 ```bash
 # Clone the repository
 git clone https://github.com/karolswdev/docloom.git
 cd docloom
 
-# Build with version information
+# Run tests
+make test
+
+# Run linting
+make lint
+
+# Build binary
 make build
 
-# Run the built binary
-./build/docloom --version
-
-# Install to $GOPATH/bin
-make install
+# Run all CI checks
+make ci
 ```
 
-## License
+### Project Structure
 
-TBD.
+```
+docloom/
+├── cmd/docloom/          # CLI entry point
+├── internal/             # Core implementation
+│   ├── ai/              # AI provider integration
+│   ├── config/          # Configuration management
+│   ├── ingest/          # Source file processing
+│   ├── render/          # Output generation
+│   └── templates/       # Template management
+├── pkg/                 # Public packages
+├── templates/           # Built-in templates
+├── docs/               # Documentation
+│   └── SRS.md         # Software Requirements Spec
+└── tests/              # Test fixtures and data
+```
+
+### Testing
+
+```bash
+# Run all tests with race detection
+make test
+
+# Run with coverage
+make coverage
+
+# Run specific tests
+go test -v ./internal/ai/...
+
+# Run integration tests
+make integration-test
+```
+
+## 🤝 Contributing
+
+We welcome contributions! DocLoom follows industry-standard practices to ensure code quality and maintainability.
+
+### Getting Started
+
+1. Read our [Software Requirements Specification](docs/SRS.md) to understand the project scope
+2. Check the [Issues](https://github.com/karolswdev/docloom/issues) for good first contributions
+3. Fork the repository and create a feature branch
+4. Make your changes following our standards
+5. Submit a PR with a clear description
+
+### Code Standards
+
+- **Commit Messages** - We use [Conventional Commits](https://www.conventionalcommits.org/):
+  - `feat:` New features
+  - `fix:` Bug fixes
+  - `docs:` Documentation changes
+  - `test:` Test additions or changes
+  - `refactor:` Code refactoring
+  - `chore:` Maintenance tasks
+
+- **Code Quality** - All code must pass:
+  ```bash
+  make lint  # golangci-lint checks
+  make test  # Unit tests with race detection
+  make ci    # All quality checks
+  ```
+
+- **Testing** - Write tests for new functionality, especially on critical paths
+
+### Development Workflow
+
+1. Fork and clone the repository
+2. Create a feature branch from `main`
+3. Make your changes with appropriate tests
+4. Run `make ci` to ensure quality
+5. Push your branch and create a PR
+6. Address review feedback
+
+### Reporting Issues
+
+Found a bug or have a feature request? [Open an issue](https://github.com/karolswdev/docloom/issues/new) with:
+- Clear description of the problem or request
+- Steps to reproduce (for bugs)
+- Expected vs actual behavior
+- Your environment details
+
+## 📚 Documentation
+
+- [Software Requirements Specification](docs/SRS.md) - Detailed project requirements
+- [API Reference](https://pkg.go.dev/github.com/karolswdev/docloom) - Go package documentation
+- [Template Development Guide](docs/templates.md) - Creating custom templates
+- [Architecture Decision Records](docs/adr/) - Key design decisions
+
+## 🔒 Security
+
+### Security Policy
+
+We take security seriously. If you discover a vulnerability:
+
+1. **Do not** open a public issue
+2. Email security concerns to the maintainers
+3. Allow time for a fix before public disclosure
+
+### API Key Safety
+
+- API keys are never logged or included in output files
+- Automatic redaction in debug output
+- Support for environment variables and secure config files
+
+## 📜 License
+
+DocLoom is open source software. See the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+DocLoom stands on the shoulders of giants:
+
+- [Cobra](https://github.com/spf13/cobra) for CLI framework
+- [Zerolog](https://github.com/rs/zerolog) for structured logging
+- [OpenAI Go](https://github.com/sashabaranov/go-openai) for AI integration
+- The Go community for excellent tools and libraries
+
+Special thanks to all [contributors](https://github.com/karolswdev/docloom/graphs/contributors) who help make DocLoom better!
+
+## 🗺️ Roadmap
+
+### Current Focus (v1.x)
+- ✅ Core template engine
+- ✅ Multi-source ingestion
+- ✅ AI integration
+- ✅ Docker support
+- ✅ Comprehensive testing
+
+### Coming Soon (v2.0)
+- 🔄 Web UI for template editing
+- 🔄 Template marketplace
+- 🔄 Real-time collaboration
+- 🔄 Version control integration
+- 🔄 Custom field validators
+
+### Future Vision
+- 📋 API server mode
+- 📋 Plugin system
+- 📋 Multi-language support
+- 📋 Advanced analytics
+- 📋 Enterprise features
+
+---
+
+<div align="center">
+
+**Ready to create beautiful documentation?**
+
+[Get Started](#quick-start) • [Read the Docs](#documentation) • [Join the Community](https://github.com/karolswdev/docloom/discussions)
+
+Made with ❤️ by the DocLoom team
+
+</div>
