@@ -38,6 +38,8 @@ jobs:
       
     - name: Run tests
       run: go test -v -race -coverprofile=coverage.out ./...
+      env:
+        CI: true
       
     - name: Upload coverage reports
       uses: codecov/codecov-action@v4
@@ -139,4 +141,4 @@ jobs:
         
     - name: Run go test in container
       run: |
-        docker run --rm -v $PWD:/workspace -w /workspace golang:1.22-alpine sh -c "go test ./..."
+        docker run --rm -v $PWD:/workspace -w /workspace -e CI=true golang:1.22-alpine sh -c "apk add --no-cache gcc g++ musl-dev git && CGO_ENABLED=1 go test ./..."
