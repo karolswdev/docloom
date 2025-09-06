@@ -53,5 +53,13 @@ Each entry follows the format:
 - **Template-Defined Intelligence** (Implied by Vision) → TC-26.1 → internal/cli/generate_template_analysis_test.go:TestGenerateCmd_UsesTemplateAnalysisPrompt
 - **Documentation:** docs/guides/creating-intelligent-templates.md (world-class guide on analysis prompts)
 
+## Phase 9 Traceability
+
+### STORY-9.1: Defining the Claude Code Agent Contract
+- **PROD-018** (External CLI Tool Agent - Contract) → TC-27.1 → docs/agents/artifact-spec-claude-code.md + .docloom/agents/csharp-cc-cli.agent.yaml
+
+### STORY-9.2: Mock Implementation and E2E Testing
+- **PROD-018** (External CLI Tool Agent - Mock) → TC-27.2 → internal/cli/generate_agent_claude_test.go:TestCSharpCCAgent_E2E_WithMock
+
 ## Previous Phases
 [Previous phase traceability would be maintained here]

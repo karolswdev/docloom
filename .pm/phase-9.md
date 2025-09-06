@@ -1,4 +1,4 @@
-## [ ] PHASE-9: `csharp-cc-cli` Agent for Claude Code & Mock Integration
+## [x] PHASE-9: `csharp-cc-cli` Agent for Claude Code & Mock Integration
 
 ---
 
@@ -57,7 +57,7 @@
 
 ---
 
-#### [ ] STORY-9.2: Mock Implementation and E2E Testing
+#### [x] STORY-9.2: Mock Implementation and E2E Testing
 
 1.  **Task:** Create the mock `cc-cli` script.
     *   **Instruction:** `Create a shell script named mock-cc-cli.sh to simulate the behavior of the future Claude Code CLI. The script MUST accept source and output path arguments and create the directory and file structure exactly as defined in the Artifact Specification, filling them with placeholder text.`
@@ -91,8 +91,8 @@ This Phase is officially complete **only when all `STORY-9.x` checkboxes in Sect
 
 #### Final Acceptance Gate
 
-*   [ ] **Final Full Regression Test Passed:**
+*   [x] **Final Full Regression Test Passed:**
     *   **Instruction:** `Execute 'go test ./...'.`
-    *   **Evidence:** Provide the full, final summary output from the test runner.
+    *   **Evidence:** All tests passing - see evidence/PHASE-GO-9/final-gate-test.txt
 
 *   **Final Instruction:** Once the `Final Full Regression Test Passed` checkbox is marked `[x]`, modify the main title to `[x] PHASE-9`.
