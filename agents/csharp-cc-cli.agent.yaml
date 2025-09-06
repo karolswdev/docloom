@@ -1,0 +1,102 @@
+# Claude Code CLI Agent Definition
+# This agent orchestrates the powerful external Claude Code CLI (cc-cli) tool
+# to perform deep code analysis and generate comprehensive insights
+
+name: csharp-cc-cli
+description: "Orchestrates the Claude Code CLI for comprehensive C# code analysis"
+version: "1.0.0"
+author: "DocLoom Team"
+
+# Command to execute - currently points to mock for testing
+# Production will use: ["cc-cli", "analyze"]
+command: ["./mock-cc-cli.sh"]
+
+# Parameters that can be passed to the Claude Code CLI
+parameters:
+  - name: language
+    description: "Programming language hint (e.g., csharp, go, python)"
+    type: string
+    default: "csharp"
+    required: false
+    
+  - name: depth
+    description: "Analysis depth level (1-3, where 3 is most detailed)"
+    type: integer
+    default: 2
+    required: false
+    validation:
+      min: 1
+      max: 3
+      
+  - name: include-tests
+    description: "Include test files in the analysis"
+    type: boolean
+    default: false
+    required: false
+    
+  - name: timeout
+    description: "Maximum execution time in seconds"
+    type: integer
+    default: 300
+    required: false
+
+# Environment variables to set when running the agent
+environment:
+  CLAUDE_CODE_VERSION: "1.0.0"
+  ANALYSIS_MODE: "comprehensive"
+
+# Working directory for the agent (relative to project root)
+workdir: "."
+
+# Output format expected from this agent
+output:
+  format: "directory"
+  structure: "claude-code-artifacts"
+  
+# Capabilities and requirements
+capabilities:
+  - "code-analysis"
+  - "dependency-mapping"
+  - "complexity-metrics"
+  - "api-extraction"
+  - "pattern-detection"
+  
+requirements:
+  - "Source code must be accessible"
+  - "Output directory must be writable"
+  
+# Tags for discovery and filtering
+tags:
+  - "analysis"
+  - "csharp"
+  - "code-quality"
+  - "external-tool"
+  - "claude-code"
+
+# Cache configuration
+cache:
+  enabled: true
+  ttl: 3600  # 1 hour cache for analysis results
+  key_components:
+    - "source_hash"
+    - "language"
+    - "depth"
+    - "include_tests"
+
+# Integration hints for DocLoom
+integration:
+  # How DocLoom should handle the agent's output
+  output_handling: "ingest_directory"
+  
+  # Special prompt additions when using this agent
+  prompt_enhancement: |
+    The following comprehensive code analysis has been performed by Claude Code CLI.
+    Use these insights to generate documentation that reflects the actual implementation,
+    identifies areas of technical debt, and provides actionable recommendations.
+  
+  # Templates that work particularly well with this agent
+  recommended_templates:
+    - "architecture-vision"
+    - "technical-debt-summary"
+    - "api-documentation"
+    - "code-review-report"

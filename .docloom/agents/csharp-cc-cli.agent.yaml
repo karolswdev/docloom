@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Agent
+metadata:
+  name: csharp-cc-cli
+  description: Orchestrates the Claude Code CLI for comprehensive C# code analysis
+spec:
+  runner:
+    command: "./mock-cc-cli.sh"
+    args: []
+  parameters:
+    - name: language
+      description: Programming language hint (e.g., csharp, go, python)
+      type: string
+      default: "csharp"
+      required: false
+    - name: depth
+      description: Analysis depth level (1-3, where 3 is most detailed)
+      type: integer
+      default: 2
+      required: false
+    - name: include-tests
+      description: Include test files in the analysis
+      type: boolean
+      default: false
+      required: false
+    - name: timeout
+      description: Maximum execution time in seconds
+      type: integer
+      default: 300
+      required: false

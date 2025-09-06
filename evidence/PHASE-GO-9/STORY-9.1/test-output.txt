@@ -1,0 +1,76 @@
+# Test Evidence for STORY-9.1
+
+## Test Run Output
+All tests passed successfully.
+
+## TC-27.1 Evidence
+
+### Test Method: Documentation & Schema Test (N/A - Documentation as code)
+
+The test is fulfilled by the creation of:
+1. `docs/agents/artifact-spec-claude-code.md` - Complete artifact specification
+2. `.docloom/agents/csharp-cc-cli.agent.yaml` - Valid, parsable agent definition
+
+### Verification of Agent Definition
+```
+$ go run ./cmd/docloom agents describe csharp-cc-cli
+Agent: csharp-cc-cli
+API Version: v1
+Kind: Agent
+Description: Orchestrates the Claude Code CLI for comprehensive C# code analysis
+
+Runner:
+  Command: ./mock-cc-cli.sh
+
+Parameters:
+  - Name: language
+    Type: string
+    Description: Programming language hint (e.g., csharp, go, python)
+    Required: false
+    Default: csharp
+
+  - Name: depth
+    Type: integer
+    Description: Analysis depth level (1-3, where 3 is most detailed)
+    Required: false
+    Default: 2
+
+  - Name: include-tests
+    Type: boolean
+    Description: Include test files in the analysis
+    Required: false
+    Default: false
+
+  - Name: timeout
+    Type: integer
+    Description: Maximum execution time in seconds
+    Required: false
+    Default: 300
+```
+
+## Files Created
+- docs/agents/artifact-spec-claude-code.md (3,267 lines)
+- .docloom/agents/csharp-cc-cli.agent.yaml (30 lines)
+- docs/agents/csharp-cc-cli.md (187 lines)
+
+## Full Test Suite Summary
+```
+?       github.com/karolswdev/docloom/cmd/docloom      [no test files]
+?       github.com/karolswdev/docloom/cmd/docloom-agent-csharp [no test files]
+ok      github.com/karolswdev/docloom/internal/agent   0.016s
+ok      github.com/karolswdev/docloom/internal/agents/csharp/parser    (cached)
+ok      github.com/karolswdev/docloom/internal/ai      (cached)
+ok      github.com/karolswdev/docloom/internal/chunk   (cached)
+ok      github.com/karolswdev/docloom/internal/cli     (cached)
+ok      github.com/karolswdev/docloom/internal/config  (cached)
+ok      github.com/karolswdev/docloom/internal/generate        (cached)
+ok      github.com/karolswdev/docloom/internal/ingest  (cached)
+ok      github.com/karolswdev/docloom/internal/prompt  (cached)
+ok      github.com/karolswdev/docloom/internal/render  (cached)
+ok      github.com/karolswdev/docloom/internal/templates       (cached)
+ok      github.com/karolswdev/docloom/internal/validate        (cached)
+ok      github.com/karolswdev/docloom/internal/version (cached)
+ok      github.com/karolswdev/docloom/test/e2e 0.354s
+```
+
+All tests PASSED ✓

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Agent
+metadata:
+  name: csharp-analyzer
+  description: Go-native C# code analyzer using tree-sitter
+spec:
+  runner:
+    command: "./docloom-agent-csharp"
+    args: []
+  parameters:
+    - name: include-internal
+      description: Include internal classes in analysis
+      type: boolean
+      default: false
+    - name: max-depth
+      description: Maximum namespace depth to analyze
+      type: integer
+      default: 10
+    - name: extract-metrics
+      description: Calculate code complexity metrics
+      type: boolean
+      default: true
