@@ -14,8 +14,9 @@ func TestVersionCmd(t *testing.T) {
 	tmpDir := t.TempDir()
 	binaryPath := filepath.Join(tmpDir, "docloom")
 
-	// Build command with ldflags
+	// Build command with ldflags (disable VCS stamping in container environments)
 	buildCmd := exec.Command("go", "build",
+		"-buildvcs=false",
 		"-ldflags",
 		"-X github.com/karolswdev/docloom/internal/version.Version=1.0.0-test "+
 			"-X github.com/karolswdev/docloom/internal/version.GitCommit=test123 "+
