@@ -1,324 +1,612 @@
 # Agent Authoring Guide
 
-This guide explains how to create custom Research Agents for DocLoom.
-
 ## Overview
 
-A Research Agent is an external program that analyzes source code and produces documentation artifacts. Agents receive source paths as command-line arguments and parameters as environment variables.
+This guide explains how to create powerful, AI-compatible agents for DocLoom using the tool-based architecture. Agents are external programs that provide specialized analysis capabilities, exposed as discrete tools that can be orchestrated by AI.
 
-## Agent Contract
+## Tool-Based Paradigm
 
-### Input
+Modern DocLoom agents expose multiple **tools** rather than a single monolithic function. This enables:
 
-Agents receive two primary inputs:
+- **Granular Control**: AI can invoke specific capabilities as needed
+- **Composability**: Tools can be combined in different ways
+- **Efficiency**: Only necessary tools are executed
+- **Discoverability**: AI understands each tool's purpose from its description
 
-1. **Source Path** (arg 1): The directory or file to analyze
-2. **Output Path** (arg 2): The directory where the agent should write its output
+## Agent Structure
 
-### Parameters
+An agent consists of:
 
-Additional parameters are passed as environment variables prefixed with `PARAM_`:
+1. **Executable Binary**: A program that implements the tools
+2. **Agent Definition**: A YAML file describing the tools
+3. **Documentation**: User and developer guides
 
-- `PARAM_DEBUG`: Debug mode flag
-- `PARAM_MAX_DEPTH`: Maximum analysis depth
-- `PARAM_<NAME>`: Any custom parameter defined in your agent definition
+## Creating an Agent Binary
 
-### Output
+Your agent binary should:
 
-Agents must produce at least one markdown file (`.md`) in the output directory. Common outputs include:
+1. **Use Subcommands**: Each tool is a subcommand
+2. **Output JSON**: Tools should output structured JSON to stdout
+3. **Log to stderr**: Use stderr for debugging and progress
+4. **Exit Cleanly**: Return 0 on success, non-zero on error
 
-- `analysis.md`: Main analysis report
-- `metrics.md`: Code metrics and statistics
-- `recommendations.md`: Improvement suggestions
+### Example Structure (Go with Cobra)
 
-## Agent Definition File
+```go
+package main
 
-Create a `.agent.yaml` file to define your agent:
+import (
+    "encoding/json"
+    "fmt"
+    "os"
+    "github.com/spf13/cobra"
+)
 
-```yaml
-apiVersion: v1
-kind: Agent
-metadata:
-  name: my-agent
-  description: Analyzes code and produces insights
-spec:
-  runner:
-    command: /usr/bin/python3
-    args: 
-      - /path/to/my-agent.py
-      - ${SOURCE_PATH}
-      - ${OUTPUT_PATH}
-  parameters:
-    - name: depth
-      type: integer
-      required: false
-      default: 3
-      description: Analysis depth
-    - name: verbose
-      type: boolean
-      required: false
-      default: false
-      description: Enable verbose output
+var rootCmd = &cobra.Command{
+    Use:   "my-agent",
+    Short: "My specialized agent for DocLoom",
+}
+
+var listCmd = &cobra.Command{
+    Use:   "list_items [path]",
+    Short: "Lists items in the repository",
+    Args:  cobra.ExactArgs(1),
+    Run: func(cmd *cobra.Command, args []string) {
+        path := args[0]
+        
+        // Your analysis logic here
+        items := analyzeRepository(path)
+        
+        // Output JSON to stdout
+        output := map[string]interface{}{
+            "itemCount": len(items),
+            "items":     items,
+        }
+        json.NewEncoder(os.Stdout).Encode(output)
+    },
+}
+
+var analyzeCmd = &cobra.Command{
+    Use:   "analyze_item [path]",
+    Short: "Analyzes a specific item",
+    Args:  cobra.ExactArgs(1),
+    Run: func(cmd *cobra.Command, args []string) {
+        path := args[0]
+        
+        // Detailed analysis
+        analysis := performAnalysis(path)
+        
+        // Output JSON
+        json.NewEncoder(os.Stdout).Encode(analysis)
+    },
+}
+
+func init() {
+    rootCmd.AddCommand(listCmd)
+    rootCmd.AddCommand(analyzeCmd)
+}
+
+func main() {
+    if err := rootCmd.Execute(); err != nil {
+        fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+        os.Exit(1)
+    }
+}
 ```
 
-## Example: Shell Script Agent
-
-Here's a simple shell script agent:
-
-```bash
-#!/bin/bash
-# simple-analyzer.sh - A basic code analysis agent
-
-SOURCE_PATH="$1"
-OUTPUT_PATH="$2"
-
-# Read parameters from environment
-DEPTH="${PARAM_DEPTH:-3}"
-VERBOSE="${PARAM_VERBOSE:-false}"
-
-echo "Analyzing: $SOURCE_PATH" >&2
-echo "Output to: $OUTPUT_PATH" >&2
-
-# Create analysis report
-cat > "$OUTPUT_PATH/analysis.md" << EOF
-# Code Analysis Report
-
-## Source Information
-- **Path**: $SOURCE_PATH
-- **Analysis Depth**: $DEPTH
-
-## File Statistics
-$(find "$SOURCE_PATH" -type f -name "*.go" | wc -l) Go files found
-
-## Code Metrics
-- Lines of Code: $(find "$SOURCE_PATH" -name "*.go" -exec wc -l {} + | tail -1 | awk '{print $1}')
-- Test Files: $(find "$SOURCE_PATH" -name "*_test.go" | wc -l)
-
-## Generated at
-$(date)
-EOF
-
-echo "Analysis complete" >&2
-exit 0
-```
-
-Save this as `simple-analyzer.sh` and create the agent definition:
-
-```yaml
-apiVersion: v1
-kind: Agent
-metadata:
-  name: simple-analyzer
-  description: Simple code analyzer
-spec:
-  runner:
-    command: /path/to/simple-analyzer.sh
-  parameters:
-    - name: depth
-      type: integer
-      required: false
-      default: 3
-      description: Analysis depth
-```
-
-## Example: Python Agent
-
-For more complex analysis, use Python:
+### Example Structure (Python with argparse)
 
 ```python
 #!/usr/bin/env python3
-# code-insights.py - Advanced code analysis agent
-
-import os
-import sys
 import json
-from pathlib import Path
+import sys
+import argparse
+
+def list_items(path):
+    """Lists items in the repository."""
+    # Your analysis logic
+    items = analyze_repository(path)
+    
+    # Output JSON to stdout
+    output = {
+        "itemCount": len(items),
+        "items": items
+    }
+    print(json.dumps(output))
+
+def analyze_item(path):
+    """Analyzes a specific item."""
+    # Detailed analysis
+    analysis = perform_analysis(path)
+    
+    # Output JSON
+    print(json.dumps(analysis))
 
 def main():
-    if len(sys.argv) < 3:
-        print("Usage: code-insights.py <source_path> <output_path>", file=sys.stderr)
+    parser = argparse.ArgumentParser(description='My specialized agent')
+    subparsers = parser.add_subparsers(dest='command', help='Commands')
+    
+    # List command
+    list_parser = subparsers.add_parser('list_items', help='List items')
+    list_parser.add_argument('path', help='Repository path')
+    
+    # Analyze command
+    analyze_parser = subparsers.add_parser('analyze_item', help='Analyze item')
+    analyze_parser.add_argument('path', help='Item path')
+    
+    args = parser.parse_args()
+    
+    if args.command == 'list_items':
+        list_items(args.path)
+    elif args.command == 'analyze_item':
+        analyze_item(args.path)
+    else:
+        parser.print_help()
         sys.exit(1)
-    
-    source_path = Path(sys.argv[1])
-    output_path = Path(sys.argv[2])
-    
-    # Read parameters
-    max_files = int(os.environ.get('PARAM_MAX_FILES', '100'))
-    include_tests = os.environ.get('PARAM_INCLUDE_TESTS', 'false').lower() == 'true'
-    
-    # Perform analysis
-    go_files = list(source_path.rglob('*.go'))
-    if not include_tests:
-        go_files = [f for f in go_files if not f.name.endswith('_test.go')]
-    
-    # Generate report
-    report = f"""# Code Insights Report
-
-## Repository Overview
-- **Total Go Files**: {len(go_files)}
-- **Analysis Parameters**:
-  - Max Files: {max_files}
-  - Include Tests: {include_tests}
-
-## File List
-"""
-    
-    for i, file in enumerate(go_files[:max_files]):
-        rel_path = file.relative_to(source_path)
-        report += f"- `{rel_path}`\n"
-    
-    # Write output
-    output_file = output_path / 'insights.md'
-    output_file.write_text(report)
-    
-    print(f"Analysis complete. Report written to {output_file}", file=sys.stderr)
-    return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()
 ```
 
-## Best Practices
+## Writing the Agent Definition
 
-1. **Error Handling**: Always validate inputs and handle errors gracefully
-2. **Logging**: Write progress messages to stderr, not stdout
-3. **Output Validation**: Ensure at least one `.md` file is created
-4. **Performance**: Be mindful of large repositories; implement reasonable limits
-5. **Documentation**: Include clear descriptions in your agent definition
-6. **Testing**: Test your agent with various repository sizes and structures
+Create `agent.agent.yaml` in your agent's directory:
 
-## Installation
+```yaml
+apiVersion: docloom.io/v1alpha1
+kind: Agent
+metadata:
+  name: my-analyzer
+  description: Analyzes repositories for specific patterns
+spec:
+  tools:
+    - name: list_items
+      description: |
+        Lists all items in the repository that match our criteria.
+        Returns a JSON array of item paths with basic metadata.
+        Use this first to understand what's available for analysis.
+      command: ./my-agent
+      args:
+        - list_items
+        - "${SOURCE_PATH}"
+    
+    - name: analyze_item
+      description: |
+        Performs deep analysis on a specific item.
+        Returns detailed metrics, patterns, and recommendations.
+        Call list_items first to identify items to analyze.
+      command: ./my-agent
+      args:
+        - analyze_item
+        - "${ITEM_PATH}"
+    
+    - name: compare_items
+      description: |
+        Compares two items and identifies differences.
+        Returns a structured diff with semantic analysis.
+        Useful for understanding changes or variations.
+      command: ./my-agent
+      args:
+        - compare_items
+        - "${ITEM_A}"
+        - "${ITEM_B}"
+  
+  parameters:
+    - name: source_path
+      type: string
+      required: true
+      description: Path to the repository to analyze
+    
+    - name: item_path
+      type: string
+      required: false
+      description: Path to a specific item
+    
+    - name: depth
+      type: int
+      default: 3
+      description: Analysis depth level
+```
 
-Place your agent definition files in one of these locations:
+## Tool Description Best Practices
 
-- `$HOME/.docloom/agents/` - User-specific agents
-- `<project>/.docloom/agents/` - Project-specific agents
+Write descriptions that help the AI understand:
 
-DocLoom will automatically discover and register agents from these directories.
+### 1. Purpose and Function
 
-## Debugging
+```yaml
+# Good
+description: |
+  Extracts all public API endpoints from the codebase.
+  Identifies REST routes, GraphQL schemas, and gRPC services.
 
-Use the verbose flag to see agent execution details:
+# Poor
+description: Gets APIs
+```
+
+### 2. Output Format
+
+```yaml
+# Good
+description: |
+  Returns a JSON object with:
+  - endpoints: Array of {method, path, handler}
+  - total: Number of endpoints found
+  - categories: Grouped by service type
+
+# Poor
+description: Returns endpoint data
+```
+
+### 3. Prerequisites and Dependencies
+
+```yaml
+# Good
+description: |
+  Analyzes test coverage for a specific module.
+  Requires: call list_modules first to get module paths.
+  Note: This runs the test suite, which may take time.
+
+# Poor
+description: Gets test coverage
+```
+
+### 4. Use Cases and Context
+
+```yaml
+# Good
+description: |
+  Identifies security vulnerabilities in dependencies.
+  Use when: Generating security audit documents.
+  Checks: CVE database, outdated packages, known issues.
+
+# Poor
+description: Checks security
+```
+
+## Parameter Handling
+
+### Environment Variables
+
+Parameters are passed as environment variables with `PARAM_` prefix:
+
+```go
+func getConfig() Config {
+    return Config{
+        Depth:     getEnvInt("PARAM_DEPTH", 3),
+        Verbose:   getEnvBool("PARAM_VERBOSE", false),
+        OutputDir: getEnvString("PARAM_OUTPUT_DIR", "./output"),
+    }
+}
+```
+
+### Parameter Substitution in Arguments
+
+Use `${PARAMETER_NAME}` in tool arguments:
+
+```yaml
+args:
+  - analyze
+  - "${SOURCE_PATH}"
+  - "--depth=${DEPTH}"
+  - "--output=${OUTPUT_DIR}"
+```
+
+## Output Guidelines
+
+### JSON Structure
+
+Keep output structured and consistent:
+
+```json
+{
+  "summary": {
+    "totalItems": 42,
+    "categories": ["typeA", "typeB"],
+    "timestamp": "2024-01-15T10:30:00Z"
+  },
+  "items": [
+    {
+      "id": "item-1",
+      "type": "typeA",
+      "metrics": {
+        "complexity": 5,
+        "size": 1024
+      }
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "analysisTime": 1.234
+  }
+}
+```
+
+### Error Handling
+
+Return errors as JSON with proper exit codes:
+
+```go
+if err != nil {
+    errorOutput := map[string]interface{}{
+        "error": err.Error(),
+        "code": "INVALID_PATH",
+        "details": "The specified path does not exist",
+    }
+    json.NewEncoder(os.Stdout).Encode(errorOutput)
+    os.Exit(1)
+}
+```
+
+## Testing Your Agent
+
+### Unit Testing Tools
+
+Test each tool independently:
 
 ```bash
-docloom generate --agent my-agent --source ./src --verbose
+# Test list tool
+./my-agent list_items /path/to/test/repo | jq .
+
+# Test analyze tool
+./my-agent analyze_item /path/to/specific/item | jq .
+
+# Test with parameters
+PARAM_DEPTH=5 ./my-agent analyze_item /path/to/item | jq .
 ```
 
-Check the agent's stderr output for debugging information.
+### Integration Testing
 
-## Building a Go-Native Analyzer with Tree-sitter
-
-For high-performance language analysis without external dependencies, you can build agents in Go using Tree-sitter. This approach provides fast, error-tolerant parsing of source code.
-
-### Example: Using Tree-sitter for C# Analysis
-
-Here's how to set up a Tree-sitter-based parser in Go:
+Test with the DocLoom executor:
 
 ```go
-package parser
-
-import (
-    "context"
-    sitter "github.com/smacker/go-tree-sitter"
-    "github.com/smacker/go-tree-sitter/csharp"
-)
-
-type Parser struct {
-    parser *sitter.Parser
-}
-
-func New() *Parser {
-    parser := sitter.NewParser()
-    parser.SetLanguage(csharp.GetLanguage())
-    return &Parser{parser: parser}
-}
-
-func (p *Parser) Analyze(ctx context.Context, source string) (*Result, error) {
-    tree, err := p.parser.ParseCtx(ctx, nil, []byte(source))
-    if err != nil {
-        return nil, err
-    }
-    defer tree.Close()
+func TestAgentIntegration(t *testing.T) {
+    executor := agent.NewExecutor(registry, cache, logger)
     
-    root := tree.RootNode()
-    // Traverse the syntax tree
-    return p.extractInfo(root, source), nil
+    // Test tool invocation
+    output, err := executor.RunTool("my-analyzer", "list_items", 
+        map[string]string{
+            "SOURCE_PATH": "/test/repo",
+        })
+    
+    require.NoError(t, err)
+    
+    var result map[string]interface{}
+    err = json.Unmarshal([]byte(output), &result)
+    require.NoError(t, err)
+    
+    assert.Contains(t, result, "items")
 }
 ```
 
-### Querying the Syntax Tree
+## Performance Considerations
 
-Tree-sitter provides powerful querying capabilities:
+### Caching
+
+Implement caching for expensive operations:
 
 ```go
-func (p *Parser) extractClasses(node *sitter.Node, source string) []Class {
-    var classes []Class
-    
-    // Find all class declarations
-    if node.Type() == "class_declaration" {
-        class := Class{
-            Name: p.getIdentifier(node, source),
-            IsPublic: p.hasModifier(node, source, "public"),
-        }
-        classes = append(classes, class)
-    }
-    
-    // Recursively process children
-    for i := 0; i < int(node.ChildCount()); i++ {
-        child := node.Child(i)
-        classes = append(classes, p.extractClasses(child, source)...)
-    }
-    
-    return classes
+type Cache struct {
+    results map[string]*AnalysisResult
+    mu      sync.RWMutex
+}
+
+func (c *Cache) Get(key string) (*AnalysisResult, bool) {
+    c.mu.RLock()
+    defer c.mu.RUnlock()
+    result, ok := c.results[key]
+    return result, ok
 }
 ```
 
-### Benefits of Tree-sitter
+### Parallel Processing
 
-1. **Language Agnostic**: Support multiple languages with the same parsing infrastructure
-2. **Error Recovery**: Continues parsing even with syntax errors
-3. **Incremental Parsing**: Efficiently reparse only changed portions
-4. **No Runtime Dependencies**: Pure Go implementation
-5. **High Performance**: C-speed parsing with Go bindings
+Use concurrency for independent operations:
 
-### Available Language Grammars
+```go
+func analyzeFiles(files []string) []Result {
+    results := make([]Result, len(files))
+    var wg sync.WaitGroup
+    
+    for i, file := range files {
+        wg.Add(1)
+        go func(idx int, path string) {
+            defer wg.Done()
+            results[idx] = analyzeFile(path)
+        }(i, file)
+    }
+    
+    wg.Wait()
+    return results
+}
+```
 
-Tree-sitter supports many languages through `github.com/smacker/go-tree-sitter`:
+### Progress Reporting
 
-- C# (`csharp`)
-- Go (`golang`)
-- JavaScript/TypeScript (`javascript`, `typescript`)
-- Python (`python`)
-- Java (`java`)
-- Rust (`rust`)
-- And many more...
+Report progress to stderr for long operations:
+
+```go
+for i, item := range items {
+    fmt.Fprintf(os.Stderr, "Processing %d/%d: %s\n", 
+        i+1, len(items), item.Name)
+    processItem(item)
+}
+```
 
 ## Advanced Features
 
-### Placeholder Variables
+### Tool Chaining
 
-In your agent's `args` configuration, you can use:
+Design tools that work well together:
 
-- `${SOURCE_PATH}`: Replaced with the actual source path
-- `${OUTPUT_PATH}`: Replaced with the cache directory path
+```yaml
+tools:
+  - name: discover_services
+    description: Finds all microservices in the repository
+    
+  - name: analyze_service
+    description: Analyzes a specific service (call discover_services first)
+    
+  - name: trace_dependencies
+    description: Traces dependencies between services
+```
 
-### Parameter Types
+### Incremental Analysis
 
-Supported parameter types:
+Support incremental updates:
 
-- `string`: Text values
-- `integer`: Numeric values
-- `boolean`: true/false values
-- `float`: Decimal numbers
+```go
+func analyzeIncremental(path string, since time.Time) {
+    // Only analyze files modified after 'since'
+    files := findModifiedFiles(path, since)
+    results := analyzeFiles(files)
+    
+    // Merge with cached results
+    mergeResults(results)
+}
+```
 
-### Exit Codes
+### Multi-Format Support
 
-- `0`: Success
-- Non-zero: Failure (DocLoom will report the error)
+Handle different input formats:
 
-## Security Considerations
+```go
+func detectFormat(path string) Format {
+    switch filepath.Ext(path) {
+    case ".json":
+        return JSONFormat
+    case ".yaml", ".yml":
+        return YAMLFormat
+    case ".xml":
+        return XMLFormat
+    default:
+        return AutoDetect
+    }
+}
+```
 
-- Agents run with the same permissions as DocLoom
-- Validate and sanitize all inputs
-- Be cautious with file system operations
-- Never expose sensitive information in outputs
+## Deployment
+
+### Binary Distribution
+
+1. Build for target platforms:
+```bash
+GOOS=linux GOARCH=amd64 go build -o my-agent-linux
+GOOS=darwin GOARCH=amd64 go build -o my-agent-darwin
+GOOS=windows GOARCH=amd64 go build -o my-agent.exe
+```
+
+2. Include in agent directory:
+```
+agents/my-analyzer/
+├── agent.agent.yaml
+├── my-agent-linux
+├── my-agent-darwin
+├── my-agent.exe
+└── README.md
+```
+
+### Container Packaging
+
+Create a Dockerfile:
+
+```dockerfile
+FROM golang:1.21 AS builder
+WORKDIR /app
+COPY . .
+RUN go build -o my-agent cmd/my-agent/main.go
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+COPY --from=builder /app/my-agent /usr/local/bin/
+COPY agent.agent.yaml /etc/my-agent/
+ENTRYPOINT ["my-agent"]
+```
+
+## Debugging
+
+### Verbose Logging
+
+Add debug output to stderr:
+
+```go
+if verbose {
+    fmt.Fprintf(os.Stderr, "[DEBUG] Processing file: %s\n", file)
+    fmt.Fprintf(os.Stderr, "[DEBUG] Found %d items\n", len(items))
+}
+```
+
+### Tool Testing Script
+
+Create a test script:
+
+```bash
+#!/bin/bash
+# test-agent.sh
+
+echo "Testing list_items..."
+./my-agent list_items ./test-data | jq .
+
+echo "Testing analyze_item..."
+./my-agent analyze_item ./test-data/sample.txt | jq .
+
+echo "Testing with parameters..."
+PARAM_DEPTH=5 PARAM_VERBOSE=true \
+  ./my-agent analyze_item ./test-data/complex.txt | jq .
+```
+
+## Common Patterns
+
+### Repository Analysis Pattern
+
+```go
+type RepoAnalyzer struct {
+    // Shared state
+}
+
+func (r *RepoAnalyzer) ListProjects() []Project
+func (r *RepoAnalyzer) AnalyzeProject(path string) ProjectAnalysis
+func (r *RepoAnalyzer) CompareProjects(a, b string) Comparison
+```
+
+### File Processing Pattern
+
+```go
+func processFiles(root string, pattern string) {
+    filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+        if matched, _ := filepath.Match(pattern, filepath.Base(path)); matched {
+            processFile(path)
+        }
+        return nil
+    })
+}
+```
+
+### Configuration Pattern
+
+```go
+type Config struct {
+    // Loaded from environment
+}
+
+func LoadConfig() Config {
+    return Config{
+        SourcePath: os.Getenv("PARAM_SOURCE_PATH"),
+        MaxDepth:   getEnvInt("PARAM_MAX_DEPTH", 10),
+        // ...
+    }
+}
+```
+
+## Summary
+
+Creating effective agents for DocLoom requires:
+
+1. **Clear Tool Design**: Each tool should have a single, well-defined purpose
+2. **Descriptive Documentation**: Help the AI understand when and how to use each tool
+3. **Structured Output**: Consistent JSON output for reliable parsing
+4. **Error Handling**: Graceful failures with informative messages
+5. **Performance**: Efficient processing with caching and parallelism
+6. **Testing**: Comprehensive tests for each tool and integration scenarios
+
+By following these guidelines, you'll create agents that integrate seamlessly with DocLoom's AI-orchestrated document generation system.

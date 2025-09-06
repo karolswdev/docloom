@@ -31,6 +31,7 @@ func NewExecutor(registry *Registry, cache *ArtifactCache, logger zerolog.Logger
 // RunOptions contains options for running an agent.
 type RunOptions struct {
 	AgentName  string            // Name of the agent to run
+	ToolName   string            // Specific tool to invoke (if agent supports tools)
 	SourcePath string            // Path to source files for analysis
 	Parameters map[string]string // Parameter overrides
 }
@@ -184,4 +185,76 @@ func (e *Executor) ValidateOutput(outputPath string) error {
 	}
 
 	return nil
+}
+
+// RunTool executes a specific tool from an agent.
+func (e *Executor) RunTool(agentName, toolName string, params map[string]string) (string, error) {
+	// Look up agent in registry
+	agent, exists := e.registry.Get(agentName)
+	if !exists {
+		return "", fmt.Errorf("agent not found: %s", agentName)
+	}
+
+	// Find the specific tool
+	var tool *Tool
+	for i := range agent.Spec.Tools {
+		if agent.Spec.Tools[i].Name == toolName {
+			tool = &agent.Spec.Tools[i]
+			break
+		}
+	}
+
+	if tool == nil {
+		return "", fmt.Errorf("tool '%s' not found in agent '%s'", toolName, agentName)
+	}
+
+	e.logger.Info().
+		Str("agent", agentName).
+		Str("tool", toolName).
+		Msg("Executing agent tool")
+
+	// Build command arguments
+	args := make([]string, 0, len(tool.Args))
+	for _, arg := range tool.Args {
+		// Replace parameter placeholders
+		for key, value := range params {
+			placeholder := fmt.Sprintf("${%s}", strings.ToUpper(key))
+			arg = strings.ReplaceAll(arg, placeholder, value)
+		}
+		args = append(args, arg)
+	}
+
+	// Execute the tool command
+	cmd := exec.Command(tool.Command, args...) // #nosec G204 - Tool commands are from trusted configuration
+
+	// Set up environment variables for parameters
+	env := os.Environ()
+	for key, value := range params {
+		envKey := fmt.Sprintf("PARAM_%s", strings.ToUpper(key))
+		env = append(env, fmt.Sprintf("%s=%s", envKey, value))
+	}
+	cmd.Env = env
+
+	// Capture output
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			e.logger.Error().
+				Str("agent", agentName).
+				Str("tool", toolName).
+				Int("exit_code", exitErr.ExitCode()).
+				Str("output", string(output)).
+				Msg("Tool execution failed")
+			return "", fmt.Errorf("tool execution failed with exit code %d: %s", exitErr.ExitCode(), string(output))
+		}
+		return "", fmt.Errorf("failed to execute tool: %w", err)
+	}
+
+	e.logger.Info().
+		Str("agent", agentName).
+		Str("tool", toolName).
+		Int("output_size", len(output)).
+		Msg("Tool execution completed")
+
+	return string(output), nil
 }

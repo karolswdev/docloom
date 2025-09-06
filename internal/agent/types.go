@@ -17,7 +17,8 @@ type Metadata struct {
 
 // Spec defines the agent's execution specification.
 type Spec struct {
-	Runner     Runner      `yaml:"runner"`
+	Runner     Runner      `yaml:"runner,omitempty"` // Deprecated: Use Tools instead
+	Tools      []Tool      `yaml:"tools,omitempty"`
 	Parameters []Parameter `yaml:"parameters"`
 }
 
@@ -25,6 +26,15 @@ type Spec struct {
 type Runner struct {
 	Command string   `yaml:"command"`
 	Args    []string `yaml:"args,omitempty"`
+}
+
+// Tool represents a specific capability that an agent exposes.
+// Each tool can be invoked independently by the LLM during analysis.
+type Tool struct {
+	Name        string   `yaml:"name"`        // Tool identifier (e.g., "list_projects")
+	Description string   `yaml:"description"` // LLM-facing description of what the tool does
+	Command     string   `yaml:"command"`     // Command to execute (can include the agent binary path)
+	Args        []string `yaml:"args,omitempty"` // Additional arguments to pass
 }
 
 // Parameter defines an input parameter for the agent.

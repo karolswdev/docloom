@@ -1,4 +1,4 @@
-// Package main implements the C# analyzer agent executable.
+// Package main implements the C# analyzer agent as a multi-tool executable.
 package main
 
 import (
@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/karolswdev/docloom/internal/agents/csharp/parser"
+	"github.com/spf13/cobra"
 )
 
 // AgentOutput represents the structured output from the agent
@@ -22,12 +23,13 @@ type AgentOutput struct {
 
 // ProjectSummary provides high-level project statistics
 type ProjectSummary struct {
-	TotalNamespaces int `json:"totalNamespaces"`
-	TotalClasses    int `json:"totalClasses"`
-	TotalInterfaces int `json:"totalInterfaces"`
-	TotalMethods    int `json:"totalMethods"`
-	TotalProperties int `json:"totalProperties"`
-	PublicAPIs      int `json:"publicAPIs"`
+	TotalNamespaces int      `json:"totalNamespaces"`
+	TotalClasses    int      `json:"totalClasses"`
+	TotalInterfaces int      `json:"totalInterfaces"`
+	TotalMethods    int      `json:"totalMethods"`
+	TotalProperties int      `json:"totalProperties"`
+	PublicAPIs      int      `json:"publicAPIs"`
+	Projects        []string `json:"projects"`
 }
 
 // ArchitecturalInsights contains detected patterns and insights
@@ -38,21 +40,276 @@ type ArchitecturalInsights struct {
 	HasAbstractions  bool     `json:"hasAbstractions"`
 }
 
+// FileInfo represents basic file information
+type FileInfo struct {
+	Path    string `json:"path"`
+	Size    int64  `json:"size"`
+	Content string `json:"content"`
+}
+
+var rootCmd = &cobra.Command{
+	Use:   "docloom-agent-csharp",
+	Short: "C# analyzer agent for DocLoom",
+	Long:  `A multi-tool C# analyzer agent that provides various code analysis capabilities.`,
+}
+
+var summarizeReadmeCmd = &cobra.Command{
+	Use:   "summarize_readme [path]",
+	Short: "Summarizes README files in the repository",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		sourcePath := args[0]
+		
+		// Find README files
+		readmeFiles := []string{}
+		filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return nil
+			}
+			name := strings.ToLower(info.Name())
+			if name == "readme.md" || name == "readme.txt" || name == "readme" {
+				readmeFiles = append(readmeFiles, path)
+			}
+			return nil
+		})
+
+		output := map[string]interface{}{
+			"readmeCount": len(readmeFiles),
+			"readmePaths": readmeFiles,
+			"summary":     fmt.Sprintf("Found %d README files in the repository", len(readmeFiles)),
+		}
+
+		json.NewEncoder(os.Stdout).Encode(output)
+	},
+}
+
+var listProjectsCmd = &cobra.Command{
+	Use:   "list_projects [path]",
+	Short: "Lists all C# projects in the repository",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		sourcePath := args[0]
+		
+		// Find .csproj files
+		projects := []string{}
+		filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return nil
+			}
+			if strings.HasSuffix(path, ".csproj") {
+				relPath, _ := filepath.Rel(sourcePath, path)
+				projects = append(projects, relPath)
+			}
+			return nil
+		})
+
+		output := map[string]interface{}{
+			"projectCount": len(projects),
+			"projects":     projects,
+		}
+
+		json.NewEncoder(os.Stdout).Encode(output)
+	},
+}
+
+var getDependenciesCmd = &cobra.Command{
+	Use:   "get_dependencies [path]",
+	Short: "Analyzes project dependencies",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		sourcePath := args[0]
+		
+		// Find and analyze .csproj files for dependencies
+		dependencies := map[string][]string{}
+		
+		filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
+			if err != nil || !strings.HasSuffix(path, ".csproj") {
+				return nil
+			}
+			
+			content, err := os.ReadFile(path)
+			if err != nil {
+				return nil
+			}
+			
+			// Simple extraction of PackageReference elements
+			deps := []string{}
+			lines := strings.Split(string(content), "\n")
+			for _, line := range lines {
+				if strings.Contains(line, "<PackageReference") {
+					// Extract Include attribute
+					start := strings.Index(line, "Include=\"")
+					if start > 0 {
+						start += 9
+						end := strings.Index(line[start:], "\"")
+						if end > 0 {
+							deps = append(deps, line[start:start+end])
+						}
+					}
+				}
+			}
+			
+			relPath, _ := filepath.Rel(sourcePath, path)
+			dependencies[relPath] = deps
+			return nil
+		})
+
+		output := map[string]interface{}{
+			"dependencies": dependencies,
+			"summary":      fmt.Sprintf("Analyzed %d projects", len(dependencies)),
+		}
+
+		json.NewEncoder(os.Stdout).Encode(output)
+	},
+}
+
+var getAPISurfaceCmd = &cobra.Command{
+	Use:   "get_api_surface [path]",
+	Short: "Extracts the public API surface",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		sourcePath := args[0]
+		
+		// Find all C# files
+		csFiles, _ := findCSharpFiles(sourcePath)
+		
+		// Parse all files
+		p := parser.New()
+		var allAPIs parser.APISurface
+		namespaceMap := make(map[string]*parser.Namespace)
+
+		for _, file := range csFiles {
+			content, err := os.ReadFile(file)
+			if err != nil {
+				continue
+			}
+
+			api, err := p.ExtractAPISurface(context.Background(), string(content))
+			if err != nil {
+				continue
+			}
+
+			// Merge namespaces
+			for _, ns := range api.Namespaces {
+				if existing, ok := namespaceMap[ns.Name]; ok {
+					existing.Classes = append(existing.Classes, ns.Classes...)
+				} else {
+					nsCopy := ns
+					namespaceMap[ns.Name] = &nsCopy
+				}
+			}
+		}
+
+		// Convert map back to slice
+		for _, ns := range namespaceMap {
+			allAPIs.Namespaces = append(allAPIs.Namespaces, *ns)
+		}
+
+		// Generate summary
+		summary := ProjectSummary{}
+		for _, ns := range allAPIs.Namespaces {
+			summary.TotalNamespaces++
+			for _, class := range ns.Classes {
+				if class.IsInterface {
+					summary.TotalInterfaces++
+				} else {
+					summary.TotalClasses++
+				}
+				if class.IsPublic {
+					summary.PublicAPIs++
+				}
+				summary.TotalMethods += len(class.Methods)
+				summary.TotalProperties += len(class.Properties)
+			}
+		}
+
+		output := map[string]interface{}{
+			"summary":    summary,
+			"apiSurface": allAPIs,
+		}
+
+		json.NewEncoder(os.Stdout).Encode(output)
+	},
+}
+
+var getFileContentCmd = &cobra.Command{
+	Use:   "get_file_content [path]",
+	Short: "Gets the content of a specific file",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		filePath := args[0]
+		
+		// Check if file exists
+		info, err := os.Stat(filePath)
+		if err != nil {
+			output := map[string]interface{}{
+				"error": fmt.Sprintf("File not found: %s", filePath),
+			}
+			json.NewEncoder(os.Stdout).Encode(output)
+			return
+		}
+
+		// Read file content
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			output := map[string]interface{}{
+				"error": fmt.Sprintf("Error reading file: %v", err),
+			}
+			json.NewEncoder(os.Stdout).Encode(output)
+			return
+		}
+
+		output := FileInfo{
+			Path:    filePath,
+			Size:    info.Size(),
+			Content: string(content),
+		}
+
+		json.NewEncoder(os.Stdout).Encode(output)
+	},
+}
+
+// Legacy mode for backward compatibility
+var legacyCmd = &cobra.Command{
+	Use:   "analyze [source_path] [output_path]",
+	Short: "Legacy analysis mode (deprecated)",
+	Args:  cobra.ExactArgs(2),
+	Run:   runLegacyAnalysis,
+}
+
+func init() {
+	rootCmd.AddCommand(summarizeReadmeCmd)
+	rootCmd.AddCommand(listProjectsCmd)
+	rootCmd.AddCommand(getDependenciesCmd)
+	rootCmd.AddCommand(getAPISurfaceCmd)
+	rootCmd.AddCommand(getFileContentCmd)
+	rootCmd.AddCommand(legacyCmd)
+}
+
 func main() {
-	if len(os.Args) < 3 {
-		fmt.Fprintf(os.Stderr, "Usage: %s <source_path> <output_path>\n", os.Args[0])
-		os.Exit(1)
+	// Check if running in legacy mode (for backward compatibility)
+	if len(os.Args) >= 3 && !strings.Contains(os.Args[1], "_") {
+		// Legacy mode: docloom-agent-csharp <source> <output>
+		runLegacyAnalysis(nil, os.Args[1:3])
+		return
 	}
 
-	sourcePath := os.Args[1]
-	outputPath := os.Args[2]
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func runLegacyAnalysis(cmd *cobra.Command, args []string) {
+	sourcePath := args[0]
+	outputPath := args[1]
 
 	// Read parameters from environment
 	includeInternal := parseBoolParam("PARAM_INCLUDE_INTERNAL", false)
 	maxDepth := parseIntParam("PARAM_MAX_DEPTH", 10)
 	extractMetrics := parseBoolParam("PARAM_EXTRACT_METRICS", true)
 
-	fmt.Fprintf(os.Stderr, "C# Analyzer Agent starting...\n")
+	fmt.Fprintf(os.Stderr, "C# Analyzer Agent starting (legacy mode)...\n")
 	fmt.Fprintf(os.Stderr, "Source: %s\n", sourcePath)
 	fmt.Fprintf(os.Stderr, "Output: %s\n", outputPath)
 	fmt.Fprintf(os.Stderr, "Parameters: includeInternal=%v, maxDepth=%d, extractMetrics=%v\n",
@@ -114,39 +371,20 @@ func main() {
 	// Generate output
 	output := generateOutput(&allAPIs, extractMetrics)
 
-	// Write ProjectSummary.md
-	if writeErr := writeProjectSummary(outputPath, &output.ProjectSummary); writeErr != nil {
-		fmt.Fprintf(os.Stderr, "Error writing ProjectSummary.md: %v\n", writeErr)
-		os.Exit(1)
-	}
+	// Write output files
+	writeProjectSummary(outputPath, &output.ProjectSummary)
+	writeAPISurface(outputPath, &allAPIs)
+	writeArchitecturalInsights(outputPath, &output.ArchitecturalInsights)
 
-	// Write ApiSurface.md
-	if writeErr := writeAPISurface(outputPath, &allAPIs); writeErr != nil {
-		fmt.Fprintf(os.Stderr, "Error writing ApiSurface.md: %v\n", writeErr)
-		os.Exit(1)
-	}
-
-	// Write ArchitecturalInsights.md
-	if writeErr := writeArchitecturalInsights(outputPath, &output.ArchitecturalInsights); writeErr != nil {
-		fmt.Fprintf(os.Stderr, "Error writing ArchitecturalInsights.md: %v\n", writeErr)
-		os.Exit(1)
-	}
-
-	// Write JSON output for further processing
+	// Write JSON output
 	jsonPath := filepath.Join(outputPath, "analysis.json")
-	jsonData, err := json.MarshalIndent(output, "", "  ")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error marshaling JSON: %v\n", err)
-		os.Exit(1)
-	}
-	if err := os.WriteFile(jsonPath, jsonData, 0600); err != nil {
-		fmt.Fprintf(os.Stderr, "Error writing JSON: %v\n", err)
-		os.Exit(1)
-	}
+	jsonData, _ := json.MarshalIndent(output, "", "  ")
+	os.WriteFile(jsonPath, jsonData, 0600)
 
 	fmt.Fprintf(os.Stderr, "Analysis complete. Output written to %s\n", outputPath)
 }
 
+// Helper functions (same as before)
 func findCSharpFiles(root string) ([]string, error) {
 	var files []string
 

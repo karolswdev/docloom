@@ -2,112 +2,216 @@
 
 ## Overview
 
-The C# Analyzer is a Go-native agent that provides automatic analysis of C# repositories, extracting the public API surface and generating comprehensive documentation. This agent is fully self-contained and requires no external dependencies like the .NET SDK.
+The C# Analyzer is a multi-tool agent that provides comprehensive analysis capabilities for C# repositories. It uses Tree-sitter for robust parsing and exposes multiple tools that can be invoked independently by the AI during document generation.
 
-## Implementation Details
+## Tools
 
-The agent is built entirely in Go and uses the Tree-sitter parsing library to achieve language analysis without external dependencies. Tree-sitter provides a robust, error-tolerant parser that can handle incomplete or syntactically incorrect code while still extracting meaningful information.
+The agent provides the following tools:
 
-### Key Technologies
+### summarize_readme
 
-- **Language**: Go 1.22+
-- **Parser**: Tree-sitter with C# grammar
-- **Output Format**: Markdown and JSON
+**Purpose**: Finds and summarizes README files in the repository
 
-### Architecture
+**Usage**: `docloom-agent-csharp summarize_readme <path>`
 
-The agent consists of two main components:
+**Output**: JSON object containing:
+- `readmeCount`: Number of README files found
+- `readmePaths`: Array of paths to README files
+- `summary`: Brief summary text
 
-1. **Parser Package** (`internal/agents/csharp/parser`): Core parsing logic that uses Tree-sitter to analyze C# source code and extract:
-   - Namespaces and their hierarchy
-   - Classes, interfaces, and structs
-   - Public methods with signatures
-   - Properties and their types
-   - XML documentation comments
+### list_projects
 
-2. **Agent Command** (`cmd/docloom-agent-csharp`): The executable entry point that:
-   - Accepts source and output path arguments
-   - Recursively scans for `.cs` files
-   - Generates structured documentation artifacts
+**Purpose**: Lists all C# project files (.csproj) in the repository
 
-## Output Artifacts
+**Usage**: `docloom-agent-csharp list_projects <path>`
 
-The agent produces the following markdown files in the output directory:
+**Output**: JSON object containing:
+- `projectCount`: Number of projects found
+- `projects`: Array of relative paths to .csproj files
 
-### ProjectSummary.md
-A high-level overview of the analyzed C# project including:
-- Total number of namespaces
-- Count of classes, interfaces, and structs
-- Public API statistics
-- Key architectural patterns detected
+### get_dependencies
 
-### ApiSurface.md
-Detailed documentation of the public API surface:
-- Hierarchical namespace structure
-- Complete class definitions with:
-  - XML documentation comments
-  - Public methods and their signatures
-  - Properties with types
-  - Inheritance relationships
-- Interface contracts
-- Static utility classes
+**Purpose**: Analyzes project dependencies from .csproj files
 
-### ArchitecturalInsights.md
-Analysis of architectural patterns and design decisions:
-- Detected design patterns (Repository, Factory, etc.)
-- Dependency injection usage
-- Async/await patterns
-- SOLID principle adherence indicators
+**Usage**: `docloom-agent-csharp get_dependencies <path>`
 
-## Configuration
+**Output**: JSON object containing:
+- `dependencies`: Map of project paths to their NuGet dependencies
+- `summary`: Analysis summary
 
-The agent is configured via the `csharp-analyzer.agent.yaml` file:
+### get_api_surface
+
+**Purpose**: Extracts the public API surface of the codebase
+
+**Usage**: `docloom-agent-csharp get_api_surface <path>`
+
+**Output**: JSON object containing:
+- `summary`: Statistics about namespaces, classes, methods, etc.
+- `apiSurface`: Detailed API structure with namespaces, classes, methods, and properties
+
+### get_file_content
+
+**Purpose**: Retrieves the content of a specific file
+
+**Usage**: `docloom-agent-csharp get_file_content <file_path>`
+
+**Output**: JSON object containing:
+- `path`: File path
+- `size`: File size in bytes
+- `content`: File content as string
+
+## Legacy Mode
+
+For backward compatibility, the agent still supports the original analyze mode:
+
+**Usage**: `docloom-agent-csharp <source_path> <output_path>`
+
+This mode generates three markdown files:
+- `ProjectSummary.md`: High-level project statistics
+- `ApiSurface.md`: Detailed API documentation
+- `ArchitecturalInsights.md`: Detected patterns and recommendations
+
+## Environment Parameters
+
+The agent accepts parameters through environment variables:
+
+- `PARAM_INCLUDE_INTERNAL`: Include internal classes (default: false)
+- `PARAM_MAX_DEPTH`: Maximum parsing depth (default: 10)
+- `PARAM_EXTRACT_METRICS`: Extract code metrics (default: true)
+- `PARAM_SOURCE_PATH`: Path to source repository
+- `PARAM_FILE_PATH`: Specific file path (for get_file_content)
+
+## Agent Definition
+
+The agent should be configured in `agent.agent.yaml`:
 
 ```yaml
-apiVersion: v1
+apiVersion: docloom.io/v1alpha1
 kind: Agent
 metadata:
   name: csharp-analyzer
-  description: Go-native C# code analyzer using tree-sitter
+  description: Analyzes C# repositories for architecture and code quality
 spec:
-  runner:
-    command: ["./docloom-agent-csharp"]
-    args: []
+  tools:
+    - name: summarize_readme
+      description: Finds and summarizes README files in the repository. Returns JSON with readme paths and count.
+      command: docloom-agent-csharp
+      args:
+        - summarize_readme
+        - "${SOURCE_PATH}"
+    
+    - name: list_projects
+      description: Lists all C# project files (.csproj) in the repository. Returns JSON array of relative paths. Use this first to understand repository structure.
+      command: docloom-agent-csharp
+      args:
+        - list_projects
+        - "${SOURCE_PATH}"
+    
+    - name: get_dependencies
+      description: Analyzes all .csproj files to extract NuGet package dependencies. Returns a map of project paths to their dependencies. Call list_projects first.
+      command: docloom-agent-csharp
+      args:
+        - get_dependencies
+        - "${SOURCE_PATH}"
+    
+    - name: get_api_surface
+      description: Analyzes the public API surface of the codebase. Returns detailed namespace, class, method, and property information in JSON format.
+      command: docloom-agent-csharp
+      args:
+        - get_api_surface
+        - "${SOURCE_PATH}"
+    
+    - name: get_file_content
+      description: Retrieves the content of a specific file. Useful for examining particular source files identified by other tools.
+      command: docloom-agent-csharp
+      args:
+        - get_file_content
+        - "${FILE_PATH}"
+  
   parameters:
-    - name: include-internal
-      description: Include internal classes in analysis
-      type: boolean
-      default: false
-    - name: max-depth
-      description: Maximum namespace depth to analyze
-      type: integer
-      default: 10
-    - name: extract-metrics
-      description: Calculate code complexity metrics
-      type: boolean
-      default: true
+    - name: source_path
+      type: string
+      required: true
+      description: Path to the source code repository
+    
+    - name: file_path
+      type: string
+      required: false
+      description: Path to a specific file (used by get_file_content tool)
 ```
 
-## Usage
+## Implementation Details
 
-The agent can be invoked through the main docloom CLI:
+### Parser
+
+The agent uses Tree-sitter with the C# grammar to parse source files. The parser extracts:
+
+- Namespaces
+- Classes (including interfaces and abstract classes)
+- Methods with signatures
+- Properties with types
+- XML documentation comments
+- Access modifiers (public, private, etc.)
+
+### Pattern Detection
+
+The agent detects common architectural patterns:
+
+- Repository Pattern
+- Factory Pattern
+- Service Layer
+- MVC/API Controllers
+
+Detection is based on class naming conventions and structural analysis.
+
+### Performance Considerations
+
+- Skips common non-source directories (bin, obj, packages)
+- Processes files in parallel where possible
+- Caches parsing results within a single invocation
+- Outputs structured JSON for efficient processing
+
+## Error Handling
+
+- Invalid file paths return error JSON
+- Parse errors are logged to stderr and skipped
+- Non-zero exit codes indicate tool failure
+- Timeout protection for long-running operations
+
+## Integration with DocLoom
+
+The C# Analyzer integrates seamlessly with DocLoom's AI-orchestrated analysis loop:
+
+1. The AI can invoke any tool based on the template's analysis needs
+2. Tools can be called in sequence to build understanding
+3. Output from one tool can inform the next tool call
+4. The final document incorporates insights from all tool invocations
+
+## Development
+
+### Building
 
 ```bash
-# Analyze a C# project
-docloom generate --agent csharp-analyzer --source /path/to/csharp/project --out architecture-doc.html
-
-# With custom parameters
-docloom generate --agent csharp-analyzer \
-  --source /path/to/project \
-  --agent-param include-internal=true \
-  --agent-param extract-metrics=false \
-  --out doc.html
+go build -o docloom-agent-csharp cmd/docloom-agent-csharp/main.go
 ```
 
-## Benefits
+### Testing Individual Tools
 
-1. **No External Dependencies**: Completely self-contained, no .NET SDK required
-2. **Fast Analysis**: Tree-sitter provides blazing-fast parsing performance
-3. **Error Tolerant**: Can analyze incomplete or work-in-progress code
-4. **Cross-Platform**: Works on any platform where Go runs
-5. **Integrated Workflow**: Seamlessly integrates with docloom's document generation pipeline
+```bash
+# List projects
+./docloom-agent-csharp list_projects /path/to/csharp/repo
+
+# Get API surface
+./docloom-agent-csharp get_api_surface /path/to/csharp/repo
+
+# Get specific file
+./docloom-agent-csharp get_file_content /path/to/file.cs
+```
+
+### Adding New Tools
+
+1. Add a new cobra command in `main.go`
+2. Implement the tool logic
+3. Output JSON to stdout
+4. Update the agent.agent.yaml with the new tool
+5. Document the tool in this file

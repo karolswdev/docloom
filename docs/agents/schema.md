@@ -2,147 +2,222 @@
 
 ## Overview
 
-Research Agents in DocLoom are defined using YAML files with a `.agent.yaml` or `.agent.yml` extension. This document describes the official schema for agent definition files, which serves as the contract for agent developers.
+DocLoom agents are defined using YAML files that specify how they operate and what tools they provide. The agent system has evolved from a simple runner-based architecture to a powerful tool-based paradigm that enables AI-orchestrated analysis.
 
-## Schema Structure
+## Schema Version
 
-### Top-Level Fields
+Current version: `docloom.io/v1alpha1`
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `apiVersion` | string | Yes | The API version for the agent schema. Currently must be `v1`. |
-| `kind` | string | Yes | The resource type. Must be `ResearchAgent`. |
-| `metadata` | object | Yes | Contains basic information about the agent. |
-| `spec` | object | Yes | Defines the agent's execution specification. |
+## Tool-Based Architecture
 
-### Metadata Section
+Agents now expose multiple **tools** that can be invoked independently by the AI during analysis. Each tool has:
+- A unique name (used as identifier)
+- A description (used by the AI to understand when to use the tool)
+- A command to execute
+- Optional arguments
 
-The `metadata` section contains identifying information:
+## File Structure
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | Unique identifier for the agent (lowercase, hyphens allowed). |
-| `description` | string | No | Human-readable description of what the agent does. |
-
-### Spec Section
-
-The `spec` section defines how the agent executes:
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `runner` | object | Yes | Specifies the command to execute the agent. |
-| `parameters` | array | No | List of input parameters the agent accepts. |
-
-#### Runner Object
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `command` | string | Yes | The executable command (e.g., `python3`, `node`, `./script.sh`). |
-| `args` | array | No | Additional arguments to pass to the command. |
-
-#### Parameter Object
-
-Each parameter in the `parameters` array has:
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | Parameter name (used as environment variable). |
-| `type` | string | Yes | Data type (`string`, `integer`, `boolean`, `float`). |
-| `description` | string | No | Description of the parameter's purpose. |
-| `required` | boolean | No | Whether the parameter must be provided (default: false). |
-| `default` | any | No | Default value if not provided by user. |
-
-## Complete Example
+Agent definitions must be placed in a file named `agent.agent.yaml` within the agent's directory.
 
 ```yaml
-apiVersion: v1
-kind: ResearchAgent
+apiVersion: docloom.io/v1alpha1
+kind: Agent
 metadata:
-  name: academic-research-agent
-  description: Performs academic literature research on specified topics
+  name: agent-name
+  description: Human-readable description of the agent
 spec:
-  runner:
-    command: python3
-    args:
-      - /agents/academic_research.py
+  # Tools array - defines the capabilities of the agent
+  tools:
+    - name: tool_name
+      description: Clear description for the AI to understand the tool's purpose
+      command: /path/to/executable
+      args: 
+        - subcommand
+        - "${PARAMETER_NAME}"
+  
+  # Parameters that can be passed to tools
   parameters:
-    - name: topic
-      type: string
-      description: The research topic to investigate
-      required: true
-    - name: depth
-      type: integer
-      description: How many levels deep to search (1-5)
-      required: false
-      default: 3
-    - name: include_citations
-      type: boolean
-      description: Whether to include full citations
-      required: false
-      default: true
-    - name: max_results
-      type: integer
-      description: Maximum number of results to return
-      required: false
-      default: 100
+    - name: parameter_name
+      type: string|int|bool
+      required: true|false
+      default: default_value
+      description: Description of the parameter
 ```
 
-## Parameter Passing
+## Field Definitions
 
-When an agent is executed, parameters are passed as environment variables with the prefix `PARAM_`. For example:
-- `topic` becomes `PARAM_TOPIC`
-- `max_results` becomes `PARAM_MAX_RESULTS`
+### Root Fields
 
-The agent also receives two command-line arguments:
-1. Source path - The path to the codebase being analyzed
-2. Output path - Where the agent should write its artifacts
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `apiVersion` | string | Yes | Schema version (currently `docloom.io/v1alpha1`) |
+| `kind` | string | Yes | Resource type (must be `Agent`) |
+| `metadata` | object | Yes | Agent metadata |
+| `spec` | object | Yes | Agent specification |
 
-## Validation Rules
+### Metadata Fields
 
-1. **API Version**: Must be a supported version (currently only `v1`).
-2. **Kind**: Must be exactly `ResearchAgent`.
-3. **Name**: Must be unique within the registry, lowercase, may contain hyphens.
-4. **Command**: Must be a valid executable available in the system PATH or an absolute path.
-5. **Parameter Types**: Must be one of `string`, `integer`, `boolean`, or `float`.
-6. **Default Values**: Must match the declared type.
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Unique agent identifier |
+| `description` | string | Yes | Human-readable description |
 
-## File Naming Convention
+### Spec Fields
 
-Agent definition files must follow this naming pattern:
-- `<agent-name>.agent.yaml`
-- `<agent-name>.agent.yml`
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `tools` | array | No* | List of tools the agent provides |
+| `runner` | object | No* | Legacy runner configuration (deprecated) |
+| `parameters` | array | No | Input parameters for the agent |
 
-The `<agent-name>` portion should match the `metadata.name` field for consistency.
+*Note: Either `tools` or `runner` must be specified. New agents should use `tools`.
 
-## Discovery Locations
+### Tool Definition
 
-DocLoom searches for agent definitions in the following locations (in order):
-1. `.docloom/agents/` - Project-specific agents
-2. `~/.docloom/agents/` - User-wide agents
-3. Custom paths added via configuration
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Tool identifier (e.g., `list_projects`) |
+| `description` | string | Yes | AI-readable description of what the tool does |
+| `command` | string | Yes | Executable path or command |
+| `args` | array | No | Command arguments (supports parameter substitution) |
 
-## Best Practices
+### Parameter Definition
 
-1. **Descriptive Names**: Use clear, descriptive names that indicate the agent's purpose.
-2. **Comprehensive Descriptions**: Provide detailed descriptions for both the agent and its parameters.
-3. **Sensible Defaults**: Include reasonable default values for optional parameters.
-4. **Type Safety**: Always specify the correct type for parameters to enable proper validation.
-5. **Documentation**: Include a README in your agent directory explaining setup and usage.
-6. **Version Compatibility**: Always specify `apiVersion: v1` for compatibility.
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Parameter name |
+| `type` | string | Yes | Data type: `string`, `int`, or `bool` |
+| `required` | bool | No | Whether the parameter is required (default: false) |
+| `default` | any | No | Default value if not provided |
+| `description` | string | Yes | Description of the parameter |
 
-## Error Handling
+## Example: Multi-Tool C# Analyzer
 
-If an agent definition file is invalid, it will be skipped during discovery with an error message indicating:
-- Missing required fields
-- Invalid field values
-- Malformed YAML syntax
-- Unsupported API versions or kinds
+```yaml
+apiVersion: docloom.io/v1alpha1
+kind: Agent
+metadata:
+  name: csharp-analyzer
+  description: Analyzes C# repositories for architecture and code quality
+spec:
+  tools:
+    - name: summarize_readme
+      description: Finds and summarizes README files in the repository
+      command: docloom-agent-csharp
+      args:
+        - summarize_readme
+        - "${SOURCE_PATH}"
+    
+    - name: list_projects
+      description: Lists all C# project files (.csproj) in the repository
+      command: docloom-agent-csharp
+      args:
+        - list_projects
+        - "${SOURCE_PATH}"
+    
+    - name: get_dependencies
+      description: Extracts NuGet package dependencies from all projects
+      command: docloom-agent-csharp
+      args:
+        - get_dependencies
+        - "${SOURCE_PATH}"
+    
+    - name: get_api_surface
+      description: Analyzes the public API surface of the codebase
+      command: docloom-agent-csharp
+      args:
+        - get_api_surface
+        - "${SOURCE_PATH}"
+    
+    - name: get_file_content
+      description: Retrieves the content of a specific file
+      command: docloom-agent-csharp
+      args:
+        - get_file_content
+        - "${FILE_PATH}"
+  
+  parameters:
+    - name: source_path
+      type: string
+      required: true
+      description: Path to the source code repository
+    
+    - name: file_path
+      type: string
+      required: false
+      description: Path to a specific file (used by get_file_content tool)
+```
 
-## Future Enhancements
+## Tool Description Best Practices
 
-The schema may be extended in future versions to support:
-- Multiple runner types (Docker, WebAssembly, etc.)
-- Resource limits (CPU, memory, timeout)
-- Output format specifications
-- Dependency declarations
-- Authentication mechanisms
+The `description` field for each tool is **critical** - it's the primary interface between your agent and the AI. Write clear, actionable descriptions that help the AI understand:
+
+1. **What the tool does** - Be specific about the tool's function
+2. **When to use it** - Include context about appropriate use cases
+3. **What it returns** - Describe the output format and content
+4. **Any prerequisites** - Mention if other tools should be called first
+
+### Good Examples
+
+```yaml
+- name: list_projects
+  description: "Lists all C# project files (.csproj) in the repository. Returns a JSON array of relative paths. Use this first to understand the repository structure."
+
+- name: get_dependencies
+  description: "Analyzes all .csproj files to extract NuGet package dependencies. Returns a map of project paths to their dependencies. Call list_projects first to see available projects."
+```
+
+### Poor Examples
+
+```yaml
+- name: list_projects
+  description: "Lists projects"  # Too vague
+
+- name: get_dependencies
+  description: "Gets dependencies from projects"  # Doesn't explain format or prerequisites
+```
+
+## Parameter Substitution
+
+Tools support parameter substitution in their arguments using the `${PARAMETER_NAME}` syntax. Parameters can come from:
+
+1. Agent-level parameters (defined in `spec.parameters`)
+2. Runtime parameters passed by the executor
+3. Special variables like `${SOURCE_PATH}` and `${OUTPUT_PATH}`
+
+## Backward Compatibility
+
+Agents using the legacy `runner` field will continue to work but should be migrated to the tool-based architecture:
+
+```yaml
+# Legacy (deprecated)
+spec:
+  runner:
+    command: /path/to/agent
+    args: ["${SOURCE_PATH}", "${OUTPUT_PATH}"]
+
+# New (recommended)
+spec:
+  tools:
+    - name: analyze
+      description: Performs comprehensive analysis of the codebase
+      command: /path/to/agent
+      args: ["analyze", "${SOURCE_PATH}", "${OUTPUT_PATH}"]
+```
+
+## Tool Execution
+
+When a tool is invoked:
+
+1. The executor looks up the tool by name in the agent definition
+2. Parameters are substituted in the command arguments
+3. Environment variables are set for all parameters (prefixed with `PARAM_`)
+4. The command is executed and output is captured
+5. The output (stdout) is returned to the caller
+
+Tools should:
+- Output structured data (preferably JSON) to stdout
+- Use stderr for logging and diagnostics
+- Return non-zero exit codes on failure
+- Complete execution within a reasonable timeout
