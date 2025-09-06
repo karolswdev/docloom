@@ -13,7 +13,7 @@ import (
 func TestArtifactWriter_Write(t *testing.T) {
 	// Create temporary output directory
 	tmpDir := t.TempDir()
-	
+
 	// Create test response
 	response := &AnalysisResponse{
 		ProjectName: "TestProject",
@@ -46,12 +46,12 @@ func TestArtifactWriter_Write(t *testing.T) {
 		},
 		Deployment: Deployment{
 			Containerized: true,
-			CICD:         "GitHub Actions",
-			Hosting:      "Docker",
+			CICD:          "GitHub Actions",
+			Hosting:       "Docker",
 		},
 		Security: Security{
-			Authentication:  "JWT",
-			Authorization:   "RBAC",
+			Authentication: "JWT",
+			Authorization:  "RBAC",
 			Considerations: []string{"HTTPS"},
 		},
 		TechnicalDebt: []TechnicalDebtItem{
@@ -66,17 +66,17 @@ func TestArtifactWriter_Write(t *testing.T) {
 			"Add caching layer",
 		},
 	}
-	
+
 	// Write artifacts
 	writer := NewArtifactWriter(tmpDir)
 	err := writer.Write(response)
 	require.NoError(t, err)
-	
+
 	// Verify directory structure
 	assert.DirExists(t, filepath.Join(tmpDir, "analysis"))
 	assert.DirExists(t, filepath.Join(tmpDir, "repository-context"))
 	assert.DirExists(t, filepath.Join(tmpDir, "technical-insights"))
-	
+
 	// Verify files exist
 	assert.FileExists(t, filepath.Join(tmpDir, "metadata.json"))
 	assert.FileExists(t, filepath.Join(tmpDir, "analysis", "summary.json"))
@@ -85,28 +85,28 @@ func TestArtifactWriter_Write(t *testing.T) {
 	assert.FileExists(t, filepath.Join(tmpDir, "repository-context", "api-endpoints.md"))
 	assert.FileExists(t, filepath.Join(tmpDir, "technical-insights", "technical-debt.md"))
 	assert.FileExists(t, filepath.Join(tmpDir, "technical-insights", "recommendations.md"))
-	
+
 	// Verify JSON content
 	summaryPath := filepath.Join(tmpDir, "analysis", "summary.json")
 	summaryData, err := os.ReadFile(summaryPath)
 	require.NoError(t, err)
-	
+
 	var loadedResponse AnalysisResponse
 	err = json.Unmarshal(summaryData, &loadedResponse)
 	require.NoError(t, err)
 	assert.Equal(t, response.ProjectName, loadedResponse.ProjectName)
-	
+
 	// Verify metadata
 	metadataPath := filepath.Join(tmpDir, "metadata.json")
 	metadataData, err := os.ReadFile(metadataPath)
 	require.NoError(t, err)
-	
+
 	var metadata map[string]interface{}
 	err = json.Unmarshal(metadataData, &metadata)
 	require.NoError(t, err)
 	assert.Equal(t, "csharp-cc-cli", metadata["agent"])
 	assert.Equal(t, "1.0.0", metadata["version"])
-	
+
 	// Verify markdown content
 	overviewPath := filepath.Join(tmpDir, "analysis", "project-overview.md")
 	overviewContent, err := os.ReadFile(overviewPath)
@@ -120,7 +120,7 @@ func TestArtifactWriter_Write(t *testing.T) {
 func TestArtifactWriter_EmptyOptionalSections(t *testing.T) {
 	// Test with minimal response (no APIs, technical debt, or recommendations)
 	tmpDir := t.TempDir()
-	
+
 	response := &AnalysisResponse{
 		ProjectName: "MinimalProject",
 		Description: "Minimal test",
@@ -136,17 +136,17 @@ func TestArtifactWriter_EmptyOptionalSections(t *testing.T) {
 		Features: []Feature{},
 		// Empty APIs, TechnicalDebt, and Recommendations
 	}
-	
+
 	writer := NewArtifactWriter(tmpDir)
 	err := writer.Write(response)
 	require.NoError(t, err)
-	
+
 	// Verify required files exist
 	assert.FileExists(t, filepath.Join(tmpDir, "metadata.json"))
 	assert.FileExists(t, filepath.Join(tmpDir, "analysis", "summary.json"))
 	assert.FileExists(t, filepath.Join(tmpDir, "analysis", "project-overview.md"))
 	assert.FileExists(t, filepath.Join(tmpDir, "repository-context", "architecture.md"))
-	
+
 	// Verify optional files don't exist when data is empty
 	assert.NoFileExists(t, filepath.Join(tmpDir, "repository-context", "api-endpoints.md"))
 	assert.NoFileExists(t, filepath.Join(tmpDir, "technical-insights", "technical-debt.md"))

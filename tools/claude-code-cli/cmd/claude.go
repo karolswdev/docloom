@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	
+
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -27,21 +27,21 @@ func NewClaudeClient(apiKey, model string, maxTokens int) *ClaudeClient {
 
 // AnalysisResponse represents the structured response from Claude
 type AnalysisResponse struct {
-	ProjectName   string                 `json:"projectName"`
-	Description   string                 `json:"description"`
-	ProjectType   string                 `json:"projectType"`
-	Framework     string                 `json:"framework"`
-	Architecture  Architecture           `json:"architecture"`
-	Dependencies  Dependencies           `json:"dependencies"`
-	Features      []Feature              `json:"features"`
-	APIs          []API                  `json:"apis"`
-	DataModel     DataModel              `json:"dataModel"`
-	Testing       Testing                `json:"testing"`
-	Deployment    Deployment             `json:"deployment"`
-	Security      Security               `json:"security"`
-	TechnicalDebt []TechnicalDebtItem    `json:"technicalDebt"`
-	Recommendations []string             `json:"recommendations"`
-	RawResponse   string                 `json:"-"` // Store raw response for debugging
+	ProjectName     string              `json:"projectName"`
+	Description     string              `json:"description"`
+	ProjectType     string              `json:"projectType"`
+	Framework       string              `json:"framework"`
+	Architecture    Architecture        `json:"architecture"`
+	Dependencies    Dependencies        `json:"dependencies"`
+	Features        []Feature           `json:"features"`
+	APIs            []API               `json:"apis"`
+	DataModel       DataModel           `json:"dataModel"`
+	Testing         Testing             `json:"testing"`
+	Deployment      Deployment          `json:"deployment"`
+	Security        Security            `json:"security"`
+	TechnicalDebt   []TechnicalDebtItem `json:"technicalDebt"`
+	Recommendations []string            `json:"recommendations"`
+	RawResponse     string              `json:"-"` // Store raw response for debugging
 }
 
 type Architecture struct {
@@ -79,13 +79,13 @@ type Testing struct {
 
 type Deployment struct {
 	Containerized bool   `json:"containerized"`
-	CICD         string `json:"cicd"`
-	Hosting      string `json:"hosting"`
+	CICD          string `json:"cicd"`
+	Hosting       string `json:"hosting"`
 }
 
 type Security struct {
-	Authentication  string   `json:"authentication"`
-	Authorization   string   `json:"authorization"`
+	Authentication string   `json:"authentication"`
+	Authorization  string   `json:"authorization"`
 	Considerations []string `json:"considerations"`
 }
 
@@ -100,7 +100,7 @@ type TechnicalDebtItem struct {
 func (c *ClaudeClient) Analyze(prompt string) (*AnalysisResponse, error) {
 	// Use OpenAI-compatible client for Claude API
 	client := openai.NewClient(c.apiKey)
-	
+
 	// Configure for Claude (Anthropic) API if needed
 	config := openai.DefaultConfig(c.apiKey)
 	if strings.Contains(c.model, "claude") {
@@ -108,7 +108,7 @@ func (c *ClaudeClient) Analyze(prompt string) (*AnalysisResponse, error) {
 		config.BaseURL = "https://api.anthropic.com/v1"
 	}
 	client = openai.NewClientWithConfig(config)
-	
+
 	// Create the chat completion request
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
@@ -128,18 +128,18 @@ func (c *ClaudeClient) Analyze(prompt string) (*AnalysisResponse, error) {
 			Temperature: 0.3,
 		},
 	)
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to call Claude API: %w", err)
 	}
-	
+
 	if len(resp.Choices) == 0 {
 		return nil, fmt.Errorf("no response from Claude API")
 	}
-	
+
 	// Extract JSON from response
 	rawResponse := resp.Choices[0].Message.Content
-	
+
 	// Parse JSON response
 	var analysis AnalysisResponse
 	if err := json.Unmarshal([]byte(rawResponse), &analysis); err != nil {
@@ -155,7 +155,7 @@ func (c *ClaudeClient) Analyze(prompt string) (*AnalysisResponse, error) {
 			return nil, fmt.Errorf("failed to parse Claude response as JSON: %w", err)
 		}
 	}
-	
+
 	analysis.RawResponse = rawResponse
 	return &analysis, nil
 }

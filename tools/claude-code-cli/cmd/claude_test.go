@@ -44,12 +44,12 @@ func TestAnalysisResponse_JSONMarshaling(t *testing.T) {
 		},
 		Deployment: Deployment{
 			Containerized: true,
-			CICD:         "GitHub Actions",
-			Hosting:      "Kubernetes",
+			CICD:          "GitHub Actions",
+			Hosting:       "Kubernetes",
 		},
 		Security: Security{
-			Authentication:  "JWT",
-			Authorization:   "Role-based",
+			Authentication: "JWT",
+			Authorization:  "Role-based",
 			Considerations: []string{"HTTPS only", "Rate limiting"},
 		},
 		TechnicalDebt: []TechnicalDebtItem{
@@ -65,16 +65,16 @@ func TestAnalysisResponse_JSONMarshaling(t *testing.T) {
 			"Add comprehensive logging",
 		},
 	}
-	
+
 	// Marshal to JSON
 	jsonData, err := json.MarshalIndent(response, "", "  ")
 	require.NoError(t, err)
-	
+
 	// Unmarshal back
 	var decoded AnalysisResponse
 	err = json.Unmarshal(jsonData, &decoded)
 	require.NoError(t, err)
-	
+
 	// Verify key fields
 	assert.Equal(t, response.ProjectName, decoded.ProjectName)
 	assert.Equal(t, response.ProjectType, decoded.ProjectType)
@@ -90,20 +90,20 @@ func TestAnalysisResponse_JSONMarshaling(t *testing.T) {
 func TestClaudeClient_ParseJSONFromMarkdown(t *testing.T) {
 	// Test that we can extract JSON from markdown-wrapped responses
 	markdownResponse := "Here is the analysis of your C# repository:\n\n```json\n{\n  \"projectName\": \"TestAPI\",\n  \"description\": \"Test API project\",\n  \"projectType\": \"Web API\",\n  \"framework\": \".NET 6\"\n}\n```\n\nThe analysis is complete."
-	
+
 	// Extract JSON
 	jsonStart := strings.Index(markdownResponse, "{")
 	jsonEnd := strings.LastIndex(markdownResponse, "}")
 	require.True(t, jsonStart >= 0)
 	require.True(t, jsonEnd > jsonStart)
-	
+
 	jsonContent := markdownResponse[jsonStart : jsonEnd+1]
-	
+
 	// Parse JSON
 	var analysis AnalysisResponse
 	err := json.Unmarshal([]byte(jsonContent), &analysis)
 	require.NoError(t, err)
-	
+
 	assert.Equal(t, "TestAPI", analysis.ProjectName)
 	assert.Equal(t, "Test API project", analysis.Description)
 	assert.Equal(t, "Web API", analysis.ProjectType)
@@ -112,7 +112,7 @@ func TestClaudeClient_ParseJSONFromMarkdown(t *testing.T) {
 
 func TestClaudeClient_NewClient(t *testing.T) {
 	client := NewClaudeClient("test-key", "claude-3-opus", 4096)
-	
+
 	assert.NotNil(t, client)
 	assert.Equal(t, "test-key", client.apiKey)
 	assert.Equal(t, "claude-3-opus", client.model)

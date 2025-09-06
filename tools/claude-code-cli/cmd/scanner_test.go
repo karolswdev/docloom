@@ -12,7 +12,7 @@ import (
 func TestScanner_Scan(t *testing.T) {
 	// Create a temporary test repository
 	tmpDir := t.TempDir()
-	
+
 	// Create test file structure
 	files := map[string]string{
 		"TestProject.sln": `Microsoft Visual Studio Solution File`,
@@ -51,7 +51,7 @@ RUN dotnet build`,
   }
 }`,
 	}
-	
+
 	// Create test files
 	for path, content := range files {
 		fullPath := filepath.Join(tmpDir, path)
@@ -59,28 +59,28 @@ RUN dotnet build`,
 		require.NoError(t, os.MkdirAll(dir, 0755))
 		require.NoError(t, os.WriteFile(fullPath, []byte(content), 0644))
 	}
-	
+
 	// Create scanner and scan
 	scanner := NewScanner(tmpDir)
 	result, err := scanner.Scan()
-	
+
 	// Assertions
 	require.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, tmpDir, result.RootPath)
-	
+
 	// Check solution file was found
 	assert.Equal(t, "TestProject.sln", result.SolutionFile)
-	
+
 	// Check project files were found
 	assert.Contains(t, result.ProjectFiles, filepath.Join("src", "TestProject.csproj"))
-	
+
 	// Check README was found
 	assert.Contains(t, result.ReadmeFiles, "README.md")
-	
+
 	// Check that files were collected
 	assert.Greater(t, len(result.Files), 0)
-	
+
 	// Verify specific files were scanned
 	var foundSolution, foundProject, foundReadme, foundProgram, foundController, foundConfig bool
 	for _, file := range result.Files {
@@ -104,7 +104,7 @@ RUN dotnet build`,
 			foundConfig = true
 		}
 	}
-	
+
 	assert.True(t, foundSolution, "Solution file should be found")
 	assert.True(t, foundProject, "Project file should be found")
 	assert.True(t, foundReadme, "README file should be found")
@@ -115,7 +115,7 @@ RUN dotnet build`,
 
 func TestScanner_SkipsHiddenAndBuildDirectories(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create directories that should be skipped
 	skipDirs := []string{
 		".git/config",
@@ -124,23 +124,23 @@ func TestScanner_SkipsHiddenAndBuildDirectories(t *testing.T) {
 		"packages/Newtonsoft.Json/lib.dll",
 		"node_modules/package/index.js",
 	}
-	
+
 	for _, path := range skipDirs {
 		fullPath := filepath.Join(tmpDir, path)
 		dir := filepath.Dir(fullPath)
 		require.NoError(t, os.MkdirAll(dir, 0755))
 		require.NoError(t, os.WriteFile(fullPath, []byte("should not scan"), 0644))
 	}
-	
+
 	// Create a file that should be scanned
 	validFile := filepath.Join(tmpDir, "Program.cs")
 	require.NoError(t, os.WriteFile(validFile, []byte("class Program {}"), 0644))
-	
+
 	scanner := NewScanner(tmpDir)
 	result, err := scanner.Scan()
-	
+
 	require.NoError(t, err)
-	
+
 	// Verify skipped files are not in results
 	for _, file := range result.Files {
 		assert.NotContains(t, file.RelPath, ".git")

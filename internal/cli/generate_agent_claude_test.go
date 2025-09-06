@@ -42,7 +42,7 @@ namespace TestNamespace {
 	// Create a test template
 	templateDir := filepath.Join(tempDir, "templates")
 	require.NoError(t, os.MkdirAll(templateDir, 0755))
-	
+
 	templateHTML := `<!DOCTYPE html>
 <html>
 <head><title>Test</title></head>
@@ -94,7 +94,7 @@ Title should mention MOCK_PLACEHOLDER if found in the analysis.`
 	// Note: We need to ensure the mock script path is correct
 	// The agent definition points to ./mock-cc-cli.sh
 	// We'll use a mock AI client that captures the prompt
-	
+
 	// Create a mock implementation that captures the prompt
 	var capturedPrompt string
 	mockGenerate := func(prompt string) string {
@@ -115,10 +115,10 @@ Title should mention MOCK_PLACEHOLDER if found in the analysis.`
 			// If running from test directory, adjust path
 			mockScript = filepath.Join("..", "..", "mock-cc-cli.sh")
 		}
-		
+
 		// Ensure the script exists
 		require.FileExists(t, mockScript)
-		
+
 		// Run the mock script
 		cmd := execCommand(mockScript,
 			"--source", sourceDir,
@@ -126,10 +126,10 @@ Title should mention MOCK_PLACEHOLDER if found in the analysis.`
 			"--language", "csharp",
 			"--depth", "2",
 		)
-		
+
 		output, err := cmd.CombinedOutput()
 		require.NoError(t, err, "Mock script failed: %s", string(output))
-		
+
 		// Verify the mock script created the expected files
 		expectedFiles := []string{
 			"overview.md",
@@ -143,15 +143,15 @@ Title should mention MOCK_PLACEHOLDER if found in the analysis.`
 			"raw/file-list.txt",
 			"raw/stats.json",
 		}
-		
+
 		for _, file := range expectedFiles {
 			path := filepath.Join(agentOutputDir, file)
 			assert.FileExists(t, path, "Expected file %s not created", file)
-			
+
 			// Read the file and check for MOCK_PLACEHOLDER
 			content, err := os.ReadFile(path)
 			require.NoError(t, err)
-			
+
 			// At least some files should contain our placeholder
 			if strings.Contains(file, ".md") || strings.Contains(file, ".json") {
 				if strings.Contains(string(content), "MOCK_PLACEHOLDER") {
@@ -167,18 +167,18 @@ Title should mention MOCK_PLACEHOLDER if found in the analysis.`
 		overviewPath := filepath.Join(agentOutputDir, "overview.md")
 		overviewContent, err := os.ReadFile(overviewPath)
 		require.NoError(t, err)
-		
+
 		// Verify it contains our mock placeholder
 		assert.Contains(t, string(overviewContent), "MOCK_PLACEHOLDER",
 			"Mock artifact should contain placeholder text")
-		
+
 		// In a real integration test, we would run the full generate command
 		// and verify that the prompt sent to the AI includes these artifacts
 		// For now, we've verified:
 		// 1. The mock script executes correctly
 		// 2. It creates the expected directory structure
 		// 3. The files contain recognizable placeholder text
-		
+
 		// Log success
 		t.Log("✓ Mock Claude Code CLI script executed successfully")
 		t.Log("✓ All expected artifacts were created")
@@ -190,12 +190,12 @@ Title should mention MOCK_PLACEHOLDER if found in the analysis.`
 		// Simulate what would happen in the real generate command
 		// The agent executor would run the mock script and collect artifacts
 		// Then these would be included in the prompt
-		
+
 		// Read all markdown files from insights
 		insightsDir := filepath.Join(agentOutputDir, "insights")
 		entries, err := os.ReadDir(insightsDir)
 		require.NoError(t, err)
-		
+
 		var combinedInsights strings.Builder
 		for _, entry := range entries {
 			if strings.HasSuffix(entry.Name(), ".md") {
@@ -205,17 +205,17 @@ Title should mention MOCK_PLACEHOLDER if found in the analysis.`
 				combinedInsights.WriteString("\n---\n")
 			}
 		}
-		
+
 		// Verify we collected the insights
 		insights := combinedInsights.String()
 		assert.Contains(t, insights, "MOCK_PLACEHOLDER Pattern")
 		assert.Contains(t, insights, "MOCK_PLACEHOLDER Anti-Pattern")
 		assert.Contains(t, insights, "MOCK_PLACEHOLDER Recommendation")
-		
+
 		// Simulate prompt generation
 		simulatedPrompt := "Analysis from Claude Code CLI:\n" + insights
 		result := mockGenerate(simulatedPrompt)
-		
+
 		// Verify the mock generation worked
 		assert.Contains(t, result, "MOCK_PLACEHOLDER")
 		assert.Contains(t, capturedPrompt, "Analysis from Claude Code CLI")

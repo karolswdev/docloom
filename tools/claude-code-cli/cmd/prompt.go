@@ -16,10 +16,10 @@ func NewPromptGenerator() *PromptGenerator {
 // Generate creates an analysis prompt from scan results
 func (p *PromptGenerator) Generate(scan *ScanResult) string {
 	var prompt strings.Builder
-	
+
 	prompt.WriteString("You are an expert C# software architect analyzing a repository to generate comprehensive documentation.\n\n")
 	prompt.WriteString("Please analyze the following C# repository and provide a structured JSON response with detailed insights.\n\n")
-	
+
 	// Add repository structure overview
 	prompt.WriteString("## Repository Overview\n\n")
 	if scan.SolutionFile != "" {
@@ -32,10 +32,10 @@ func (p *PromptGenerator) Generate(scan *ScanResult) string {
 		prompt.WriteString(fmt.Sprintf("README Files: %s\n", strings.Join(scan.ReadmeFiles, ", ")))
 	}
 	prompt.WriteString("\n")
-	
+
 	// Add file contents
 	prompt.WriteString("## Key Files\n\n")
-	
+
 	// Prioritize files by type
 	fileTypes := []string{"solution", "project", "readme", "config", "source"}
 	for _, fileType := range fileTypes {
@@ -50,7 +50,7 @@ func (p *PromptGenerator) Generate(scan *ScanResult) string {
 			}
 		}
 	}
-	
+
 	// Add analysis instructions
 	prompt.WriteString("## Analysis Requirements\n\n")
 	prompt.WriteString("Based on the repository contents above, provide a JSON response with the following structure:\n\n")
@@ -115,6 +115,6 @@ func (p *PromptGenerator) Generate(scan *ScanResult) string {
 }`)
 	prompt.WriteString("\n```\n\n")
 	prompt.WriteString("Provide your analysis as valid JSON that matches this structure. Be thorough and specific based on the actual code you've seen.\n")
-	
+
 	return prompt.String()
 }

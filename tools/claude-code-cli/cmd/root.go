@@ -31,7 +31,7 @@ that provide rich context for automated document generation.`,
 		} else {
 			zerolog.SetGlobalLevel(zerolog.InfoLevel)
 		}
-		
+
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	},
 	Run: analyze,
@@ -44,7 +44,7 @@ func init() {
 	rootCmd.Flags().StringVar(&apiKey, "api-key", "", "Claude API key (can also be set via CLAUDE_API_KEY env var)")
 	rootCmd.Flags().StringVar(&model, "model", "claude-3-opus-20240229", "Claude model to use")
 	rootCmd.Flags().IntVar(&maxTokens, "max-tokens", 4096, "Maximum tokens for Claude response")
-	
+
 	rootCmd.MarkFlagRequired("repo-path")
 	rootCmd.MarkFlagRequired("output-path")
 }
@@ -61,47 +61,47 @@ func analyze(cmd *cobra.Command, args []string) {
 			log.Fatal().Msg("Claude API key is required. Set via --api-key flag or CLAUDE_API_KEY environment variable")
 		}
 	}
-	
+
 	log.Info().
 		Str("repo", repoPath).
 		Str("output", outputPath).
 		Str("model", model).
 		Msg("Starting C# repository analysis")
-	
+
 	// Initialize scanner
 	scanner := NewScanner(repoPath)
-	
+
 	// Scan repository
 	scanResult, err := scanner.Scan()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to scan repository")
 	}
-	
+
 	log.Info().
 		Int("files_found", len(scanResult.Files)).
 		Msg("Repository scan complete")
-	
+
 	// Generate prompt
 	promptGen := NewPromptGenerator()
 	prompt := promptGen.Generate(scanResult)
-	
+
 	log.Debug().Str("prompt_preview", fmt.Sprintf("%.200s...", prompt)).Msg("Generated analysis prompt")
-	
+
 	// Call Claude API
 	client := NewClaudeClient(apiKey, model, maxTokens)
 	response, err := client.Analyze(prompt)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to get response from Claude")
 	}
-	
+
 	log.Info().Msg("Received analysis from Claude")
-	
+
 	// Write artifacts
 	writer := NewArtifactWriter(outputPath)
 	if err := writer.Write(response); err != nil {
 		log.Fatal().Err(err).Msg("Failed to write artifacts")
 	}
-	
+
 	log.Info().
 		Str("output", outputPath).
 		Msg("Successfully wrote analysis artifacts")
