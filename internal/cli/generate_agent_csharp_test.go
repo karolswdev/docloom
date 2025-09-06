@@ -23,11 +23,11 @@ func TestCSharpAgent_E2E_Integration(t *testing.T) {
 
 	// Arrange - Create a sample C# project
 	tmpDir := t.TempDir()
-	
+
 	// Create sample C# source files
 	sampleProjectDir := filepath.Join(tmpDir, "sample-csharp-project")
 	require.NoError(t, os.MkdirAll(sampleProjectDir, 0755))
-	
+
 	// Sample C# code with various constructs
 	sampleCode1 := `using System;
 using System.Collections.Generic;
@@ -110,17 +110,17 @@ namespace SampleProject.Controllers
 		[]byte(sampleCode1),
 		0644,
 	))
-	
+
 	require.NoError(t, os.WriteFile(
 		filepath.Join(sampleProjectDir, "ProductController.cs"),
 		[]byte(sampleCode2),
 		0644,
 	))
-	
+
 	// Create agent definition in temp location
 	agentDir := filepath.Join(tmpDir, "agents")
 	require.NoError(t, os.MkdirAll(agentDir, 0755))
-	
+
 	agentDef := agent.Definition{
 		APIVersion: "v1",
 		Kind:       "Agent",
@@ -142,43 +142,43 @@ namespace SampleProject.Controllers
 			},
 		},
 	}
-	
+
 	agentDefPath := filepath.Join(agentDir, "csharp-analyzer.agent.yaml")
 	agentDefData, err := yaml.Marshal(&agentDef)
 	require.NoError(t, err)
 	require.NoError(t, os.WriteFile(agentDefPath, agentDefData, 0644))
-	
+
 	// Build the agent binary if it doesn't exist
 	agentBinaryPath := filepath.Join(".", "build", "docloom-agent-csharp")
-	if _, err := os.Stat(agentBinaryPath); os.IsNotExist(err) {
+	if _, statErr := os.Stat(agentBinaryPath); os.IsNotExist(statErr) {
 		// Try to build it
 		t.Logf("Building C# agent binary...")
 		// Note: In a real CI environment, this would be built by the Makefile
 		t.Skip("Agent binary not found, skipping E2E test")
 	}
-	
+
 	// Act - Run the agent through the generate command workflow
 	// Note: This is a simplified test that verifies the agent can be executed
 	// In a full E2E test, we would run the complete generate command
-	
+
 	outputDir := filepath.Join(tmpDir, "output")
 	require.NoError(t, os.MkdirAll(outputDir, 0755))
-	
+
 	// Create a registry and load the agent
 	registry := agent.NewRegistry()
 	registry.AddSearchPath(agentDir)
 	require.NoError(t, registry.Discover())
-	
+
 	agents := registry.List()
 	require.Len(t, agents, 1, "Should find one agent")
 	assert.Equal(t, "csharp-analyzer", agents[0].Metadata.Name)
-	
+
 	// Execute the agent
 	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
 	cache, err := agent.NewArtifactCache()
 	require.NoError(t, err)
 	executor := agent.NewExecutor(registry, cache, logger)
-	
+
 	runOpts := agent.RunOptions{
 		AgentName:  "csharp-analyzer",
 		SourcePath: sampleProjectDir,
@@ -186,35 +186,35 @@ namespace SampleProject.Controllers
 			"include-internal": "false",
 		},
 	}
-	
+
 	result, err := executor.Run(runOpts)
-	
+
 	// If execution fails, it might be because the binary isn't built
 	if err != nil {
 		if strings.Contains(err.Error(), "executable file not found") ||
-		   strings.Contains(err.Error(), "no such file") {
+			strings.Contains(err.Error(), "no such file") {
 			t.Skip("Agent binary not available, skipping execution test")
 		}
 		require.NoError(t, err, "Agent execution should succeed")
 	}
-	
+
 	// Assert - Verify the agent produced expected artifacts
 	require.NotNil(t, result, "Should have execution result")
 	require.Equal(t, 0, result.ExitCode, "Agent should exit successfully")
-	
+
 	// List artifacts in the output directory
 	artifacts, err := filepath.Glob(filepath.Join(result.OutputPath, "*.md"))
 	require.NoError(t, err)
 	require.NotEmpty(t, artifacts, "Should produce markdown artifacts")
-	
+
 	// Check for expected markdown files
 	foundProjectSummary := false
 	foundAPISurface := false
 	foundInsights := false
-	
+
 	// Also check for JSON file
 	jsonFile := filepath.Join(result.OutputPath, "analysis.json")
-	
+
 	for _, artifact := range artifacts {
 		baseName := filepath.Base(artifact)
 		switch baseName {
@@ -246,25 +246,25 @@ namespace SampleProject.Controllers
 			assert.Contains(t, contentStr, "Asynchronous Programming", "Should detect async methods")
 		}
 	}
-	
+
 	// Check JSON file separately
 	if _, err := os.Stat(jsonFile); err == nil {
 		content, err := os.ReadFile(jsonFile)
 		require.NoError(t, err)
-		
+
 		var analysis map[string]interface{}
 		require.NoError(t, json.Unmarshal(content, &analysis))
-		
+
 		// Check for expected fields
 		assert.Contains(t, analysis, "projectSummary")
 		assert.Contains(t, analysis, "apiSurface")
 		assert.Contains(t, analysis, "architecturalInsights")
 	}
-	
+
 	assert.True(t, foundProjectSummary, "Should produce ProjectSummary.md")
 	assert.True(t, foundAPISurface, "Should produce ApiSurface.md")
 	assert.True(t, foundInsights, "Should produce ArchitecturalInsights.md")
-	
+
 	// Final verification: The complete workflow would render HTML
 	// This is verified by checking that the artifacts can be used as sources
 	t.Log("C# Analyzer Agent E2E test completed successfully")

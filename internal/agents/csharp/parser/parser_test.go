@@ -68,14 +68,14 @@ public class GlobalClass
 	// Act
 	parser := New()
 	api, err := parser.ExtractAPISurface(context.Background(), sampleCode)
-	
+
 	// Assert
 	require.NoError(t, err, "Parser should not return an error")
 	require.NotNil(t, api, "API surface should not be nil")
-	
+
 	// Verify we have namespaces
 	assert.GreaterOrEqual(t, len(api.Namespaces), 1, "Should have at least one namespace")
-	
+
 	// Find the SampleNamespace
 	var sampleNs *Namespace
 	for i := range api.Namespaces {
@@ -84,12 +84,12 @@ public class GlobalClass
 			break
 		}
 	}
-	
+
 	require.NotNil(t, sampleNs, "Should find SampleNamespace")
-	
+
 	// Verify classes in namespace
 	assert.GreaterOrEqual(t, len(sampleNs.Classes), 2, "Should have at least 2 types (class and interface)")
-	
+
 	// Find SampleClass
 	var sampleClass *Class
 	for i := range sampleNs.Classes {
@@ -98,14 +98,14 @@ public class GlobalClass
 			break
 		}
 	}
-	
+
 	require.NotNil(t, sampleClass, "Should find SampleClass")
 	assert.True(t, sampleClass.IsPublic, "SampleClass should be public")
 	assert.False(t, sampleClass.IsInterface, "SampleClass should not be an interface")
-	
+
 	// Verify methods
 	assert.GreaterOrEqual(t, len(sampleClass.Methods), 2, "Should have at least 2 methods")
-	
+
 	// Find Add method
 	var addMethod *Method
 	for i := range sampleClass.Methods {
@@ -114,13 +114,13 @@ public class GlobalClass
 			break
 		}
 	}
-	
+
 	require.NotNil(t, addMethod, "Should find Add method")
 	assert.True(t, addMethod.IsPublic, "Add method should be public")
 	assert.Equal(t, 2, len(addMethod.Parameters), "Add method should have 2 parameters")
 	assert.Contains(t, addMethod.Signature, "Add", "Signature should contain method name")
 	assert.Contains(t, addMethod.Signature, "int", "Signature should contain return type")
-	
+
 	// Find static method
 	var formatMethod *Method
 	for i := range sampleClass.Methods {
@@ -129,13 +129,13 @@ public class GlobalClass
 			break
 		}
 	}
-	
+
 	require.NotNil(t, formatMethod, "Should find FormatString method")
 	assert.True(t, formatMethod.IsStatic, "FormatString should be static")
-	
+
 	// Verify properties
 	assert.GreaterOrEqual(t, len(sampleClass.Properties), 1, "Should have at least 1 property")
-	
+
 	// Find Name property
 	var nameProp *Property
 	for i := range sampleClass.Properties {
@@ -144,11 +144,11 @@ public class GlobalClass
 			break
 		}
 	}
-	
+
 	require.NotNil(t, nameProp, "Should find Name property")
 	assert.True(t, nameProp.IsPublic, "Name property should be public")
 	assert.Equal(t, "string", nameProp.Type, "Name property should be of type string")
-	
+
 	// Find interface
 	var sampleInterface *Class
 	for i := range sampleNs.Classes {
@@ -157,10 +157,10 @@ public class GlobalClass
 			break
 		}
 	}
-	
+
 	require.NotNil(t, sampleInterface, "Should find ISampleInterface")
 	assert.True(t, sampleInterface.IsInterface, "ISampleInterface should be marked as interface")
-	
+
 	// Verify global class (outside namespace)
 	var globalNs *Namespace
 	for i := range api.Namespaces {
@@ -169,7 +169,7 @@ public class GlobalClass
 			break
 		}
 	}
-	
+
 	if globalNs != nil {
 		var globalClass *Class
 		for i := range globalNs.Classes {
@@ -178,7 +178,7 @@ public class GlobalClass
 				break
 			}
 		}
-		
+
 		if globalClass != nil {
 			assert.True(t, globalClass.IsPublic, "GlobalClass should be public")
 			assert.GreaterOrEqual(t, len(globalClass.Methods), 1, "GlobalClass should have at least 1 method")
@@ -189,10 +189,10 @@ public class GlobalClass
 func TestCSharpParser_EmptySource(t *testing.T) {
 	// Arrange
 	parser := New()
-	
+
 	// Act
 	api, err := parser.ExtractAPISurface(context.Background(), "")
-	
+
 	// Assert
 	require.NoError(t, err, "Should not error on empty source")
 	require.NotNil(t, api, "Should return non-nil API surface")
@@ -207,10 +207,10 @@ func TestCSharpParser_InvalidSyntax(t *testing.T) {
 		public void Method() {
 			// Unclosed brace
 	}`
-	
+
 	// Act - Parser should still attempt to extract what it can
 	api, err := parser.ExtractAPISurface(context.Background(), invalidCode)
-	
+
 	// Assert
 	require.NoError(t, err, "Tree-sitter should handle invalid syntax gracefully")
 	require.NotNil(t, api, "Should return API surface even for invalid code")

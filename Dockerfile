@@ -29,6 +29,11 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
     -X github.com/karolswdev/docloom/internal/version.BuildDate=${BUILD_DATE}" \
     -o docloom ./cmd/docloom
 
+# Build the C# agent binary (requires CGO for tree-sitter)
+RUN apk add --no-cache gcc musl-dev && \
+    CGO_ENABLED=1 GOOS=linux go build -a \
+    -o docloom-agent-csharp ./cmd/docloom-agent-csharp
+
 # Run tests (with CI flag to skip tests that need bash)
 ENV CI=true
 RUN go test ./...
@@ -42,8 +47,12 @@ RUN apk add --no-cache ca-certificates
 # Create non-root user
 RUN adduser -D -u 1000 docloom
 
-# Copy binary from builder
+# Copy binaries from builder
 COPY --from=builder /build/docloom /usr/local/bin/docloom
+COPY --from=builder /build/docloom-agent-csharp /usr/local/bin/docloom-agent-csharp
+
+# Copy agent definitions
+COPY --from=builder /build/agents /usr/local/share/docloom/agents
 
 # Copy default templates (when we have them)
 # COPY --from=builder /build/templates /usr/local/share/docloom/templates

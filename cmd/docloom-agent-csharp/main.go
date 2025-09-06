@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -17,7 +16,7 @@ import (
 // AgentOutput represents the structured output from the agent
 type AgentOutput struct {
 	ProjectSummary        ProjectSummary        `json:"projectSummary"`
-	APISurface           *parser.APISurface    `json:"apiSurface"`
+	APISurface            *parser.APISurface    `json:"apiSurface"`
 	ArchitecturalInsights ArchitecturalInsights `json:"architecturalInsights"`
 }
 
@@ -81,16 +80,16 @@ func main() {
 
 	for _, file := range csFiles {
 		fmt.Fprintf(os.Stderr, "Analyzing: %s\n", file)
-		
-		content, err := os.ReadFile(file)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error reading %s: %v\n", file, err)
+
+		content, readErr := os.ReadFile(file)
+		if readErr != nil {
+			fmt.Fprintf(os.Stderr, "Error reading %s: %v\n", file, readErr)
 			continue
 		}
 
-		api, err := p.ExtractAPISurface(context.Background(), string(content))
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing %s: %v\n", file, err)
+		api, parseErr := p.ExtractAPISurface(context.Background(), string(content))
+		if parseErr != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing %s: %v\n", file, parseErr)
 			continue
 		}
 
@@ -116,20 +115,20 @@ func main() {
 	output := generateOutput(&allAPIs, extractMetrics)
 
 	// Write ProjectSummary.md
-	if err := writeProjectSummary(outputPath, &output.ProjectSummary); err != nil {
-		fmt.Fprintf(os.Stderr, "Error writing ProjectSummary.md: %v\n", err)
+	if writeErr := writeProjectSummary(outputPath, &output.ProjectSummary); writeErr != nil {
+		fmt.Fprintf(os.Stderr, "Error writing ProjectSummary.md: %v\n", writeErr)
 		os.Exit(1)
 	}
 
 	// Write ApiSurface.md
-	if err := writeAPISurface(outputPath, &allAPIs); err != nil {
-		fmt.Fprintf(os.Stderr, "Error writing ApiSurface.md: %v\n", err)
+	if writeErr := writeAPISurface(outputPath, &allAPIs); writeErr != nil {
+		fmt.Fprintf(os.Stderr, "Error writing ApiSurface.md: %v\n", writeErr)
 		os.Exit(1)
 	}
 
 	// Write ArchitecturalInsights.md
-	if err := writeArchitecturalInsights(outputPath, &output.ArchitecturalInsights); err != nil {
-		fmt.Fprintf(os.Stderr, "Error writing ArchitecturalInsights.md: %v\n", err)
+	if writeErr := writeArchitecturalInsights(outputPath, &output.ArchitecturalInsights); writeErr != nil {
+		fmt.Fprintf(os.Stderr, "Error writing ArchitecturalInsights.md: %v\n", writeErr)
 		os.Exit(1)
 	}
 
@@ -140,7 +139,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error marshaling JSON: %v\n", err)
 		os.Exit(1)
 	}
-	if err := os.WriteFile(jsonPath, jsonData, 0644); err != nil {
+	if err := os.WriteFile(jsonPath, jsonData, 0600); err != nil {
 		fmt.Fprintf(os.Stderr, "Error writing JSON: %v\n", err)
 		os.Exit(1)
 	}
@@ -150,12 +149,12 @@ func main() {
 
 func findCSharpFiles(root string) ([]string, error) {
 	var files []string
-	
+
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Skip common non-source directories
 		if info.IsDir() {
 			name := info.Name()
@@ -163,18 +162,18 @@ func findCSharpFiles(root string) ([]string, error) {
 				return filepath.SkipDir
 			}
 		}
-		
+
 		if !info.IsDir() && strings.HasSuffix(path, ".cs") {
 			files = append(files, path)
 		}
-		
+
 		return nil
 	})
-	
+
 	return files, err
 }
 
-func generateOutput(api *parser.APISurface, extractMetrics bool) *AgentOutput {
+func generateOutput(api *parser.APISurface, _ bool) *AgentOutput {
 	output := &AgentOutput{
 		APISurface: api,
 	}
@@ -182,7 +181,7 @@ func generateOutput(api *parser.APISurface, extractMetrics bool) *AgentOutput {
 	// Calculate summary statistics
 	for _, ns := range api.Namespaces {
 		output.ProjectSummary.TotalNamespaces++
-		
+
 		for _, class := range ns.Classes {
 			if class.IsInterface {
 				output.ProjectSummary.TotalInterfaces++
@@ -190,22 +189,22 @@ func generateOutput(api *parser.APISurface, extractMetrics bool) *AgentOutput {
 			} else {
 				output.ProjectSummary.TotalClasses++
 			}
-			
+
 			if class.IsAbstract {
 				output.ArchitecturalInsights.HasAbstractions = true
 			}
-			
+
 			if class.IsPublic {
 				output.ProjectSummary.PublicAPIs++
 			}
-			
+
 			output.ProjectSummary.TotalMethods += len(class.Methods)
 			output.ProjectSummary.TotalProperties += len(class.Properties)
-			
+
 			// Check for async methods
 			for _, method := range class.Methods {
-				if strings.Contains(method.ReturnType, "Task") || 
-				   strings.Contains(method.ReturnType, "async") {
+				if strings.Contains(method.ReturnType, "Task") ||
+					strings.Contains(method.ReturnType, "async") {
 					output.ArchitecturalInsights.HasAsyncMethods = true
 				}
 			}
@@ -220,16 +219,16 @@ func generateOutput(api *parser.APISurface, extractMetrics bool) *AgentOutput {
 
 func detectPatterns(api *parser.APISurface) []string {
 	patterns := []string{}
-	
+
 	hasRepository := false
 	hasFactory := false
 	hasService := false
 	hasController := false
-	
+
 	for _, ns := range api.Namespaces {
 		for _, class := range ns.Classes {
 			className := strings.ToLower(class.Name)
-			
+
 			if strings.Contains(className, "repository") {
 				hasRepository = true
 			}
@@ -244,7 +243,7 @@ func detectPatterns(api *parser.APISurface) []string {
 			}
 		}
 	}
-	
+
 	if hasRepository {
 		patterns = append(patterns, "Repository Pattern")
 	}
@@ -257,7 +256,7 @@ func detectPatterns(api *parser.APISurface) []string {
 	if hasController {
 		patterns = append(patterns, "MVC/API Controllers")
 	}
-	
+
 	return patterns
 }
 
@@ -303,41 +302,41 @@ The codebase exposes %d public APIs with a total of %d methods and %d properties
 	)
 
 	path := filepath.Join(outputPath, "ProjectSummary.md")
-	return os.WriteFile(path, []byte(content), 0644)
+	return os.WriteFile(path, []byte(content), 0600)
 }
 
 func writeAPISurface(outputPath string, api *parser.APISurface) error {
 	var sb strings.Builder
-	
+
 	sb.WriteString("# API Surface\n\n")
 	sb.WriteString("## Namespaces\n\n")
-	
+
 	for _, ns := range api.Namespaces {
 		if ns.Name == "<global>" {
 			sb.WriteString("### Global Namespace\n\n")
 		} else {
 			sb.WriteString(fmt.Sprintf("### %s\n\n", ns.Name))
 		}
-		
+
 		for _, class := range ns.Classes {
 			visibility := "internal"
 			if class.IsPublic {
 				visibility = "public"
 			}
-			
+
 			typeKind := "class"
 			if class.IsInterface {
 				typeKind = "interface"
 			} else if class.IsAbstract {
 				typeKind = "abstract class"
 			}
-			
+
 			sb.WriteString(fmt.Sprintf("#### %s %s %s\n\n", visibility, typeKind, class.Name))
-			
+
 			if class.DocComment != "" {
 				sb.WriteString(fmt.Sprintf("_%s_\n\n", class.DocComment))
 			}
-			
+
 			if len(class.Properties) > 0 {
 				sb.WriteString("**Properties:**\n\n")
 				for _, prop := range class.Properties {
@@ -355,7 +354,7 @@ func writeAPISurface(outputPath string, api *parser.APISurface) error {
 				}
 				sb.WriteString("\n")
 			}
-			
+
 			if len(class.Methods) > 0 {
 				sb.WriteString("**Methods:**\n\n")
 				for _, method := range class.Methods {
@@ -375,16 +374,16 @@ func writeAPISurface(outputPath string, api *parser.APISurface) error {
 			}
 		}
 	}
-	
+
 	path := filepath.Join(outputPath, "ApiSurface.md")
-	return os.WriteFile(path, []byte(sb.String()), 0644)
+	return os.WriteFile(path, []byte(sb.String()), 0600)
 }
 
 func writeArchitecturalInsights(outputPath string, insights *ArchitecturalInsights) error {
 	var sb strings.Builder
-	
+
 	sb.WriteString("# Architectural Insights\n\n")
-	
+
 	sb.WriteString("## Detected Patterns\n\n")
 	if len(insights.DetectedPatterns) > 0 {
 		for _, pattern := range insights.DetectedPatterns {
@@ -394,42 +393,42 @@ func writeArchitecturalInsights(outputPath string, insights *ArchitecturalInsigh
 		sb.WriteString("No common architectural patterns detected.\n")
 	}
 	sb.WriteString("\n")
-	
+
 	sb.WriteString("## Design Characteristics\n\n")
-	
+
 	if insights.HasAsyncMethods {
 		sb.WriteString("- **Asynchronous Programming**: The codebase uses async/await patterns\n")
 	}
-	
+
 	if insights.UsesInterfaces {
 		sb.WriteString("- **Interface-Based Design**: Interfaces are used for abstraction\n")
 	}
-	
+
 	if insights.HasAbstractions {
 		sb.WriteString("- **Abstract Classes**: Abstract base classes provide shared functionality\n")
 	}
-	
+
 	if !insights.HasAsyncMethods && !insights.UsesInterfaces && !insights.HasAbstractions {
 		sb.WriteString("The codebase follows a straightforward implementation approach.\n")
 	}
-	
+
 	sb.WriteString("\n## Recommendations\n\n")
 	sb.WriteString("Based on the analysis:\n\n")
-	
+
 	if !insights.UsesInterfaces {
 		sb.WriteString("- Consider introducing interfaces to improve testability and flexibility\n")
 	}
-	
+
 	if !insights.HasAsyncMethods {
 		sb.WriteString("- Consider using async/await for I/O-bound operations\n")
 	}
-	
+
 	if len(insights.DetectedPatterns) == 0 {
 		sb.WriteString("- Consider implementing common design patterns where appropriate\n")
 	}
-	
+
 	path := filepath.Join(outputPath, "ArchitecturalInsights.md")
-	return os.WriteFile(path, []byte(sb.String()), 0644)
+	return os.WriteFile(path, []byte(sb.String()), 0600)
 }
 
 func parseBoolParam(name string, defaultValue bool) bool {
@@ -450,21 +449,4 @@ func parseIntParam(name string, defaultValue int) int {
 		return defaultValue
 	}
 	return i
-}
-
-func copyFile(src, dst string) error {
-	source, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer source.Close()
-
-	destination, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer destination.Close()
-
-	_, err = io.Copy(destination, source)
-	return err
 }

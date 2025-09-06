@@ -10,6 +10,19 @@ import (
 	"github.com/smacker/go-tree-sitter/csharp"
 )
 
+// Constants for tree-sitter node types
+const (
+	nodeTypeIdentifier  = "identifier"
+	nodeTypeModifier    = "modifier"
+	nodeTypeGenericName = "generic_name"
+	nodeTypePredefined  = "predefined_type"
+	nodeTypeNullable    = "nullable_type"
+	nodeTypeArray       = "array_type"
+	modifierPublic      = "public"
+	modifierAbstract    = "abstract"
+	modifierStatic      = "static"
+)
+
 // APISurface represents the extracted public API surface of C# code
 type APISurface struct {
 	Namespaces []Namespace `json:"namespaces"`
@@ -23,24 +36,24 @@ type Namespace struct {
 
 // Class represents a C# class with its members
 type Class struct {
-	Name        string   `json:"name"`
-	DocComment  string   `json:"docComment,omitempty"`
-	Methods     []Method `json:"methods"`
+	Name        string     `json:"name"`
+	DocComment  string     `json:"docComment,omitempty"`
+	Methods     []Method   `json:"methods"`
 	Properties  []Property `json:"properties"`
-	IsPublic    bool     `json:"isPublic"`
-	IsAbstract  bool     `json:"isAbstract"`
-	IsInterface bool     `json:"isInterface"`
+	IsPublic    bool       `json:"isPublic"`
+	IsAbstract  bool       `json:"isAbstract"`
+	IsInterface bool       `json:"isInterface"`
 }
 
 // Method represents a C# method
 type Method struct {
-	Name       string   `json:"name"`
-	Signature  string   `json:"signature"`
-	DocComment string   `json:"docComment,omitempty"`
-	IsPublic   bool     `json:"isPublic"`
-	IsStatic   bool     `json:"isStatic"`
+	Name       string      `json:"name"`
+	Signature  string      `json:"signature"`
+	DocComment string      `json:"docComment,omitempty"`
+	IsPublic   bool        `json:"isPublic"`
+	IsStatic   bool        `json:"isStatic"`
 	Parameters []Parameter `json:"parameters"`
-	ReturnType string   `json:"returnType"`
+	ReturnType string      `json:"returnType"`
 }
 
 // Property represents a C# property
@@ -81,7 +94,7 @@ func (p *Parser) ExtractAPISurface(ctx context.Context, source string) (*APISurf
 	defer tree.Close()
 
 	root := tree.RootNode()
-	
+
 	api := &APISurface{
 		Namespaces: make([]Namespace, 0),
 	}
@@ -134,7 +147,7 @@ func (p *Parser) parseNamespace(node *sitter.Node, source string) *Namespace {
 	// Extract namespace name
 	for i := 0; i < int(node.ChildCount()); i++ {
 		child := node.Child(i)
-		if child.Type() == "qualified_name" || child.Type() == "identifier" {
+		if child.Type() == "qualified_name" || child.Type() == nodeTypeIdentifier {
 			ns.Name = source[child.StartByte():child.EndByte()]
 			break
 		}
@@ -154,7 +167,7 @@ func (p *Parser) extractClassesFromNode(node *sitter.Node, source string, ns *Na
 	}
 
 	nodeType := node.Type()
-	
+
 	if nodeType == "class_declaration" || nodeType == "interface_declaration" || nodeType == "struct_declaration" {
 		class := p.parseClass(node, source)
 		if class != nil {
@@ -188,16 +201,16 @@ func (p *Parser) parseClass(node *sitter.Node, source string) *Class {
 	for i := 0; i < int(node.ChildCount()); i++ {
 		child := node.Child(i)
 		childType := child.Type()
-		
-		if childType == "modifier" {
+
+		if childType == nodeTypeModifier {
 			modifier := source[child.StartByte():child.EndByte()]
 			switch modifier {
-			case "public":
+			case modifierPublic:
 				class.IsPublic = true
-			case "abstract":
+			case modifierAbstract:
 				class.IsAbstract = true
 			}
-		} else if childType == "identifier" {
+		} else if childType == nodeTypeIdentifier {
 			class.Name = source[child.StartByte():child.EndByte()]
 		} else if childType == "declaration_list" {
 			// Parse class members
@@ -246,9 +259,9 @@ func (p *Parser) parseMethod(node *sitter.Node, source string) *Method {
 		case "modifier":
 			modifier := source[child.StartByte():child.EndByte()]
 			switch modifier {
-			case "public":
+			case modifierPublic:
 				method.IsPublic = true
-			case "static":
+			case modifierStatic:
 				method.IsStatic = true
 			}
 		case "identifier":
@@ -285,9 +298,9 @@ func (p *Parser) parseProperty(node *sitter.Node, source string) *Property {
 		case "modifier":
 			modifier := source[child.StartByte():child.EndByte()]
 			switch modifier {
-			case "public":
+			case modifierPublic:
 				prop.IsPublic = true
-			case "static":
+			case modifierStatic:
 				prop.IsStatic = true
 			}
 		case "identifier":
@@ -309,19 +322,19 @@ func (p *Parser) parseParameters(node *sitter.Node, source string, method *Metho
 		child := node.Child(i)
 		if child.Type() == "parameter" {
 			param := Parameter{}
-			
+
 			for j := 0; j < int(child.ChildCount()); j++ {
 				grandchild := child.Child(j)
 				grandchildType := grandchild.Type()
-				
+
 				switch grandchildType {
-				case "identifier":
+				case nodeTypeIdentifier:
 					param.Name = source[grandchild.StartByte():grandchild.EndByte()]
-				case "predefined_type", "nullable_type", "array_type", "generic_name":
+				case nodeTypePredefined, nodeTypeNullable, nodeTypeArray, nodeTypeGenericName:
 					param.Type = source[grandchild.StartByte():grandchild.EndByte()]
 				}
 			}
-			
+
 			if param.Name != "" {
 				method.Parameters = append(method.Parameters, param)
 			}
@@ -335,7 +348,7 @@ func (p *Parser) extractDocComment(node *sitter.Node, source string) string {
 	if node.Parent() != nil {
 		parent := node.Parent()
 		nodeIndex := -1
-		
+
 		// Find the index of the current node
 		for i := 0; i < int(parent.ChildCount()); i++ {
 			if parent.Child(i) == node {
@@ -343,7 +356,7 @@ func (p *Parser) extractDocComment(node *sitter.Node, source string) string {
 				break
 			}
 		}
-		
+
 		// Look for comments before this node
 		if nodeIndex > 0 {
 			prevNode := parent.Child(nodeIndex - 1)
@@ -356,6 +369,6 @@ func (p *Parser) extractDocComment(node *sitter.Node, source string) string {
 			}
 		}
 	}
-	
+
 	return ""
 }
