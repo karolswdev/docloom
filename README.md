@@ -70,6 +70,9 @@ That's it! You've just created a professional architecture vision document.
   - [Basic Commands](#basic-commands)
   - [Generating Documents](#generating-documents)
   - [Dry Run Mode](#dry-run-mode)
+- [Research Agents](#research-agents)
+  - [Agent Management Commands](#agent-management-commands)
+  - [Adding Custom Agents](#adding-custom-agents)
 - [Configuration](#configuration)
   - [Config File](#configuration-file)
   - [Environment Variables](#environment-variables)
@@ -237,6 +240,62 @@ docloom generate \
   --source ./docs \
   --out output.html
 ```
+
+## 🤖 Research Agents
+
+DocLoom supports Research Agents - external programs that can analyze your codebase and generate specialized documentation. Agents can be written in any language and are discovered automatically from designated directories.
+
+### Agent Management Commands
+
+```bash
+# List all available agents
+docloom agents list
+
+# Show detailed information about an agent
+docloom agents describe <agent-name>
+```
+
+### Example Output
+
+```bash
+$ docloom agents list
+NAME                DESCRIPTION
+----                -----------
+code-analyzer       Analyzes code complexity and patterns
+api-documenter      Generates API documentation from source
+security-scanner    Identifies security vulnerabilities
+
+$ docloom agents describe code-analyzer
+Agent: code-analyzer
+API Version: v1
+Kind: ResearchAgent
+Description: Analyzes code complexity and patterns
+
+Runner:
+  Command: python3
+  Args:
+    - /agents/code_analyzer.py
+
+Parameters:
+  - Name: language
+    Type: string
+    Description: Programming language to analyze
+    Required: true
+    
+  - Name: max_depth
+    Type: integer
+    Description: Maximum analysis depth
+    Required: false
+    Default: 3
+```
+
+### Adding Custom Agents
+
+Agents are defined using YAML files with a `.agent.yaml` extension. Place them in:
+- `.docloom/agents/` - Project-specific agents
+- `~/.docloom/agents/` - User-wide agents
+
+See [docs/agents/schema.md](docs/agents/schema.md) for the complete agent definition schema.
 
 ## ⚙️ Configuration
 
