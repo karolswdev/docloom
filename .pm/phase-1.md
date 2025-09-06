@@ -80,21 +80,21 @@ This section is a reference library defining the acceptance criteria for this ph
     *   **Fulfills:** **ARCH-001, TECH-P-001, TECH-P-006**.
     *   **Verification via Test Cases:** N/A (Structural setup).
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Create a README.md with the project title and a brief description.` **Evidence:** `README.md` content.
+        *   [x] **Documentation Updated:** **Instruction:** `Create a README.md with the project title and a brief description.` **Evidence:** `README.md` content.
 2.  **Task:** Implement the basic CLI structure with Cobra.
     *   **Instruction:** `Use spf13/cobra to create the root command and a 'generate' subcommand in the /internal/cli package. Add a persistent --verbose flag. Implement a basic --help flag handler.`
     *   **Fulfills:** **USER-001, USER-002, TECH-P-002, TECH-L-001**.
     *   **Verification via Test Cases:**
         *   **Test Case `TC-1.1`:**
-            *   [ ] **Test Method Created:** **Evidence:** Provide the complete code for `TestRootCmd_HelpFlag`.
-            *   [ ] **Test Method Passed:** **Evidence:** Console output from `go test` showing `TC-1.1` passed.
+            *   [x] **Test Method Created:** **Evidence:** Provided in `/internal/cli/root_test.go`.
+            *   [x] **Test Method Passed:** **Evidence:** `evidence/PHASE-1/story-1.1/task-2/test-output/TC-1.1.log` showing test passed.
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Update README.md with a "Usage" section showing the basic 'docloom generate --help' command.` **Evidence:** Diff of `README.md`.
+        *   [x] **Documentation Updated:** **Instruction:** `Update README.md with a "Usage" section showing the basic 'docloom generate --help' command.` **Evidence:** Added Usage section to README.md.
 3.  **Task:** Integrate structured logging with Zerolog.
     *   **Instruction:** `Add rs/zerolog to the project. Configure a global logger that respects the --verbose flag to switch between INFO and DEBUG levels. Ensure logs are human-readable by default.`
     *   **Fulfills:** **NFR-005 (partial), TECH-L-004**.
     *   **Verification via Test Cases:** N/A (Manual verification during other tests).
-    *   **Documentation:** [ ] No documentation updates required for this task.
+    *   **Documentation:** [x] No documentation updates required for this task.
 
 ---
 > ### **Story Completion: STORY-1.1**

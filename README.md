@@ -59,6 +59,15 @@ Printing tips:
 - Use the browser’s Print dialog to export to PDF.
 - Enable printing of backgrounds so header/footer visuals appear.
 
+## Usage
+
+To see available commands and options:
+
+```bash
+docloom --help
+docloom generate --help
+```
+
 ## Planned CLI (from SRS)
 
 The SRS outlines a CLI along these lines:

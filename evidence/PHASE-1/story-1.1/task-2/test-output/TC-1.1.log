@@ -1,0 +1,24 @@
+=== RUN   TestRootCmd_HelpFlag
+    root_test.go:29: Help output:
+        Docloom is a system for technical folks to generate high-quality documents 
+        by combining structured templates with source materials and model-assisted content. 
+        The aim is consistent, branded, and reviewable outputs that you can print, share, 
+        and iterate on quickly.
+        
+        Usage:
+          docloom [command]
+        
+        Available Commands:
+          completion  Generate the autocompletion script for the specified shell
+          generate    Generate a document from sources and template
+          help        Help about any command
+          templates   Manage document templates
+        
+        Flags:
+          -h, --help      help for docloom
+          -v, --verbose   Enable verbose logging
+        
+        Use "docloom [command] --help" for more information about a command.
+--- PASS: TestRootCmd_HelpFlag (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/cli	0.003s
