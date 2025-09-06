@@ -31,9 +31,9 @@ type Runner struct {
 // Tool represents a specific capability that an agent exposes.
 // Each tool can be invoked independently by the LLM during analysis.
 type Tool struct {
-	Name        string   `yaml:"name"`        // Tool identifier (e.g., "list_projects")
-	Description string   `yaml:"description"` // LLM-facing description of what the tool does
-	Command     string   `yaml:"command"`     // Command to execute (can include the agent binary path)
+	Name        string   `yaml:"name"`           // Tool identifier (e.g., "list_projects")
+	Description string   `yaml:"description"`    // LLM-facing description of what the tool does
+	Command     string   `yaml:"command"`        // Command to execute (can include the agent binary path)
 	Args        []string `yaml:"args,omitempty"` // Additional arguments to pass
 }
 

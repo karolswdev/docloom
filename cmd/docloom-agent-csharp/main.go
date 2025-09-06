@@ -59,10 +59,10 @@ var summarizeReadmeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		sourcePath := args[0]
-		
+
 		// Find README files
 		readmeFiles := []string{}
-		filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
+		err := filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return nil
 			}
@@ -72,6 +72,9 @@ var summarizeReadmeCmd = &cobra.Command{
 			}
 			return nil
 		})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error walking path: %v\n", err)
+		}
 
 		output := map[string]interface{}{
 			"readmeCount": len(readmeFiles),
@@ -79,7 +82,10 @@ var summarizeReadmeCmd = &cobra.Command{
 			"summary":     fmt.Sprintf("Found %d README files in the repository", len(readmeFiles)),
 		}
 
-		json.NewEncoder(os.Stdout).Encode(output)
+		if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+			fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -89,26 +95,35 @@ var listProjectsCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		sourcePath := args[0]
-		
+
 		// Find .csproj files
 		projects := []string{}
-		filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
+		err := filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return nil
 			}
 			if strings.HasSuffix(path, ".csproj") {
-				relPath, _ := filepath.Rel(sourcePath, path)
+				relPath, err := filepath.Rel(sourcePath, path)
+				if err != nil {
+					return nil
+				}
 				projects = append(projects, relPath)
 			}
 			return nil
 		})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error walking path: %v\n", err)
+		}
 
 		output := map[string]interface{}{
 			"projectCount": len(projects),
 			"projects":     projects,
 		}
 
-		json.NewEncoder(os.Stdout).Encode(output)
+		if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+			fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -118,20 +133,20 @@ var getDependenciesCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		sourcePath := args[0]
-		
+
 		// Find and analyze .csproj files for dependencies
 		dependencies := map[string][]string{}
-		
-		filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
+
+		err := filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
 			if err != nil || !strings.HasSuffix(path, ".csproj") {
 				return nil
 			}
-			
+
 			content, err := os.ReadFile(path)
 			if err != nil {
 				return nil
 			}
-			
+
 			// Simple extraction of PackageReference elements
 			deps := []string{}
 			lines := strings.Split(string(content), "\n")
@@ -148,18 +163,27 @@ var getDependenciesCmd = &cobra.Command{
 					}
 				}
 			}
-			
-			relPath, _ := filepath.Rel(sourcePath, path)
+
+			relPath, err := filepath.Rel(sourcePath, path)
+			if err != nil {
+				return nil
+			}
 			dependencies[relPath] = deps
 			return nil
 		})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error walking path: %v\n", err)
+		}
 
 		output := map[string]interface{}{
 			"dependencies": dependencies,
 			"summary":      fmt.Sprintf("Analyzed %d projects", len(dependencies)),
 		}
 
-		json.NewEncoder(os.Stdout).Encode(output)
+		if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+			fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -169,10 +193,13 @@ var getAPISurfaceCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		sourcePath := args[0]
-		
+
 		// Find all C# files
-		csFiles, _ := findCSharpFiles(sourcePath)
-		
+		csFiles, err := findCSharpFiles(sourcePath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error finding C# files: %v\n", err)
+		}
+
 		// Parse all files
 		p := parser.New()
 		var allAPIs parser.APISurface
@@ -228,7 +255,10 @@ var getAPISurfaceCmd = &cobra.Command{
 			"apiSurface": allAPIs,
 		}
 
-		json.NewEncoder(os.Stdout).Encode(output)
+		if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+			fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -238,14 +268,17 @@ var getFileContentCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		filePath := args[0]
-		
+
 		// Check if file exists
 		info, err := os.Stat(filePath)
 		if err != nil {
 			output := map[string]interface{}{
 				"error": fmt.Sprintf("File not found: %s", filePath),
 			}
-			json.NewEncoder(os.Stdout).Encode(output)
+			if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+				fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
+				os.Exit(1)
+			}
 			return
 		}
 
@@ -255,7 +288,10 @@ var getFileContentCmd = &cobra.Command{
 			output := map[string]interface{}{
 				"error": fmt.Sprintf("Error reading file: %v", err),
 			}
-			json.NewEncoder(os.Stdout).Encode(output)
+			if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+				fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
+				os.Exit(1)
+			}
 			return
 		}
 
@@ -265,7 +301,10 @@ var getFileContentCmd = &cobra.Command{
 			Content: string(content),
 		}
 
-		json.NewEncoder(os.Stdout).Encode(output)
+		if err := json.NewEncoder(os.Stdout).Encode(output); err != nil {
+			fmt.Fprintf(os.Stderr, "Error encoding output: %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -378,8 +417,13 @@ func runLegacyAnalysis(cmd *cobra.Command, args []string) {
 
 	// Write JSON output
 	jsonPath := filepath.Join(outputPath, "analysis.json")
-	jsonData, _ := json.MarshalIndent(output, "", "  ")
-	os.WriteFile(jsonPath, jsonData, 0600)
+	jsonData, err := json.MarshalIndent(output, "", "  ")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error marshaling JSON: %v\n", err)
+	}
+	if err := os.WriteFile(jsonPath, jsonData, 0600); err != nil {
+		fmt.Fprintf(os.Stderr, "Error writing JSON file: %v\n", err)
+	}
 
 	fmt.Fprintf(os.Stderr, "Analysis complete. Output written to %s\n", outputPath)
 }

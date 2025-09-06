@@ -60,7 +60,12 @@ func NewOrchestrator(aiClient ai.Client) *Orchestrator {
 
 	// Initialize agent support
 	agentRegistry := agent.NewRegistry()
-	agentCache, _ := agent.NewArtifactCache()
+	agentCache, err := agent.NewArtifactCache()
+	if err != nil {
+		// Log warning but continue - cache is optional
+		log.Warn().Err(err).Msg("Failed to create agent cache, continuing without cache")
+		agentCache = nil
+	}
 	agentExecutor := agent.NewExecutor(agentRegistry, agentCache, log.Logger)
 
 	return &Orchestrator{

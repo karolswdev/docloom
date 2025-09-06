@@ -18,8 +18,8 @@ type Tool struct {
 
 // ToolCall represents a request from the AI to call a specific tool.
 type ToolCall struct {
-	ID       string          `json:"id"`
-	Name     string          `json:"name"`
+	ID        string          `json:"id"`
+	Name      string          `json:"name"`
 	Arguments json.RawMessage `json:"arguments"`
 }
 
@@ -31,17 +31,17 @@ type ToolResult struct {
 
 // ChatMessage represents a message in the conversation.
 type ChatMessage struct {
-	Role       string       `json:"role"` // "system", "user", "assistant", "tool"
-	Content    string       `json:"content,omitempty"`
-	ToolCalls  []ToolCall   `json:"tool_calls,omitempty"`
-	ToolCallID string       `json:"tool_call_id,omitempty"` // For tool response messages
+	Role       string     `json:"role"` // "system", "user", "assistant", "tool"
+	Content    string     `json:"content,omitempty"`
+	ToolCalls  []ToolCall `json:"tool_calls,omitempty"`
+	ToolCallID string     `json:"tool_call_id,omitempty"` // For tool response messages
 }
 
 // ChatResponse represents the AI's response which can be either a message or tool calls.
 type ChatResponse struct {
-	Message   string     `json:"message,omitempty"`
-	ToolCalls []ToolCall `json:"tool_calls,omitempty"`
-	FinishReason string `json:"finish_reason,omitempty"`
+	Message      string     `json:"message,omitempty"`
+	ToolCalls    []ToolCall `json:"tool_calls,omitempty"`
+	FinishReason string     `json:"finish_reason,omitempty"`
 }
 
 // ChatWithTools sends a conversation with available tools to the AI and returns its response.
@@ -53,13 +53,13 @@ func (c *OpenAIClient) ChatWithTools(ctx context.Context, messages []ChatMessage
 			Role:    msg.Role,
 			Content: msg.Content,
 		}
-		
+
 		// Handle tool messages
 		if msg.Role == "tool" {
 			openaiMsg.Role = openai.ChatMessageRoleTool
 			openaiMsg.ToolCallID = msg.ToolCallID
 		}
-		
+
 		// Handle assistant messages with tool calls
 		if len(msg.ToolCalls) > 0 {
 			openaiMsg.ToolCalls = make([]openai.ToolCall, len(msg.ToolCalls))
@@ -74,7 +74,7 @@ func (c *OpenAIClient) ChatWithTools(ctx context.Context, messages []ChatMessage
 				}
 			}
 		}
-		
+
 		openaiMessages = append(openaiMessages, openaiMsg)
 	}
 
@@ -85,11 +85,11 @@ func (c *OpenAIClient) ChatWithTools(ctx context.Context, messages []ChatMessage
 		params := tool.Parameters
 		if params == nil {
 			params = map[string]interface{}{
-				"type": "object",
+				"type":       "object",
 				"properties": map[string]interface{}{},
 			}
 		}
-		
+
 		openaiTools = append(openaiTools, openai.Tool{
 			Type: "function",
 			Function: &openai.FunctionDefinition{
@@ -107,12 +107,12 @@ func (c *OpenAIClient) ChatWithTools(ctx context.Context, messages []ChatMessage
 		MaxTokens:   c.config.MaxTokens,
 		Temperature: c.config.Temperature,
 	}
-	
+
 	// Add tools if provided
 	if len(openaiTools) > 0 {
 		req.Tools = openaiTools
 	}
-	
+
 	// Add seed if configured
 	if c.config.Seed != nil {
 		req.Seed = c.config.Seed
@@ -154,10 +154,10 @@ func (c *OpenAIClient) ChatWithTools(ctx context.Context, messages []ChatMessage
 // ConvertAgentToolsToAITools converts agent tool definitions to AI-compatible tool definitions.
 func ConvertAgentToolsToAITools(agentTools []interface{}) []Tool {
 	aiTools := make([]Tool, 0)
-	
+
 	// This would be populated from the agent's tool definitions
 	// For now, returning empty slice as a placeholder
 	// The actual implementation would parse the agent.Spec.Tools
-	
+
 	return aiTools
 }

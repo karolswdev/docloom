@@ -16,11 +16,11 @@ import (
 
 // AnalysisOptions contains configuration for the analysis loop.
 type AnalysisOptions struct {
-	AgentName    string
-	Template     *templates.Template
-	SourcePath   string
-	MaxTurns     int
-	AgentParams  map[string]string
+	AgentName   string
+	Template    *templates.Template
+	SourcePath  string
+	MaxTurns    int
+	AgentParams map[string]string
 }
 
 // runAnalysisLoop executes the multi-turn conversation between AI and agent tools.
@@ -33,7 +33,7 @@ func (o *Orchestrator) runAnalysisLoop(ctx context.Context, opts AnalysisOptions
 
 	// Convert agent tools to AI tools
 	aiTools := convertAgentTools(agentDef)
-	
+
 	// Initialize conversation with system prompt
 	messages := []ai.ChatMessage{
 		{
@@ -140,7 +140,7 @@ func (o *Orchestrator) runAnalysisLoop(ctx context.Context, opts AnalysisOptions
 		} else {
 			// AI provided final answer
 			log.Info().Msg("AI provided final response")
-			
+
 			// Add final assistant message to history
 			messages = append(messages, ai.ChatMessage{
 				Role:    "assistant",
@@ -173,14 +173,14 @@ func (o *Orchestrator) runAnalysisLoop(ctx context.Context, opts AnalysisOptions
 // convertAgentTools converts agent tool definitions to AI tool format.
 func convertAgentTools(agentDef *agent.Definition) []ai.Tool {
 	tools := make([]ai.Tool, 0, len(agentDef.Spec.Tools))
-	
+
 	for _, agentTool := range agentDef.Spec.Tools {
 		// Create parameter schema based on the tool's expected inputs
 		params := map[string]interface{}{
-			"type": "object",
+			"type":       "object",
 			"properties": map[string]interface{}{},
 		}
-		
+
 		// Parse arguments to determine expected parameters
 		for _, arg := range agentTool.Args {
 			if strings.Contains(arg, "${") {
@@ -198,16 +198,16 @@ func convertAgentTools(agentDef *agent.Definition) []ai.Tool {
 				}
 			}
 		}
-		
+
 		aiTool := ai.Tool{
 			Name:        agentTool.Name,
 			Description: agentTool.Description,
 			Parameters:  params,
 		}
-		
+
 		tools = append(tools, aiTool)
 	}
-	
+
 	return tools
 }
 
@@ -245,7 +245,10 @@ func (o *Orchestrator) GenerateWithAgent(ctx context.Context, opts Options, agen
 	}
 
 	// Validate the response against template schema
-	schemaBytes, _ := json.Marshal(template.FieldSchema)
+	schemaBytes, err := json.Marshal(template.FieldSchema)
+	if err != nil {
+		return fmt.Errorf("failed to marshal schema: %w", err)
+	}
 	if err := o.validator.Validate(jsonResponse, string(schemaBytes)); err != nil {
 		log.Warn().Err(err).Msg("AI response validation failed")
 		// For now, we'll continue with the response as-is
@@ -276,11 +279,4 @@ func (o *Orchestrator) GenerateWithAgent(ctx context.Context, opts Options, agen
 		Msg("Document generated successfully with agent analysis")
 
 	return nil
-}
-
-// Additional fields needed in Orchestrator
-type enhancedOrchestrator struct {
-	*Orchestrator
-	agentRegistry *agent.Registry
-	agentExecutor *agent.Executor
 }

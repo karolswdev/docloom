@@ -37,10 +37,10 @@ func (m *MockAIClientCapture) ChatWithTools(ctx context.Context, messages []ai.C
 			m.CapturedPrompts = append(m.CapturedPrompts, msg.Content)
 		}
 	}
-	
+
 	// Return a simple response
 	return &ai.ChatResponse{
-		Message: `{"title": "Test Analysis", "content": "Analysis complete"}`,
+		Message:      `{"title": "Test Analysis", "content": "Analysis complete"}`,
 		FinishReason: "stop",
 	}, nil
 }
@@ -97,14 +97,14 @@ func TestGenerateCmd_UsesTemplateAnalysisPrompt(t *testing.T) {
 
 		// Simulate running generate command with template A and agent
 		// This would normally be done through the CLI, but we're testing the core logic
-		prompts := simulateGenerateWithAgent(mockAI, templateA, "test-agent")
-		
+		prompts := simulateGenerateWithAgent(mockAI, templateA)
+
 		// Verify Template A's specific prompts were used
 		assert.Contains(t, prompts, "You are analyzing for Template A purposes",
 			"System prompt from Template A should be used")
 		assert.Contains(t, prompts, "Please analyze this repository with Template A focus",
 			"User prompt from Template A should be used")
-		
+
 		// Verify Template B's prompts were NOT used
 		for _, prompt := range prompts {
 			assert.NotContains(t, prompt, "Template B",
@@ -119,14 +119,14 @@ func TestGenerateCmd_UsesTemplateAnalysisPrompt(t *testing.T) {
 		}
 
 		// Simulate running generate command with template B and agent
-		prompts := simulateGenerateWithAgent(mockAI, templateB, "test-agent")
-		
+		prompts := simulateGenerateWithAgent(mockAI, templateB)
+
 		// Verify Template B's specific prompts were used
 		assert.Contains(t, prompts, "You are analyzing for Template B purposes",
 			"System prompt from Template B should be used")
 		assert.Contains(t, prompts, "Please analyze this repository with Template B focus",
 			"User prompt from Template B should be used")
-		
+
 		// Verify Template A's prompts were NOT used
 		for _, prompt := range prompts {
 			assert.NotContains(t, prompt, "Template A",
@@ -152,12 +152,12 @@ func TestGenerateCmd_UsesTemplateAnalysisPrompt(t *testing.T) {
 			Schema:      json.RawMessage(`{"type": "object", "properties": {"title": {"type": "string"}}}`),
 		}
 
-		prompts := simulateGenerateWithAgent(mockAI, uniqueTemplate, "test-agent")
-		
+		prompts := simulateGenerateWithAgent(mockAI, uniqueTemplate)
+
 		// Find the exact prompts in captured data
 		foundSystem := false
 		foundUser := false
-		
+
 		for _, prompt := range prompts {
 			if prompt == uniqueTemplate.Analysis.SystemPrompt {
 				foundSystem = true
@@ -166,7 +166,7 @@ func TestGenerateCmd_UsesTemplateAnalysisPrompt(t *testing.T) {
 				foundUser = true
 			}
 		}
-		
+
 		assert.True(t, foundSystem, "Exact system prompt from template should be used")
 		assert.True(t, foundUser, "Exact user prompt from template should be used")
 	})
@@ -174,10 +174,10 @@ func TestGenerateCmd_UsesTemplateAnalysisPrompt(t *testing.T) {
 
 // simulateGenerateWithAgent simulates the generate command with an agent
 // Returns all prompts that were sent to the AI
-func simulateGenerateWithAgent(mockAI *MockAIClientCapture, template *templates.Template, agentName string) []string {
+func simulateGenerateWithAgent(mockAI *MockAIClientCapture, template *templates.Template) []string {
 	// Reset captured prompts
 	mockAI.CapturedPrompts = []string{}
-	
+
 	// Simulate the conversation setup that would happen in runAnalysisLoop
 	if template.Analysis != nil {
 		messages := []ai.ChatMessage{
@@ -190,12 +190,12 @@ func simulateGenerateWithAgent(mockAI *MockAIClientCapture, template *templates.
 				Content: template.Analysis.InitialUserPrompt,
 			},
 		}
-		
+
 		// The ChatWithTools method will capture these prompts
 		ctx := context.Background()
 		mockAI.ChatWithTools(ctx, messages, []ai.Tool{})
 	}
-	
+
 	return mockAI.CapturedPrompts
 }
 
@@ -204,27 +204,27 @@ func TestTemplateAnalysisPromptsLoaded(t *testing.T) {
 	registry := templates.NewRegistry()
 	err := registry.LoadDefaults()
 	require.NoError(t, err)
-	
+
 	// Check that architecture-vision template has analysis prompts
 	archTemplate, err := registry.Get("architecture-vision")
 	require.NoError(t, err)
 	require.NotNil(t, archTemplate.Analysis, "Architecture Vision template should have analysis prompts")
 	assert.NotEmpty(t, archTemplate.Analysis.SystemPrompt, "System prompt should not be empty")
 	assert.NotEmpty(t, archTemplate.Analysis.InitialUserPrompt, "Initial user prompt should not be empty")
-	
+
 	// Check that the prompts contain expected keywords
 	assert.Contains(t, strings.ToLower(archTemplate.Analysis.SystemPrompt), "architect",
 		"Architecture template should mention architect role")
 	assert.Contains(t, strings.ToLower(archTemplate.Analysis.InitialUserPrompt), "architecture",
 		"Architecture template should focus on architecture")
-	
+
 	// Check technical-debt-summary template
 	debtTemplate, err := registry.Get("technical-debt-summary")
 	require.NoError(t, err)
 	require.NotNil(t, debtTemplate.Analysis, "Technical Debt template should have analysis prompts")
 	assert.Contains(t, strings.ToLower(debtTemplate.Analysis.SystemPrompt), "debt",
 		"Technical Debt template should mention debt")
-	
+
 	// Check reference-architecture template
 	refTemplate, err := registry.Get("reference-architecture")
 	require.NoError(t, err)

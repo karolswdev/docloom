@@ -15,6 +15,11 @@ import (
 // Test Case ID: TC-24.1
 // Requirement: Agent-as-Toolkit
 func TestAgentExecutor_RunTool(t *testing.T) {
+	// Skip in CI environment where bash may not be available
+	if os.Getenv("CI") == "true" {
+		t.Skip("Skipping test in CI environment")
+	}
+
 	// Arrange
 	tempDir := t.TempDir()
 	agentDir := tempDir // Place agent files directly in tempDir for discovery
