@@ -8,11 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/karolswdev/docloom/internal/templates"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/karolswdev/docloom/internal/templates"
 )
 
 // MockAIClient is a mock implementation of the AI client for testing.

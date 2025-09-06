@@ -9,13 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/karolswdev/docloom/internal/ai"
 	"github.com/karolswdev/docloom/internal/ingest"
 	"github.com/karolswdev/docloom/internal/prompt"
 	"github.com/karolswdev/docloom/internal/render"
 	"github.com/karolswdev/docloom/internal/templates"
 	"github.com/karolswdev/docloom/internal/validate"
-	"github.com/rs/zerolog/log"
 )
 
 // Options contains configuration for the generation process.

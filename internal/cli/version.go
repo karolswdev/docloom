@@ -3,8 +3,9 @@ package cli
 import (
 	"fmt"
 
-	"github.com/karolswdev/docloom/internal/version"
 	"github.com/spf13/cobra"
+
+	"github.com/karolswdev/docloom/internal/version"
 )
 
 // versionCmd represents the version command

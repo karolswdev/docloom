@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/karolswdev/docloom/internal/ai"
 	"github.com/karolswdev/docloom/internal/generate"
-	"github.com/spf13/cobra"
 )
 
 var (
