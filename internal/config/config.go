@@ -128,6 +128,34 @@ func loadFromEnv(cfg *Config) {
 	}
 }
 
+// applyStringOverride applies a string override if valid
+func applyStringOverride(target *string, value interface{}) {
+	if v, ok := value.(string); ok && v != "" {
+		*target = v
+	}
+}
+
+// applyIntOverride applies an int override if valid
+func applyIntOverride(target *int, value interface{}) {
+	if v, ok := value.(int); ok {
+		*target = v
+	}
+}
+
+// applyFloatOverride applies a float override if valid
+func applyFloatOverride(target *float64, value interface{}) {
+	if v, ok := value.(float64); ok {
+		*target = v
+	}
+}
+
+// applyBoolOverride applies a bool override if valid
+func applyBoolOverride(target *bool, value interface{}) {
+	if v, ok := value.(bool); ok {
+		*target = v
+	}
+}
+
 // applyCliOverrides applies CLI flag overrides to the configuration
 func applyCliOverrides(cfg *Config, overrides map[string]interface{}) {
 	if overrides == nil {
@@ -138,45 +166,25 @@ func applyCliOverrides(cfg *Config, overrides map[string]interface{}) {
 	for key, value := range overrides {
 		switch key {
 		case "model":
-			if v, ok := value.(string); ok && v != "" {
-				cfg.Model = v
-			}
+			applyStringOverride(&cfg.Model, value)
 		case "base_url":
-			if v, ok := value.(string); ok && v != "" {
-				cfg.BaseURL = v
-			}
+			applyStringOverride(&cfg.BaseURL, value)
 		case "api_key":
-			if v, ok := value.(string); ok && v != "" {
-				cfg.APIKey = v
-			}
+			applyStringOverride(&cfg.APIKey, value)
 		case "temperature":
-			if v, ok := value.(float64); ok {
-				cfg.Temperature = v
-			}
+			applyFloatOverride(&cfg.Temperature, value)
 		case "seed":
-			if v, ok := value.(int); ok {
-				cfg.Seed = v
-			}
+			applyIntOverride(&cfg.Seed, value)
 		case "max_retries":
-			if v, ok := value.(int); ok {
-				cfg.MaxRetries = v
-			}
+			applyIntOverride(&cfg.MaxRetries, value)
 		case "template_dir":
-			if v, ok := value.(string); ok && v != "" {
-				cfg.TemplateDir = v
-			}
+			applyStringOverride(&cfg.TemplateDir, value)
 		case "force":
-			if v, ok := value.(bool); ok {
-				cfg.Force = v
-			}
+			applyBoolOverride(&cfg.Force, value)
 		case "verbose":
-			if v, ok := value.(bool); ok {
-				cfg.Verbose = v
-			}
+			applyBoolOverride(&cfg.Verbose, value)
 		case "dry_run":
-			if v, ok := value.(bool); ok {
-				cfg.DryRun = v
-			}
+			applyBoolOverride(&cfg.DryRun, value)
 		}
 	}
 }

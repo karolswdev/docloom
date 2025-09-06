@@ -64,6 +64,80 @@ func NewOrchestrator(aiClient ai.Client) *Orchestrator {
 	}
 }
 
+// generateWithRetries attempts to generate valid JSON with retries
+func (o *Orchestrator) generateWithRetries(ctx context.Context, generationPrompt string, tmpl *templates.Template, opts Options) (string, error) {
+	var generatedJSON string
+	var lastError error
+	maxAttempts := opts.MaxRepairs + 1 // Initial attempt + repairs
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		var currentPrompt string
+
+		if attempt == 1 {
+			currentPrompt = generationPrompt
+			log.Info().Msg("Calling AI model for initial generation")
+			log.Debug().Str("model", opts.Model).Float32("temperature", opts.Temperature).Msg("Model parameters")
+		} else {
+			// Build repair prompt
+			log.Info().Int("attempt", attempt).Int("max_attempts", maxAttempts).Msg("Attempting repair")
+			repairPrompt, err := o.builder.BuildRepairPrompt(generationPrompt, generatedJSON, lastError.Error(), tmpl.Schema)
+			if err != nil {
+				return "", fmt.Errorf("failed to build repair prompt: %w", err)
+			}
+			currentPrompt = repairPrompt
+		}
+
+		// Call AI model
+		startTime := time.Now()
+		generatedJSON, err := o.aiClient.GenerateJSON(ctx, currentPrompt)
+		if err != nil {
+			return "", fmt.Errorf("AI generation failed: %w", err)
+		}
+		log.Info().Dur("duration", time.Since(startTime)).Int("response_bytes", len(generatedJSON)).Msg("Received AI response")
+
+		// Validate the generated JSON
+		schemaStr, schemaErr := json.Marshal(tmpl.Schema)
+		if schemaErr != nil {
+			return "", fmt.Errorf("failed to marshal schema: %w", schemaErr)
+		}
+
+		validationErr := o.validator.Validate(generatedJSON, string(schemaStr))
+		if validationErr == nil {
+			log.Info().Msg("JSON validation successful")
+			return generatedJSON, nil
+		}
+
+		lastError = validationErr
+		log.Warn().Err(validationErr).Int("attempt", attempt).Msg("JSON validation failed")
+	}
+
+	return "", fmt.Errorf("failed to generate valid JSON after %d attempts: %w", maxAttempts, lastError)
+}
+
+// handleDryRun prints dry-run information and returns
+func (o *Orchestrator) handleDryRun(opts Options, tmpl *templates.Template, generationPrompt string) error {
+	fmt.Println("\n=== DRY RUN MODE ===")
+	fmt.Printf("Template: %s\n", opts.TemplateType)
+	fmt.Printf("Sources: %v\n", opts.Sources)
+	fmt.Printf("Output: %s\n", opts.OutputFile)
+	fmt.Printf("Model: %s\n", opts.Model)
+	fmt.Printf("Estimated tokens: %d\n", o.builder.EstimateTokens(generationPrompt))
+	fmt.Println("\n=== PROMPT PREVIEW (first 1000 chars) ===")
+	if len(generationPrompt) > 1000 {
+		fmt.Println(generationPrompt[:1000] + "...")
+	} else {
+		fmt.Println(generationPrompt)
+	}
+	fmt.Println("\n=== SCHEMA ===")
+	schemaBytes, schemaErr := json.MarshalIndent(tmpl.Schema, "", "  ")
+	if schemaErr != nil {
+		log.Warn().Err(schemaErr).Msg("Failed to marshal schema for display")
+		schemaBytes = []byte("{}")
+	}
+	fmt.Println(string(schemaBytes))
+	return nil
+}
+
 // Generate performs the complete document generation workflow.
 func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 	// Validate options
@@ -106,100 +180,13 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 	log.Debug().Int("prompt_length", len(generationPrompt)).Msg("Generation prompt built")
 
 	if opts.DryRun {
-		fmt.Println("\n=== DRY RUN MODE ===")
-		fmt.Printf("Template: %s\n", opts.TemplateType)
-		fmt.Printf("Sources: %v\n", opts.Sources)
-		fmt.Printf("Output: %s\n", opts.OutputFile)
-		fmt.Printf("Model: %s\n", opts.Model)
-		fmt.Printf("Estimated tokens: %d\n", o.builder.EstimateTokens(generationPrompt))
-		fmt.Println("\n=== PROMPT PREVIEW (first 1000 chars) ===")
-		if len(generationPrompt) > 1000 {
-			fmt.Println(generationPrompt[:1000] + "...")
-		} else {
-			fmt.Println(generationPrompt)
-		}
-		fmt.Println("\n=== SCHEMA ===")
-		schemaBytes, schemaErr := json.MarshalIndent(tmpl.Schema, "", "  ")
-		if schemaErr != nil {
-			log.Warn().Err(schemaErr).Msg("Failed to marshal schema for display")
-			schemaBytes = []byte("{}")
-		}
-		fmt.Println(string(schemaBytes))
-		return nil
+		return o.handleDryRun(opts, tmpl, generationPrompt)
 	}
 
 	// Step 3: Generate with validation and repair loop
-	var generatedJSON string
-	var lastError error
-	maxAttempts := opts.MaxRepairs + 1 // Initial attempt + repairs
-
-	for attempt := 1; attempt <= maxAttempts; attempt++ {
-		var currentPrompt string
-
-		if attempt == 1 {
-			// First attempt - use the original prompt
-			currentPrompt = generationPrompt
-			log.Info().Msg("Calling AI model for initial generation")
-			log.Debug().Str("model", opts.Model).Float32("temperature", opts.Temperature).Msg("Model parameters")
-		} else {
-			// Repair attempt - build repair prompt
-			log.Info().
-				Int("attempt", attempt).
-				Int("max_attempts", maxAttempts).
-				Msg("Validation failed, attempting repair")
-			log.Debug().Str("validation_error", lastError.Error()).Msg("Previous validation error")
-
-			repairPrompt, repairErr := o.builder.BuildRepairPrompt(
-				generationPrompt,
-				generatedJSON,
-				lastError.Error(),
-				tmpl.Schema,
-			)
-			if repairErr != nil {
-				return fmt.Errorf("failed to build repair prompt: %w", repairErr)
-			}
-			currentPrompt = repairPrompt
-		}
-
-		// Call AI model
-		log.Debug().Msg("Sending request to AI model")
-		startTime := time.Now()
-		generatedJSON, err = o.aiClient.GenerateJSON(ctx, currentPrompt)
-		if err != nil {
-			log.Error().Err(err).Msg("AI model call failed")
-			return fmt.Errorf("AI generation failed: %w", err)
-		}
-		duration := time.Since(startTime)
-
-		log.Info().
-			Dur("duration", duration).
-			Int("response_bytes", len(generatedJSON)).
-			Msg("Received AI response")
-		log.Debug().Str("response_preview", generatedJSON[:min(200, len(generatedJSON))]).Msg("AI response preview")
-
-		// Validate the generated JSON
-		schemaStr, err := json.Marshal(tmpl.Schema)
-		if err != nil {
-			return fmt.Errorf("failed to marshal schema: %w", err)
-		}
-
-		validationErr := o.validator.Validate(generatedJSON, string(schemaStr))
-		if validationErr == nil {
-			// Validation passed!
-			log.Info().Msg("JSON validation successful")
-			break
-		}
-
-		// Validation failed
-		lastError = validationErr
-		log.Warn().
-			Err(validationErr).
-			Int("attempt", attempt).
-			Msg("JSON validation failed")
-
-		if attempt == maxAttempts {
-			return fmt.Errorf("failed to generate valid JSON after %d attempts: %w", maxAttempts, lastError)
-		}
+	generatedJSON, err := o.generateWithRetries(ctx, generationPrompt, tmpl, opts)
+	if err != nil {
+		return err
 	}
 
 	// Step 4: Save JSON sidecar file

@@ -118,7 +118,7 @@ func TestGenerationFlow_RepairLoop(t *testing.T) {
 
 	// Verify that repair was attempted (check logs)
 	logs := logBuffer.String()
-	assert.Contains(t, logs, "Validation failed, attempting repair")
+	assert.Contains(t, logs, "Attempting repair")
 	assert.Contains(t, logs, "JSON validation successful")
 
 	// Verify the AI client was called twice

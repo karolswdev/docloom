@@ -160,8 +160,8 @@ func (v *Validator) ValidateWithDetails(jsonStr string, schemaStr string) (*Vali
 
 // ValidationResult contains the outcome of a validation check.
 type ValidationResult struct {
-	Valid  bool              `json:"valid"`
 	Errors []ValidationIssue `json:"errors,omitempty"`
+	Valid  bool              `json:"valid"`
 }
 
 // ValidationIssue represents a single validation problem.

@@ -9,8 +9,10 @@ import (
 )
 
 // TC-4.1: Golden file test for HTML rendering
-func TestRenderer_RenderHTML_Golden(t *testing.T) {
-	// Arrange
+// loadTestData loads template, fields, and expected output from testdata
+func loadTestData(t *testing.T) (string, map[string]interface{}, string) {
+	t.Helper()
+
 	// Read the template HTML
 	templatePath := filepath.Join("testdata", "architecture-vision.html")
 	templateBytes, err := os.ReadFile(templatePath)
@@ -37,36 +39,50 @@ func TestRenderer_RenderHTML_Golden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read expected output file: %v", err)
 	}
-	expected := string(expectedBytes)
+
+	return string(templateBytes), fields, string(expectedBytes)
+}
+
+// reportDifference reports the difference between expected and actual output
+func reportDifference(t *testing.T, expected, actual string) {
+	t.Helper()
+
+	// For debugging, write the actual output to a file
+	actualPath := filepath.Join("testdata", "actual.html")
+	os.WriteFile(actualPath, []byte(actual), 0644)
+	expectedPath := filepath.Join("testdata", "expected.html")
+
+	t.Errorf("Rendered HTML does not match expected golden file\n"+
+		"Expected output saved to: %s\n"+
+		"Actual output saved to: %s\n"+
+		"Diff:\nExpected length: %d\nActual length: %d",
+		expectedPath, actualPath, len(expected), len(actual))
+
+	// Show first difference
+	for i := 0; i < len(expected) && i < len(actual); i++ {
+		if expected[i] != actual[i] {
+			t.Errorf("First difference at position %d: expected %q, got %q",
+				i, expected[max(0, i-20):min(len(expected), i+20)],
+				actual[max(0, i-20):min(len(actual), i+20)])
+			break
+		}
+	}
+}
+
+func TestRenderer_HTML_Golden(t *testing.T) {
+	// Arrange
+	template, fields, expected := loadTestData(t)
 
 	// Act
-	rendered, err := RenderHTML(string(templateBytes), fields)
+	rendered, err := HTML(template, fields)
 
 	// Assert
 	if err != nil {
-		t.Fatalf("RenderHTML failed: %v", err)
+		t.Fatalf("HTML failed: %v", err)
 	}
 
 	if rendered != expected {
-		// For debugging, write the actual output to a file
-		actualPath := filepath.Join("testdata", "actual.html")
-		os.WriteFile(actualPath, []byte(rendered), 0644)
-
-		t.Errorf("Rendered HTML does not match expected golden file\n"+
-			"Expected output saved to: %s\n"+
-			"Actual output saved to: %s\n"+
-			"Diff:\nExpected length: %d\nActual length: %d",
-			expectedPath, actualPath, len(expected), len(rendered))
-
-		// Show first difference
-		for i := 0; i < len(expected) && i < len(rendered); i++ {
-			if expected[i] != rendered[i] {
-				t.Errorf("First difference at position %d: expected %q, got %q",
-					i, expected[max(0, i-20):min(len(expected), i+20)],
-					rendered[max(0, i-20):min(len(rendered), i+20)])
-				break
-			}
-		}
+		reportDifference(t, expected, rendered)
 	}
 
 	// Test that the renderer also saves JSON sidecar
@@ -75,9 +91,12 @@ func TestRenderer_RenderHTML_Golden(t *testing.T) {
 		tmpDir := t.TempDir()
 		outputPath := filepath.Join(tmpDir, "output.html")
 
+		// Get the template from parent scope
+		templateStr, fieldsData, _ := loadTestData(t)
+
 		// Create renderer and render
 		renderer := NewRenderer(tmpDir)
-		err := renderer.Render(string(templateBytes), fields, outputPath)
+		err := renderer.Render(templateStr, fieldsData, outputPath)
 
 		if err != nil {
 			t.Fatalf("Render failed: %v", err)
@@ -117,7 +136,7 @@ func TestRenderer_RenderHTML_Golden(t *testing.T) {
 }
 
 // Test pure rendering function
-func TestRenderHTML_Pure(t *testing.T) {
+func TestHTML_Pure(t *testing.T) {
 	tests := []struct {
 		name     string
 		template string
@@ -165,9 +184,9 @@ func TestRenderHTML_Pure(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := RenderHTML(tt.template, tt.fields)
+			result, err := HTML(tt.template, tt.fields)
 			if err != nil {
-				t.Fatalf("RenderHTML failed: %v", err)
+				t.Fatalf("HTML failed: %v", err)
 			}
 
 			if result != tt.expected {
@@ -178,7 +197,7 @@ func TestRenderHTML_Pure(t *testing.T) {
 }
 
 // Test idempotency - rendering the same inputs always produces the same output
-func TestRenderHTML_Idempotent(t *testing.T) {
+func TestHTML_Idempotent(t *testing.T) {
 	template := `<h1><!-- data-field="title" --></h1><p><!-- data-field="content" --></p>`
 	fields := map[string]interface{}{
 		"title":   "Test Document",
@@ -188,9 +207,9 @@ func TestRenderHTML_Idempotent(t *testing.T) {
 	// Render multiple times
 	results := make([]string, 5)
 	for i := 0; i < 5; i++ {
-		result, err := RenderHTML(template, fields)
+		result, err := HTML(template, fields)
 		if err != nil {
-			t.Fatalf("RenderHTML failed on iteration %d: %v", i, err)
+			t.Fatalf("HTML failed on iteration %d: %v", i, err)
 		}
 		results[i] = result
 	}
@@ -203,17 +222,17 @@ func TestRenderHTML_Idempotent(t *testing.T) {
 	}
 }
 
-// Test RenderToWriter
-func TestRenderToWriter(t *testing.T) {
+// Test ToWriter
+func TestToWriter(t *testing.T) {
 	template := `<h1><!-- data-field="title" --></h1>`
 	fields := map[string]interface{}{"title": "Test Title"}
 
 	htmlBuf := &bytes.Buffer{}
 	jsonBuf := &bytes.Buffer{}
 
-	err := RenderToWriter(template, fields, htmlBuf, jsonBuf)
+	err := ToWriter(template, fields, htmlBuf, jsonBuf)
 	if err != nil {
-		t.Fatalf("RenderToWriter failed: %v", err)
+		t.Fatalf("ToWriter failed: %v", err)
 	}
 
 	// Check HTML output

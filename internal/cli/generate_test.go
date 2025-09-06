@@ -426,13 +426,11 @@ func TestGenerateCmd_DryRun(t *testing.T) {
 		})
 
 		// Execute - should work without API key in dry-run mode
-		err := rootCmd.Execute()
+		_ = rootCmd.Execute()
 
 		// In dry-run mode, it should output preview information
 		_ = outputBuf.String()
-		if err != nil {
-			// In dry-run mode, error is expected without API key
-		}
+		// In dry-run mode, error is expected without API key
 
 		// Check that dry-run mode was activated
 		assert.True(t, dryRun, "Dry-run flag should be set")

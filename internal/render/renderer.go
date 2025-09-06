@@ -24,9 +24,9 @@ func NewRenderer(outputDir string) *Renderer {
 	}
 }
 
-// RenderHTML takes an HTML template and field data, replacing placeholders with actual values
+// HTML takes an HTML template and field data, replacing placeholders with actual values
 // This function is pure - it has no side effects other than returning the rendered string
-func RenderHTML(htmlTemplate string, fields map[string]interface{}) (string, error) {
+func HTML(htmlTemplate string, fields map[string]interface{}) (string, error) {
 	// Create a flat map of field paths to values
 	flatFields := flattenMap(fields, "")
 
@@ -78,7 +78,7 @@ func RenderHTML(htmlTemplate string, fields map[string]interface{}) (string, err
 // Render renders an HTML template with the given fields and saves both HTML and JSON outputs
 func (r *Renderer) Render(templateHTML string, fields map[string]interface{}, outputPath string) error {
 	// Render the HTML
-	renderedHTML, err := RenderHTML(templateHTML, fields)
+	renderedHTML, err := HTML(templateHTML, fields)
 	if err != nil {
 		return fmt.Errorf("failed to render HTML: %w", err)
 	}
@@ -90,8 +90,8 @@ func (r *Renderer) Render(templateHTML string, fields map[string]interface{}, ou
 	}
 
 	// Write the rendered HTML
-	if err := os.WriteFile(outputPath, []byte(renderedHTML), 0600); err != nil {
-		return fmt.Errorf("failed to write HTML output: %w", err)
+	if writeErr := os.WriteFile(outputPath, []byte(renderedHTML), 0600); writeErr != nil {
+		return fmt.Errorf("failed to write HTML output: %w", writeErr)
 	}
 
 	// Generate JSON sidecar path (same name, .json extension)
@@ -140,10 +140,10 @@ func (r *Renderer) RenderFromFiles(templatePath string, fieldsPath string, outpu
 	return r.Render(string(templateBytes), fields, outputPath)
 }
 
-// RenderToWriter renders the template and writes to the provided writers
-func RenderToWriter(htmlTemplate string, fields map[string]interface{}, htmlWriter, jsonWriter io.Writer) error {
+// ToWriter renders the template and writes to the provided writers
+func ToWriter(htmlTemplate string, fields map[string]interface{}, htmlWriter, jsonWriter io.Writer) error {
 	// Render the HTML
-	renderedHTML, err := RenderHTML(htmlTemplate, fields)
+	renderedHTML, err := HTML(htmlTemplate, fields)
 	if err != nil {
 		return fmt.Errorf("failed to render HTML: %w", err)
 	}

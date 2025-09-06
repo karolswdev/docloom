@@ -251,7 +251,7 @@ func TestOpenAIClient_GenerateJSON_ContextCancellation(t *testing.T) {
 	client, err := NewOpenAIClient(config)
 	require.NoError(t, err)
 
-	// Create a context that will be cancelled after first request
+	// Create a context that will be canceled after first request
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Cancel context after a short delay
