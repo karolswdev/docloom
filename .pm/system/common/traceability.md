@@ -7,6 +7,17 @@ This document maintains the traceability links between requirements, test cases,
 Each entry follows the format:
 - **Requirement ID** → **Test Case(s)** → **Evidence Path(s)**
 
+## Phase 5 Traceability
+
+### STORY-5.1: Agent Definition & Registry
+- **PROD-015** (Agent Definition Files) → TC-17.1 → internal/agent/types_test.go:TestAgentDefinition_ParseYAML
+- **TECH-P-008** (Agent Definition Files) → TC-17.1 → internal/agent/types_test.go:TestAgentDefinition_ParseYAML
+- **ARCH-009** (Agent Registry & Discovery) → TC-18.1 → internal/agent/registry_test.go:TestAgentRegistry_DiscoverAgents
+
+### STORY-5.2: CLI for Agent Management
+- **USER-009** (Agent Management CLI) → TC-19.1 → internal/cli/agents_test.go:TestAgentsListCmd_E2E
+- **USER-009** (Agent Management CLI) → TC-19.2 → internal/cli/agents_test.go:TestAgentsDescribeCmd_E2E
+
 ## Phase 6 Traceability
 
 ### STORY-6.1: Agent Execution Engine

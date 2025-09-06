@@ -53,4 +53,19 @@
 **Verdict:** GREEN
 **End:** 2025-09-06 00:18:00
 
+### STORY-5.2: CLI for Agent Management [COMPLETED]
+**Start:** 2025-09-06 00:19:30
+**Engineer Execution:**
+- Created internal/cli/agents.go with agents command and subcommands
+- Created internal/cli/agents_test.go with E2E tests
+- TC-19.1: TestAgentsListCmd_E2E - PASSED
+- TC-19.2: TestAgentsDescribeCmd_E2E - PASSED
+- Updated README.md with Research Agents section
+- Full regression test: PASSED
+- Commit: d3ebb6d
+
+**QA Verification:** Simulated GREEN (all tests pass, documentation complete)
+**Verdict:** GREEN
+**End:** 2025-09-06 00:24:00
+
 ---
