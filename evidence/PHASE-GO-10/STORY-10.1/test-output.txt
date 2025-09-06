@@ -1,0 +1,20 @@
+=== RUN   TestPromptGenerator_Generate
+--- PASS: TestPromptGenerator_Generate (0.00s)
+=== RUN   TestPromptGenerator_EmptyRepository
+--- PASS: TestPromptGenerator_EmptyRepository (0.00s)
+=== RUN   TestPromptGenerator_FileTypePrioritization
+--- PASS: TestPromptGenerator_FileTypePrioritization (0.00s)
+=== RUN   TestScanner_Scan
+{"level":"debug","file":"Dockerfile","time":"2025-09-06T14:42:03-06:00","message":"Found config file"}
+{"level":"debug","file":"README.md","time":"2025-09-06T14:42:03-06:00","message":"Found README file"}
+{"level":"debug","file":"TestProject.sln","time":"2025-09-06T14:42:03-06:00","message":"Found solution file"}
+{"level":"debug","file":"appsettings.json","time":"2025-09-06T14:42:03-06:00","message":"Found config file"}
+{"level":"debug","file":"src/Controllers/TestController.cs","time":"2025-09-06T14:42:03-06:00","message":"Found key source file"}
+{"level":"debug","file":"src/Program.cs","time":"2025-09-06T14:42:03-06:00","message":"Found key source file"}
+{"level":"debug","file":"src/TestProject.csproj","time":"2025-09-06T14:42:03-06:00","message":"Found project file"}
+--- PASS: TestScanner_Scan (0.00s)
+=== RUN   TestScanner_SkipsHiddenAndBuildDirectories
+{"level":"debug","file":"Program.cs","time":"2025-09-06T14:42:03-06:00","message":"Found key source file"}
+--- PASS: TestScanner_SkipsHiddenAndBuildDirectories (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/tools/claude-code-cli/cmd	(cached)
