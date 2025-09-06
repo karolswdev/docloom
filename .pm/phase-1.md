@@ -73,7 +73,7 @@ This section is a reference library defining the acceptance criteria for this ph
 
 ### **3. Implementation Plan (The Execution)**
 
-#### [ ] STORY-1.1: Project Setup & CLI Foundation
+#### [x] STORY-1.1: Project Setup & CLI Foundation
 
 1.  **Task:** Initialize Go module and project structure.
     *   **Instruction:** `Execute 'go mod init github.com/karolswdev/docloom'. Create the modular package layout as specified in ARCH-001: /cmd, /internal/config, /internal/cli, /internal/render, /internal/templates.`
@@ -102,13 +102,13 @@ This section is a reference library defining the acceptance criteria for this ph
 > You may only proceed once all checkboxes for all tasks within this story are marked `[x]`. Then, you **MUST** complete the following steps in order:
 >
 > 1.  **Run Full Regression Test:**
->     *   [ ] **All Prior Tests Passed:** Checked after running all tests created in the project up to this point.
+>     *   [x] **All Prior Tests Passed:** Checked after running all tests created in the project up to this point.
 >     *   **Instruction:** `Execute 'go test ./...'.`
->     *   **Evidence:** Full summary output from the test runner.
+>     *   **Evidence:** `evidence/PHASE-1/story-1.1/regression-test.log`
 > 2.  **Create Git Commit:**
->     *   [ ] **Work Committed:** Checked after creating the Git commit.
+>     *   [x] **Work Committed:** Checked after creating the Git commit.
 >     *   **Instruction:** `Execute 'git add .' followed by 'git commit -m "feat(cli): setup project structure and basic CLI with cobra"'.`
->     *   **Evidence:** Provide the full commit hash.
+>     *   **Evidence:** Commit hash: 854a91c
 > 3.  **Finalize Story:**
 >     *   **Instruction:** Once the two checkboxes above are complete, you **MUST** update this story's main checkbox from `[ ]` to `[x]`.
 
@@ -121,18 +121,18 @@ This section is a reference library defining the acceptance criteria for this ph
     *   **Fulfills:** **PROD-012, USER-006**.
     *   **Verification via Test Cases:**
         *   **Test Case `TC-2.1`:**
-            *   [ ] **Test Method Created:** **Evidence:** Provide the code for `TestConfig_LoadWithPrecedence`.
-            *   [ ] **Test Method Passed:** **Evidence:** Console output from `go test` showing `TC-2.1` passed.
+            *   [x] **Test Method Created:** **Evidence:** Provided in `/internal/config/config_test.go`.
+            *   [x] **Test Method Passed:** **Evidence:** `evidence/PHASE-1/story-1.2/task-1/test-output/TC-2.1.log` showing test passed.
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Add a 'Configuration' section to the README explaining the precedence order and showing a sample docloom.yaml.` **Evidence:** Diff of `README.md`.
+        *   [x] **Documentation Updated:** **Instruction:** `Add a 'Configuration' section to the README explaining the precedence order and showing a sample docloom.yaml.` **Evidence:** Added Configuration section with precedence and sample YAML to README.md.
 2.  **Task:** Implement the Template Registry.
     *   **Instruction:** `Create a template registry in /internal/templates that can discover and load templates from a given directory. Each template consists of an HTML file, a JSON schema, and a prompt file. Embed the default templates into the binary using 'embed'.`
     *   **Fulfills:** **PROD-002, ARCH-006**.
     *   **Verification via Test Cases:**
         *   **Test Case `TC-3.1`:**
-            *   [ ] **Test Method Created:** **Evidence:** Provide the code for `TestTemplateRegistry_Load`.
-            *   [ ] **Test Method Passed:** **Evidence:** Console output from `go test` showing `TC-3.1` passed.
-    *   **Documentation:** [ ] No documentation updates required for this task.
+            *   [x] **Test Method Created:** **Evidence:** Provided in `/internal/templates/registry_test.go`.
+            *   [x] **Test Method Passed:** **Evidence:** `evidence/PHASE-1/story-1.2/task-2/test-output/TC-3.1.log` showing test passed.
+    *   **Documentation:** [x] No documentation updates required for this task.
 
 ---
 > ### **Story Completion: STORY-1.2**
@@ -157,7 +157,7 @@ This section is a reference library defining the acceptance criteria for this ph
         *   **Test Case `TC-4.1`:**
             *   [ ] **Test Method Created:** **Evidence:** Provide the code for `TestRenderer_RenderHTML_Golden`.
             *   [ ] **Test Method Passed:** **Evidence:** Console output from `go test` showing `TC-4.1` passed.
-    *   **Documentation:** [ ] No documentation updates required for this task.
+    *   **Documentation:** [x] No documentation updates required for this task.
 2.  **Task:** Create Dockerfile and basic CI workflow.
     *   **Instruction:** `Create a multi-stage Dockerfile that builds the Go binary and creates a minimal final image. Create a .github/workflows/ci.yml file that triggers on push, builds the container, and runs 'go build' and 'go test' inside it.`
     *   **Fulfills:** **DEV-001, DEV-004**.

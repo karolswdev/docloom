@@ -1,0 +1,18 @@
+=== RUN   TestConfig_LoadWithPrecedence
+=== RUN   TestConfig_LoadWithPrecedence/CLI_overrides_all
+=== RUN   TestConfig_LoadWithPrecedence/ENV_overrides_file
+=== RUN   TestConfig_LoadWithPrecedence/File_value_when_no_overrides
+=== RUN   TestConfig_LoadWithPrecedence/Full_config_precedence
+=== RUN   TestConfig_LoadWithPrecedence/ENV_precedence_without_CLI
+=== RUN   TestConfig_LoadWithPrecedence/Default_values
+=== RUN   TestConfig_LoadWithPrecedence/Multiple_env_vars
+--- PASS: TestConfig_LoadWithPrecedence (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/CLI_overrides_all (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/ENV_overrides_file (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/File_value_when_no_overrides (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/Full_config_precedence (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/ENV_precedence_without_CLI (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/Default_values (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/Multiple_env_vars (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/config	0.002s

@@ -1,0 +1,20 @@
+=== RUN   TestTemplateRegistry_Load
+=== RUN   TestTemplateRegistry_Load/Load_default_templates
+{"level":"debug","time":"2025-09-05T18:06:19-06:00","message":"Loading default embedded templates"}
+=== RUN   TestTemplateRegistry_Load/All_required_templates_present
+{"level":"debug","time":"2025-09-05T18:06:19-06:00","message":"Loading default embedded templates"}
+=== RUN   TestTemplateRegistry_Load/Load_from_directory
+{"level":"debug","dir":"/tmp/docloom-test-templates2491644991","time":"2025-09-05T18:06:19-06:00","message":"Loading templates from directory"}
+{"level":"debug","name":"test-template","html":"/tmp/docloom-test-templates2491644991/test-template/test-template.html","schema":"/tmp/docloom-test-templates2491644991/test-template/schema.json","prompt":"/tmp/docloom-test-templates2491644991/test-template/prompt.txt","time":"2025-09-05T18:06:19-06:00","message":"Loading template"}
+=== RUN   TestTemplateRegistry_Load/List_templates
+{"level":"debug","time":"2025-09-05T18:06:19-06:00","message":"Loading default embedded templates"}
+=== RUN   TestTemplateRegistry_Load/Get_non-existent_template
+{"level":"debug","time":"2025-09-05T18:06:19-06:00","message":"Loading default embedded templates"}
+--- PASS: TestTemplateRegistry_Load (0.00s)
+    --- PASS: TestTemplateRegistry_Load/Load_default_templates (0.00s)
+    --- PASS: TestTemplateRegistry_Load/All_required_templates_present (0.00s)
+    --- PASS: TestTemplateRegistry_Load/Load_from_directory (0.00s)
+    --- PASS: TestTemplateRegistry_Load/List_templates (0.00s)
+    --- PASS: TestTemplateRegistry_Load/Get_non-existent_template (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/templates	0.002s

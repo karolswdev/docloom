@@ -68,6 +68,45 @@ docloom --help
 docloom generate --help
 ```
 
+## Configuration
+
+Docloom supports configuration through multiple sources with the following precedence order (highest to lowest):
+
+1. **CLI flags** - Command-line arguments passed directly
+2. **Environment variables** - Variables prefixed with `DOCLOOM_`
+3. **Configuration file** - YAML file specified with `--config`
+4. **Defaults** - Built-in default values
+
+### Example Configuration File (docloom.yaml)
+
+```yaml
+# Model configuration
+model: gpt-4
+base_url: https://api.openai.com/v1
+temperature: 0.7
+max_retries: 3
+
+# Template configuration
+template_dir: ./templates
+
+# Output configuration
+force: false
+
+# Operational configuration
+verbose: false
+dry_run: false
+```
+
+### Environment Variables
+
+- `DOCLOOM_MODEL` - AI model to use
+- `DOCLOOM_BASE_URL` - Base URL for OpenAI-compatible API
+- `DOCLOOM_API_KEY` or `OPENAI_API_KEY` - API key for authentication
+- `DOCLOOM_TEMPERATURE` - Temperature for model generation
+- `DOCLOOM_TEMPLATE_DIR` - Directory containing templates
+- `DOCLOOM_VERBOSE` - Enable verbose logging
+- `DOCLOOM_DRY_RUN` - Enable dry-run mode
+
 ## Planned CLI (from SRS)
 
 The SRS outlines a CLI along these lines:
