@@ -61,5 +61,17 @@ Each entry follows the format:
 ### STORY-9.2: Mock Implementation and E2E Testing
 - **PROD-018** (External CLI Tool Agent - Mock) → TC-27.2 → internal/cli/generate_agent_claude_test.go:TestCSharpCCAgent_E2E_WithMock
 
+## Phase 10 Traceability
+
+### STORY-10.1: cc-cli Scaffolding and Core Logic
+- **PROD-018** (External CLI Tool Agent - Real Implementation) → TC-28.1 → tools/claude-code-cli/cmd/*_test.go (Unit tests for scanner, prompt, claude, writer)
+  - Evidence: evidence/PHASE-GO-10/STORY-10.1/test-output.txt
+
+### STORY-10.2: Claude LLM Interaction and Artifact Generation
+- **PROD-018** (External CLI Tool Agent - Real Implementation) → TC-28.2 → tools/claude-code-cli acceptance test
+  - Evidence: evidence/PHASE-GO-10/STORY-10.2/test-tc-28.2-run.txt
+- **PROD-018** (External CLI Tool Agent - Real Implementation) → TC-28.3 → Full E2E integration with main docloom
+  - Evidence: evidence/PHASE-GO-10/final-regression.txt
+
 ## Previous Phases
 [Previous phase traceability would be maintained here]

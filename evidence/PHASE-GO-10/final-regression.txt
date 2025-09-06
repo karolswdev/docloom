@@ -1,0 +1,16 @@
+?   	github.com/karolswdev/docloom/cmd/docloom	[no test files]
+?   	github.com/karolswdev/docloom/cmd/docloom-agent-csharp	[no test files]
+ok  	github.com/karolswdev/docloom/internal/agent	(cached)
+ok  	github.com/karolswdev/docloom/internal/agents/csharp/parser	(cached)
+ok  	github.com/karolswdev/docloom/internal/ai	(cached)
+ok  	github.com/karolswdev/docloom/internal/chunk	(cached)
+ok  	github.com/karolswdev/docloom/internal/cli	(cached)
+ok  	github.com/karolswdev/docloom/internal/config	(cached)
+ok  	github.com/karolswdev/docloom/internal/generate	(cached)
+ok  	github.com/karolswdev/docloom/internal/ingest	(cached)
+ok  	github.com/karolswdev/docloom/internal/prompt	(cached)
+ok  	github.com/karolswdev/docloom/internal/render	(cached)
+ok  	github.com/karolswdev/docloom/internal/templates	(cached)
+ok  	github.com/karolswdev/docloom/internal/validate	(cached)
+ok  	github.com/karolswdev/docloom/internal/version	(cached)
+ok  	github.com/karolswdev/docloom/test/e2e	0.377s

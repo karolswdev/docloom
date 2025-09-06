@@ -1,4 +1,4 @@
-## [ ] PHASE-10: Building the Claude Code CLI (`cc-cli`) Analysis Tool
+## [x] PHASE-10: Building the Claude Code CLI (`cc-cli`) Analysis Tool
 
 ---
 
@@ -59,41 +59,41 @@
 
 ---
 
-#### [ ] STORY-10.2: Claude LLM Interaction and Artifact Generation
+#### [x] STORY-10.2: Claude LLM Interaction and Artifact Generation
 
 1.  **Task:** Implement the Claude API client and interaction logic.
     *   **Instruction:** `Add an LLM client to the cc-cli tool to communicate with the Claude API. Implement the logic to send the initial analysis prompt and parse the structured response from the LLM.`
     *   **Fulfills:** `PROD-018`.
     *   **Verification via Test Cases:**
         *   **Test Case `TC-28.1`:**
-            *   [ ] **Test Method Created:** **Evidence:** Provide the Go unit tests for the Claude API interaction and parsing logic.
-            *   [ ] **Test Method Passed:** **Evidence:** Console output from `go test`.
+            *   [x] **Test Method Created:** **Evidence:** Provide the Go unit tests for the Claude API interaction and parsing logic.
+            *   [x] **Test Method Passed:** **Evidence:** Console output from `go test`.
     *   **Documentation:** [ ] No documentation updates required for this task.
 2.  **Task:** Implement artifact writer conforming to the specification.
     *   **Instruction:** `Create a component that takes the structured analysis from the Claude LLM and writes it to the disk, creating the exact directory and file structure defined in the Artifact Specification from Phase 9.`
     *   **Fulfills:** `PROD-018`.
     *   **Verification via Test Cases:**
         *   **Test Case `TC-28.2`:**
-            *   [ ] **Test Method Created:** **Evidence:** Provide the acceptance test script or Go test code.
-            *   [ ] **Test Method Passed:** **Evidence:** The generated artifacts from the test run.
+            *   [x] **Test Method Created:** **Evidence:** Provide the acceptance test script or Go test code.
+            *   [x] **Test Method Passed:** **Evidence:** The generated artifacts from the test run.
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Update the cc-cli README.md with an "Output" section that links to the main docloom Artifact Specification document, ensuring a single source of truth.` **Evidence:** Diff of `cc-cli`'s `README.md`.
+        *   [x] **Documentation Updated:** **Instruction:** `Update the cc-cli README.md with an "Output" section that links to the main docloom Artifact Specification document, ensuring a single source of truth.` **Evidence:** Diff of `cc-cli`'s `README.md`.
 3.  **Task:** Final integration and release.
     *   **Instruction:** `Update the build process (Makefile, GoReleaser) to build and package the cc-cli binary. Update the csharp-cc-cli.agent.yaml to point to the real cc-cli command. Run the final E2E test to verify the entire system works with the real tool.`
     *   **Fulfills:** `PROD-018`.
     *   **Verification via Test Cases:**
         *   **Test Case `TC-28.3`:**
-            *   [ ] **Test Method Created:** **Evidence:** The E2E test is already written; this task is to run it against the real binary.
-            *   [ ] **Test Method Passed:** **Evidence:** Console output from `go test` in the main `docloom` repo.
+            *   [x] **Test Method Created:** **Evidence:** The E2E test is already written; this task is to run it against the real binary.
+            *   [x] **Test Method Passed:** **Evidence:** Console output from `go test` in the main `docloom` repo.
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `In the main docloom README.md, update the section on the csharp-cc-cli agent. Add instructions for how to install the required **Claude Code CLI (`cc-cli`)** binary, or note that it's bundled with the docloom release.` **Evidence:** Diff of the main `README.md`.
+        *   [x] **Documentation Updated:** **Instruction:** `In the main docloom README.md, update the section on the csharp-cc-cli agent. Add instructions for how to install the required **Claude Code CLI (`cc-cli`)** binary, or note that it's bundled with the docloom release.` **Evidence:** Diff of the main `README.md`.
 
 ---
 > ### **Story Completion: STORY-10.2**
 > 1.  **Run Full Regression Test:**
->     *   [ ] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...' in both the main docloom repo and the cc-cli repo.` **Evidence:** Summary outputs from both test runners.
+>     *   [x] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...' in both the main docloom repo and the cc-cli repo.` **Evidence:** Summary outputs from both test runners.
 > 2.  **Create Git Commit:**
->     *   [ ] **Work Committed:** **Instruction:** `git commit -m "feat(cc-cli): complete claude code cli and final integration"`. **Evidence:** Commit hash.
+>     *   [x] **Work Committed:** **Instruction:** `git commit -m "feat(cc-cli): complete claude code cli and final integration"`. **Evidence:** Commit hash 2c10f5d.
 > 3.  **Finalize Story:**
 >     *   **Instruction:** Update this story's main checkbox to `[x]`.
 
@@ -105,8 +105,8 @@ This Phase is officially complete **only when all `STORY-10.x` checkboxes in Sec
 
 #### Final Acceptance Gate
 
-*   [ ] **Final Full Regression Test Passed:**
+*   [x] **Final Full Regression Test Passed:**
     *   **Instruction:** `Execute 'go test ./...'.`
-    *   **Evidence:** Provide the full, final summary output from the test runner.
+    *   **Evidence:** All tests pass - see evidence/PHASE-GO-10/final-regression.txt
 
 *   **Final Instruction:** Once the `Final Full Regression Test Passed` checkbox is marked `[x]`, modify the main title to `[x] PHASE-10`.
