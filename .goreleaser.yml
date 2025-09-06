@@ -37,6 +37,35 @@ builds:
     tags:
       - netgo
       - osusergo
+  
+  - id: docloom-agent-csharp
+    main: ./cmd/docloom-agent-csharp
+    binary: docloom-agent-csharp
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    # Skip some combinations that are less common
+    ignore:
+      - goos: windows
+        goarch: arm64
+    # Build flags
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/karolswdev/docloom/internal/version.Version={{.Version}}
+      - -X github.com/karolswdev/docloom/internal/version.GitCommit={{.ShortCommit}}
+      - -X github.com/karolswdev/docloom/internal/version.BuildDate={{.Date}}
+    # Custom build tags
+    tags:
+      - netgo
+      - osusergo
 
 archives:
   - id: default
@@ -47,6 +76,9 @@ archives:
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
+    builds:
+      - docloom
+      - docloom-agent-csharp
     format_overrides:
       - goos: windows
         format: zip
@@ -54,6 +86,7 @@ archives:
       - LICENSE*
       - README.md
       - docs/SRS.md
+      - agents/csharp-analyzer.agent.yaml
 
 checksum:
   name_template: 'checksums.txt'

@@ -7,8 +7,10 @@ BUILD_DATE := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 
 # Build variables
 BINARY_NAME := docloom
+AGENT_BINARY := docloom-agent-csharp
 BUILD_DIR := build
 MAIN_PACKAGE := ./cmd/docloom
+AGENT_PACKAGE := ./cmd/docloom-agent-csharp
 
 # Go build flags
 LDFLAGS := -ldflags "-X github.com/karolswdev/docloom/internal/version.Version=$(VERSION) \
@@ -26,6 +28,9 @@ build:
 	@mkdir -p $(BUILD_DIR)
 	go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_PACKAGE)
 	@echo "Binary built: $(BUILD_DIR)/$(BINARY_NAME)"
+	@echo "Building $(AGENT_BINARY)..."
+	go build $(LDFLAGS) -o $(BUILD_DIR)/$(AGENT_BINARY) $(AGENT_PACKAGE)
+	@echo "Agent binary built: $(BUILD_DIR)/$(AGENT_BINARY)"
 
 # Run tests
 .PHONY: test

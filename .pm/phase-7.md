@@ -30,7 +30,7 @@
 
 **Note:** This phase involves creating a new agent as a Go sub-package or command within our existing `docloom` repository.
 
-#### [ ] STORY-7.1: Integrating the Tree-sitter C# Parser
+#### [x] STORY-7.1: Integrating the Tree-sitter C# Parser
 
 1.  **Task:** Add Tree-sitter and the C# grammar to the project.
     *   **Instruction:** `Add the 'smacker/go-tree-sitter' Go module. Create a new package /internal/agents/csharp/parser. Set up the necessary boilerplate to load the official Tree-sitter grammar for C#.`

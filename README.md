@@ -35,6 +35,7 @@ DocLoom is a powerful documentation generator that transforms your scattered tec
 - **🔧 Flexible Configuration** - YAML configs, environment variables, and CLI flags for complete control
 - **🚀 Production Ready** - Battle-tested with comprehensive test coverage and CI/CD pipeline
 - **🐳 Docker Support** - Run anywhere with our official Docker images
+- **🔬 C# Code Analysis** - Built-in Go-native C# analyzer with no external dependencies (NEW!)
 
 ## 🚀 Quick Start
 
