@@ -58,30 +58,30 @@ spec:
 
 	// Act: Execute the `docloom agents list` command
 	rootCmd.SetArgs([]string{"agents", "list"})
-	
+
 	// Capture output
 	var stdout bytes.Buffer
 	rootCmd.SetOut(&stdout)
 	rootCmd.SetErr(&stdout)
-	
+
 	err := rootCmd.Execute()
-	
+
 	// Assert: The command's standard output must contain the names and descriptions of the two test agents in a clean, tabular format
 	require.NoError(t, err)
-	
+
 	output := stdout.String()
 	t.Logf("agents list output:\n%s", output)
-	
+
 	// Check for header
 	assert.Contains(t, output, "NAME")
 	assert.Contains(t, output, "DESCRIPTION")
-	
+
 	// Check for both agents
 	assert.Contains(t, output, "test-agent-one")
 	assert.Contains(t, output, "First test agent for listing")
 	assert.Contains(t, output, "test-agent-two")
 	assert.Contains(t, output, "Second test agent for listing")
-	
+
 	// Verify tabular format (check for consistent spacing/alignment)
 	lines := strings.Split(strings.TrimSpace(output), "\n")
 	assert.GreaterOrEqual(t, len(lines), 4) // Header, separator, and at least 2 agents
@@ -133,45 +133,45 @@ spec:
 
 	// Act: Execute `docloom agents describe <agent-name>`
 	rootCmd.SetArgs([]string{"agents", "describe", "detailed-test-agent"})
-	
+
 	// Capture output
 	var stdout bytes.Buffer
 	rootCmd.SetOut(&stdout)
 	rootCmd.SetErr(&stdout)
-	
+
 	err := rootCmd.Execute()
-	
+
 	// Assert: The standard output must contain the agent's full details
 	require.NoError(t, err)
-	
+
 	output := stdout.String()
 	t.Logf("agents describe output:\n%s", output)
-	
+
 	// Check agent metadata
 	assert.Contains(t, output, "Agent: detailed-test-agent")
 	assert.Contains(t, output, "API Version: v1")
 	assert.Contains(t, output, "Kind: ResearchAgent")
 	assert.Contains(t, output, "Description: A comprehensive test agent for the describe command")
-	
+
 	// Check runner details
 	assert.Contains(t, output, "Runner:")
 	assert.Contains(t, output, "Command: python3")
 	assert.Contains(t, output, "/path/to/script.py")
 	assert.Contains(t, output, "--verbose")
-	
+
 	// Check parameters
 	assert.Contains(t, output, "Parameters:")
 	assert.Contains(t, output, "Name: input_file")
 	assert.Contains(t, output, "Type: string")
 	assert.Contains(t, output, "Description: Path to the input file")
 	assert.Contains(t, output, "Required: true")
-	
+
 	assert.Contains(t, output, "Name: depth_level")
 	assert.Contains(t, output, "Type: integer")
 	assert.Contains(t, output, "Description: How deep to analyze")
 	assert.Contains(t, output, "Required: false")
 	assert.Contains(t, output, "Default: 5")
-	
+
 	assert.Contains(t, output, "Name: enable_cache")
 	assert.Contains(t, output, "Type: boolean")
 	assert.Contains(t, output, "Description: Whether to use caching")
@@ -192,13 +192,13 @@ func TestAgentsDescribeCmd_NotFound(t *testing.T) {
 
 	// Try to describe non-existent agent
 	rootCmd.SetArgs([]string{"agents", "describe", "non-existent-agent"})
-	
+
 	var stderr bytes.Buffer
 	rootCmd.SetOut(&stderr)
 	rootCmd.SetErr(&stderr)
-	
+
 	err := rootCmd.Execute()
-	
+
 	// Should return an error
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "agent 'non-existent-agent' not found")
@@ -217,13 +217,13 @@ func TestAgentsListCmd_Empty(t *testing.T) {
 
 	// Execute list command
 	rootCmd.SetArgs([]string{"agents", "list"})
-	
+
 	var stdout bytes.Buffer
 	rootCmd.SetOut(&stdout)
 	rootCmd.SetErr(&stdout)
-	
+
 	err := rootCmd.Execute()
-	
+
 	// Should succeed but show message about no agents
 	require.NoError(t, err)
 	output := stdout.String()

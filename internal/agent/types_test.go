@@ -48,13 +48,13 @@ spec:
 		assert.Equal(t, "python3", def.Spec.Runner.Command)
 		assert.Equal(t, []string{"research.py"}, def.Spec.Runner.Args)
 		assert.Len(t, def.Spec.Parameters, 2)
-		
+
 		// Validate first parameter
 		assert.Equal(t, "topic", def.Spec.Parameters[0].Name)
 		assert.Equal(t, "string", def.Spec.Parameters[0].Type)
 		assert.Equal(t, "The research topic", def.Spec.Parameters[0].Description)
 		assert.True(t, def.Spec.Parameters[0].Required)
-		
+
 		// Validate second parameter
 		assert.Equal(t, "depth", def.Spec.Parameters[1].Name)
 		assert.Equal(t, "integer", def.Spec.Parameters[1].Type)

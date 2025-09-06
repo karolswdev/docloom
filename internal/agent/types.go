@@ -31,7 +31,7 @@ type Runner struct {
 type Parameter struct {
 	Name        string      `yaml:"name"`
 	Type        string      `yaml:"type"`
-	Description string      `yaml:"description"`
 	Required    bool        `yaml:"required"`
 	Default     interface{} `yaml:"default,omitempty"`
+	Description string      `yaml:"description"`
 }

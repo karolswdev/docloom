@@ -160,7 +160,7 @@ spec:
 
 func TestAgentRegistry_List(t *testing.T) {
 	tempDir := t.TempDir()
-	
+
 	agent1 := `
 apiVersion: v1
 kind: ResearchAgent
@@ -171,7 +171,7 @@ spec:
   runner:
     command: echo
 `
-	
+
 	agent2 := `
 apiVersion: v1
 kind: ResearchAgent
@@ -182,17 +182,17 @@ spec:
   runner:
     command: echo
 `
-	
+
 	require.NoError(t, os.WriteFile(filepath.Join(tempDir, "one.agent.yaml"), []byte(agent1), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(tempDir, "two.agent.yaml"), []byte(agent2), 0644))
-	
+
 	registry := NewRegistry()
 	registry.searchPaths = []string{tempDir}
 	require.NoError(t, registry.Discover())
-	
+
 	agents := registry.List()
 	assert.Len(t, agents, 2)
-	
+
 	// Check that both agents are in the list
 	names := []string{agents[0].Metadata.Name, agents[1].Metadata.Name}
 	assert.Contains(t, names, "agent-one")

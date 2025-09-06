@@ -48,7 +48,7 @@ The list shows each agent's name and description.`,
 		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
 		fmt.Fprintln(w, "NAME\tDESCRIPTION")
 		fmt.Fprintln(w, "----\t-----------")
-		
+
 		for _, agent := range agents {
 			description := agent.Metadata.Description
 			if description == "" {
@@ -56,7 +56,7 @@ The list shows each agent's name and description.`,
 			}
 			fmt.Fprintf(w, "%s\t%s\n", agent.Metadata.Name, description)
 		}
-		
+
 		return w.Flush()
 	},
 }
@@ -88,11 +88,11 @@ name, description, runner command, and parameters.`,
 		fmt.Fprintf(out, "Agent: %s\n", agentDef.Metadata.Name)
 		fmt.Fprintf(out, "API Version: %s\n", agentDef.APIVersion)
 		fmt.Fprintf(out, "Kind: %s\n", agentDef.Kind)
-		
+
 		if agentDef.Metadata.Description != "" {
 			fmt.Fprintf(out, "Description: %s\n", agentDef.Metadata.Description)
 		}
-		
+
 		fmt.Fprintf(out, "\nRunner:\n")
 		fmt.Fprintf(out, "  Command: %s\n", agentDef.Spec.Runner.Command)
 		if len(agentDef.Spec.Runner.Args) > 0 {
@@ -101,7 +101,7 @@ name, description, runner command, and parameters.`,
 				fmt.Fprintf(out, "    - %s\n", arg)
 			}
 		}
-		
+
 		if len(agentDef.Spec.Parameters) > 0 {
 			fmt.Fprintf(out, "\nParameters:\n")
 			for _, param := range agentDef.Spec.Parameters {
@@ -119,7 +119,7 @@ name, description, runner command, and parameters.`,
 		} else {
 			fmt.Fprintf(out, "\nNo parameters defined.\n")
 		}
-		
+
 		return nil
 	},
 }

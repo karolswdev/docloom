@@ -29,7 +29,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
     -X github.com/karolswdev/docloom/internal/version.BuildDate=${BUILD_DATE}" \
     -o docloom ./cmd/docloom
 
-# Run tests
+# Run tests (with CI flag to skip tests that need bash)
+ENV CI=true
 RUN go test ./...
 
 # Stage 2: Create minimal final image

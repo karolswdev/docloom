@@ -19,7 +19,7 @@ func NewArtifactCache() (*ArtifactCache, error) {
 	if err := os.MkdirAll(baseDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create cache base directory: %w", err)
 	}
-	
+
 	return &ArtifactCache{
 		baseDir: baseDir,
 	}, nil
@@ -30,12 +30,12 @@ func (c *ArtifactCache) CreateRunDirectory(agentName string) (string, error) {
 	// Create unique directory name with timestamp
 	timestamp := time.Now().Format("20060102-150405")
 	runID := fmt.Sprintf("%s-%s-%d", agentName, timestamp, os.Getpid())
-	
+
 	runDir := filepath.Join(c.baseDir, runID)
 	if err := os.MkdirAll(runDir, 0755); err != nil {
 		return "", fmt.Errorf("failed to create run directory: %w", err)
 	}
-	
+
 	return runDir, nil
 }
 
@@ -50,7 +50,7 @@ func (c *ArtifactCache) Clean(maxAge time.Duration) error {
 	if err != nil {
 		return fmt.Errorf("failed to read cache directory: %w", err)
 	}
-	
+
 	cutoff := time.Now().Add(-maxAge)
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -64,6 +64,6 @@ func (c *ArtifactCache) Clean(maxAge time.Duration) error {
 			}
 		}
 	}
-	
+
 	return nil
 }

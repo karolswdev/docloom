@@ -17,12 +17,14 @@ type Registry struct {
 
 // NewRegistry creates a new agent registry with default search paths.
 func NewRegistry() *Registry {
-	homeDir, _ := os.UserHomeDir()
+	homeDir, err := os.UserHomeDir()
 	searchPaths := []string{
-		".docloom/agents",                              // Project-local agents
-		filepath.Join(homeDir, ".docloom", "agents"),   // User-home agents
+		".docloom/agents", // Project-local agents
 	}
-	
+	if err == nil && homeDir != "" {
+		searchPaths = append(searchPaths, filepath.Join(homeDir, ".docloom", "agents")) // User-home agents
+	}
+
 	return &Registry{
 		agents:      make(map[string]*Definition),
 		searchPaths: searchPaths,
@@ -53,12 +55,12 @@ func (r *Registry) discoverInPath(searchPath string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
 		}
-		
+
 		if strings.HasSuffix(entry.Name(), ".agent.yaml") || strings.HasSuffix(entry.Name(), ".agent.yml") {
 			fullPath := filepath.Join(searchPath, entry.Name())
 			if err := r.loadAgent(fullPath); err != nil {
@@ -66,7 +68,7 @@ func (r *Registry) discoverInPath(searchPath string) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -76,12 +78,12 @@ func (r *Registry) loadAgent(path string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	var def Definition
 	if err := yaml.Unmarshal(data, &def); err != nil {
 		return fmt.Errorf("error parsing YAML: %w", err)
 	}
-	
+
 	// Validate the definition
 	if def.APIVersion == "" {
 		return fmt.Errorf("missing apiVersion")
@@ -92,7 +94,7 @@ func (r *Registry) loadAgent(path string) error {
 	if def.Metadata.Name == "" {
 		return fmt.Errorf("missing metadata.name")
 	}
-	
+
 	r.agents[def.Metadata.Name] = &def
 	return nil
 }
