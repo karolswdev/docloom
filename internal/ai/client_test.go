@@ -146,8 +146,8 @@ func TestAIClient_GenerateJSON_RetriesOn503(t *testing.T) {
 func TestNewOpenAIClient_Validation(t *testing.T) {
 	tests := []struct {
 		name        string
-		config      Config
 		expectError string
+		config      Config
 	}{
 		{
 			name: "missing API key",
@@ -275,10 +275,10 @@ func TestOpenAIClient_GenerateJSON_ContextCancellation(t *testing.T) {
 func TestOpenAIClient_ConfigIntegration(t *testing.T) {
 	tests := []struct {
 		name          string
-		config        Config
 		expectedModel string
 		expectedPath  string
 		expectedAuth  string
+		config        Config
 	}{
 		{
 			name: "OpenAI default configuration",

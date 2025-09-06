@@ -45,9 +45,8 @@ func Load(configFile string, cliOverrides map[string]interface{}) (*Config, erro
 
 	// Load from file if provided
 	if configFile != "" {
-		if err := loadFromFile(cfg, configFile); err != nil {
-			log.Warn().Err(err).Str("file", configFile).Msg("Failed to load config file, using defaults")
-		}
+		loadFromFile(cfg, configFile)
+		// TODO: When YAML parsing is implemented, handle errors here
 	}
 
 	// Override with environment variables
@@ -88,13 +87,12 @@ func LoadWithPrecedence(fileValue, envValue, cliValue string, field string) stri
 }
 
 // loadFromFile loads configuration from a YAML file
-func loadFromFile(cfg *Config, path string) error {
+func loadFromFile(cfg *Config, path string) {
 	// For now, we'll stub this out as YAML parsing will be added when needed
 	// In a real implementation, this would use a YAML library to unmarshal the file
 	log.Debug().Str("path", path).Msg("Loading config from file")
 	// TODO: Implement YAML parsing and populate cfg
 	_ = cfg // cfg will be used when YAML parsing is implemented
-	return nil
 }
 
 // loadFromEnv loads configuration from environment variables

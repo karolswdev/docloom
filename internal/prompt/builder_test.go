@@ -20,12 +20,12 @@ func TestBuildGenerationPrompt(t *testing.T) {
 	builder := NewBuilder()
 
 	tests := []struct {
+		validatePrompt func(t *testing.T, prompt string)
+		schema         interface{}
 		name           string
 		sourceContent  string
 		templatePrompt string
-		schema         interface{}
 		expectError    bool
-		validatePrompt func(t *testing.T, prompt string)
 	}{
 		{
 			name:           "Basic prompt generation with map schema",
@@ -151,13 +151,13 @@ func TestBuildRepairPrompt(t *testing.T) {
 	builder := NewBuilder()
 
 	tests := []struct {
+		validatePrompt  func(t *testing.T, prompt string)
+		schema          interface{}
 		name            string
 		originalPrompt  string
 		invalidJSON     string
 		validationError string
-		schema          interface{}
 		expectError     bool
-		validatePrompt  func(t *testing.T, prompt string)
 	}{
 		{
 			name:            "Basic repair prompt",

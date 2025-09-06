@@ -19,8 +19,8 @@ import (
 // MockAIClient is a mock implementation of the AI client for testing.
 type MockAIClient struct {
 	responses []string
-	callCount int
 	errors    []error
+	callCount int
 }
 
 func (m *MockAIClient) GenerateJSON(ctx context.Context, prompt string) (string, error) {
@@ -183,8 +183,8 @@ func TestOrchestrator_ValidateOptions(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		opts        Options
 		expectError string
+		opts        Options
 	}{
 		{
 			name: "missing template type",

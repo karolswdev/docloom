@@ -67,9 +67,8 @@ func (r *Registry) LoadFromDirectory(dir string) error {
 		// Look for template directories with required files
 		if strings.HasSuffix(path, "template.json") {
 			templateDir := filepath.Dir(path)
-			if err := r.loadTemplate(templateDir); err != nil {
-				log.Warn().Err(err).Str("path", path).Msg("Failed to load template")
-			}
+			r.loadTemplate(templateDir)
+			// TODO: When file reading is implemented, handle errors here
 		}
 
 		return nil
@@ -79,7 +78,7 @@ func (r *Registry) LoadFromDirectory(dir string) error {
 }
 
 // loadTemplate loads a single template from a directory
-func (r *Registry) loadTemplate(dir string) error {
+func (r *Registry) loadTemplate(dir string) {
 	templateName := filepath.Base(dir)
 
 	// Initialize template
@@ -105,7 +104,7 @@ func (r *Registry) loadTemplate(dir string) error {
 	// Register the template
 	r.templates[templateName] = tmpl
 
-	return nil // Currently always succeeds; will return errors when file reading is implemented
+	// TODO: Return errors when file reading is implemented
 }
 
 // registerDefaultTemplates registers the built-in templates
