@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 
+	"github.com/karolswdev/docloom/internal/agent"
 	"github.com/karolswdev/docloom/internal/ai"
 	"github.com/karolswdev/docloom/internal/generate"
 )
@@ -24,6 +27,8 @@ var (
 	dryRun       bool
 	force        bool
 	configFile   string
+	agentName    string
+	agentParams  []string
 )
 
 // generateCmd represents the generate command
@@ -34,8 +39,66 @@ var generateCmd = &cobra.Command{
 with a selected template type and AI-generated content mapped to that template's field schema.
 
 Example:
-  docloom generate --type architecture-vision --source ./docs --out output.html`,
+  docloom generate --type architecture-vision --source ./docs --out output.html
+  docloom generate --agent research-agent --source ./repo --type report --out analysis.html`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
+		
+		// If agent is specified, run it first
+		actualSources := sources
+		if agentName != "" {
+			// Parse agent parameters
+			params := make(map[string]string)
+			for _, param := range agentParams {
+				parts := strings.SplitN(param, "=", 2)
+				if len(parts) != 2 {
+					return fmt.Errorf("invalid agent parameter format: %s (expected key=value)", param)
+				}
+				params[parts[0]] = parts[1]
+			}
+
+			// Create agent registry and discover agents
+			registry := agent.NewRegistry()
+			if err := registry.Discover(); err != nil {
+				return fmt.Errorf("failed to discover agents: %w", err)
+			}
+
+			// Create artifact cache
+			cache, err := agent.NewArtifactCache()
+			if err != nil {
+				return fmt.Errorf("failed to create artifact cache: %w", err)
+			}
+
+			// Create executor
+			executor := agent.NewExecutor(registry, cache, logger)
+
+			// Prepare source path (use first source or current directory)
+			sourcePath := "."
+			if len(sources) > 0 {
+				sourcePath = sources[0]
+			}
+
+			// Run the agent
+			fmt.Printf("Running agent '%s' on source: %s\n", agentName, sourcePath)
+			result, err := executor.Run(agent.RunOptions{
+				AgentName:  agentName,
+				SourcePath: sourcePath,
+				Parameters: params,
+			})
+			if err != nil {
+				return fmt.Errorf("agent execution failed: %w", err)
+			}
+
+			// Validate agent output
+			if err := executor.ValidateOutput(result.OutputPath); err != nil {
+				return fmt.Errorf("agent output validation failed: %w", err)
+			}
+
+			// Replace sources with agent output directory
+			actualSources = []string{result.OutputPath}
+			fmt.Printf("Agent completed. Using artifacts from: %s\n", result.OutputPath)
+		}
+		
 		// Get API key from flag or environment
 		if apiKey == "" {
 			apiKey = os.Getenv("OPENAI_API_KEY")
@@ -75,7 +138,7 @@ Example:
 		// Prepare options
 		opts := generate.Options{
 			TemplateType: templateType,
-			Sources:      sources,
+			Sources:      actualSources,
 			OutputFile:   outputFile,
 			Model:        model,
 			BaseURL:      baseURL,
@@ -125,6 +188,10 @@ func init() {
 	generateCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Preview without making API calls")
 	generateCmd.Flags().BoolVar(&force, "force", false, "Overwrite existing output files")
 	generateCmd.Flags().StringVar(&configFile, "config", "", "Config file path")
+
+	// Agent flags
+	generateCmd.Flags().StringVar(&agentName, "agent", "", "Research agent to run before generation")
+	generateCmd.Flags().StringSliceVar(&agentParams, "agent-param", []string{}, "Agent parameters (format: key=value, can be specified multiple times)")
 
 	// Mark required flags
 	if err := generateCmd.MarkFlagRequired("type"); err != nil {

@@ -172,6 +172,48 @@ To troubleshoot agent discovery issues:
 4. **Version Control**: Track project agents in version control
 5. **Test Locally**: Validate agents work before sharing
 
+## Workflow Integration
+
+When the `--agent` flag is used with the `generate` command, the following workflow is executed:
+
+```mermaid
+graph LR
+    A[CLI Command] --> B{Agent Flag?}
+    B -->|Yes| C[Agent Registry]
+    B -->|No| G[Ingest Sources]
+    C --> D[Agent Executor]
+    D --> E[Artifact Cache]
+    E --> F[Agent Output]
+    F --> G[Ingest Sources]
+    G --> H[AI Client]
+    H --> I[Template Renderer]
+    I --> J[HTML Output]
+```
+
+### Workflow Steps
+
+1. **Command Parsing**: The CLI parses the `--agent` flag and any `--agent-param` values
+2. **Agent Discovery**: The registry locates the specified agent definition
+3. **Agent Execution**: The executor runs the agent with the source path and parameters
+4. **Artifact Generation**: The agent writes its output to a temporary cache directory
+5. **Source Replacement**: The agent's output directory replaces the original source paths
+6. **Standard Flow**: The document generation continues with ingestion, AI processing, and rendering
+
+### Example Flow
+
+```bash
+# User runs:
+docloom generate --agent analyzer --source ./repo --type report --out doc.html
+
+# System executes:
+1. Registry finds "analyzer" agent definition
+2. Executor runs: analyzer ./repo /tmp/docloom-cache/analyzer-xxx/
+3. Agent produces: /tmp/docloom-cache/analyzer-xxx/analysis.md
+4. Ingester reads from: /tmp/docloom-cache/analyzer-xxx/ (not ./repo)
+5. AI processes the agent's analysis
+6. Renderer creates: doc.html
+```
+
 ## Intermediate Artifact Cache
 
 The registry works in conjunction with an artifact cache system to manage temporary files produced by agents.

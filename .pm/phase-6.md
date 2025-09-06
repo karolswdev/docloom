@@ -34,33 +34,33 @@
 
 ### **3. Implementation Plan (The Execution)**
 
-#### [ ] STORY-6.1: Agent Execution Engine
+#### [x] STORY-6.1: Agent Execution Engine
 
 1.  **Task:** Implement the agent artifact cache.
     *   **Instruction:** `In /internal/agent, create an ArtifactCache component that manages a temporary directory (e.g., in the system's temp folder). It should be responsible for creating a unique subdirectory for each agent run and providing the path for the agent's output.`
     *   **Fulfills:** **ARCH-010**.
     *   **Verification via Test Cases:** N/A (Verified via executor tests).
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `In docs/agents/registry.md, add a subsection explaining how intermediate artifacts are handled, where they are stored temporarily, and the lifecycle of the cache.` **Evidence:** Diff of `registry.md`.
+        *   [x] **Documentation Updated:** **Instruction:** `In docs/agents/registry.md, add a subsection explaining how intermediate artifacts are handled, where they are stored temporarily, and the lifecycle of the cache.` **Evidence:** Diff of `registry.md`.
 2.  **Task:** Implement the decoupled Agent Executor.
     *   **Instruction:** `Create an Executor in /internal/agent. It will take an agent definition, source/output paths, and parameter overrides. It must: 1) Prepare environment variables for parameters. 2) Use os/exec to run the agent's command. 3) Stream the agent's stdout/stderr to docloom's logger. 4) Wait for completion and handle exit codes.`
     *   **Fulfills:** **ARCH-008, USER-010**.
     *   **Verification via Test Cases:**
         *   **Test Case `TC-20.1`:**
-            *   [ ] **Test Method Created:** **Evidence:** Provide the test code for `TestAgentExecutor_RunCommand` and the content of `mock-agent.sh`.
-            *   [ ] **Test Method Passed:** **Evidence:** Console output from `go test`.
+            *   [x] **Test Method Created:** **Evidence:** Provide the test code for `TestAgentExecutor_RunCommand` and the content of `mock-agent.sh`.
+            *   [x] **Test Method Passed:** **Evidence:** Console output from `go test`.
         *   **Test Case `TC-22.1`:**
-            *   [ ] **Test Method Created:** **Evidence:** Provide the test code for `TestAgentExecutor_ParameterOverrides`.
-            *   [ ] **Test Method Passed:** **Evidence:** Console output from `go test` and the captured agent log.
+            *   [x] **Test Method Created:** **Evidence:** Provide the test code for `TestAgentExecutor_ParameterOverrides`.
+            *   [x] **Test Method Passed:** **Evidence:** Console output from `go test` and the captured agent log.
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Create docs/agents/authoring-guide.md. In this guide, explain the contract for agent developers: how they receive source/output paths as arguments and parameters as environment variables (prefixed with PARAM_). Provide a simple shell script example.` **Evidence:** Content of `authoring-guide.md`.
+        *   [x] **Documentation Updated:** **Instruction:** `Create docs/agents/authoring-guide.md. In this guide, explain the contract for agent developers: how they receive source/output paths as arguments and parameters as environment variables (prefixed with PARAM_). Provide a simple shell script example.` **Evidence:** Content of `authoring-guide.md`.
 
 ---
 > ### **Story Completion: STORY-6.1**
 > 1.  **Run Full Regression Test:**
->     *   [ ] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...'.` **Evidence:** Full summary output.
+>     *   [x] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...'.` **Evidence:** Full summary output.
 > 2.  **Create Git Commit:**
->     *   [ ] **Work Committed:** **Instruction:** `git commit -m "feat(agent): implement decoupled agent executor and artifact cache"`. **Evidence:** Commit hash.
+>     *   [x] **Work Committed:** **Instruction:** `git commit -m "feat(agent): implement decoupled agent executor and artifact cache"`. **Evidence:** Commit hash 809c64a.
 > 3.  **Finalize Story:**
 >     *   **Instruction:** Update this story's main checkbox to `[x]`.
 

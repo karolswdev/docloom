@@ -205,6 +205,34 @@ docloom generate \
   --verbose
 ```
 
+### Using Research Agents
+
+Research Agents are external programs that analyze your code and produce documentation artifacts before the main generation process:
+
+```bash
+# Run a research agent before generating documentation
+docloom generate \
+  --agent code-analyzer \
+  --source ./src \
+  --type technical-report \
+  --out analysis.html
+
+# Pass parameters to the agent
+docloom generate \
+  --agent research-agent \
+  --source ./project \
+  --agent-param "depth=3" \
+  --agent-param "include_tests=true" \
+  --type architecture-vision \
+  --out vision.html
+
+# List available agents
+docloom agents list
+
+# Show details about a specific agent
+docloom agents describe code-analyzer
+```
+
 ### Advanced Usage
 
 ```bash
