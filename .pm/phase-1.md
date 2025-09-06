@@ -25,7 +25,7 @@
 > 5.  **Commit Work:** You **MUST** create a Git commit at the completion of each story. This is a non-negotiable step.
 > 6.  **Update Progress in Real-Time:** Meticulously update every checkbox (`[ ]` to `[x]`) in this document as you complete each step. Your progress tracking must be flawless.
 
-## [ ] PHASE-1: Project Scaffolding & Deterministic Rendering
+## [x] PHASE-1: Project Scaffolding & Deterministic Rendering
 
 ---
 
@@ -148,7 +148,7 @@ This section is a reference library defining the acceptance criteria for this ph
 
 ---
 
-#### [ ] STORY-1.3: Deterministic Rendering & DevOps Foundation
+#### [x] STORY-1.3: Deterministic Rendering & DevOps Foundation
 
 1.  **Task:** Implement the HTML renderer.
     *   **Instruction:** `In the /internal/render package, create a function that takes a map of field data (from a parsed JSON) and an HTML template. It MUST replace placeholders like '<!-- data-field="document.title" -->' with the corresponding data. This function must be pure and have no side effects other than returning the rendered string.`
@@ -174,9 +174,9 @@ This section is a reference library defining the acceptance criteria for this ph
 > You may only proceed once all checkboxes for all tasks within this story are marked `[x]`. Then, you **MUST** complete the following steps in order:
 >
 > 1.  **Run Full Regression Test:**
->     *   [ ] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...'.` **Evidence:** Full summary output from the test runner.
+>     *   [x] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...'.` **Evidence:** `evidence/PHASE-1/story-1.3/regression-test.log`
 > 2.  **Create Git Commit:**
->     *   [ ] **Work Committed:** **Instruction:** `Execute 'git add .' followed by 'git commit -m "feat(render): add deterministic renderer and initial CI pipeline"'.` **Evidence:** The commit hash.
+>     *   [x] **Work Committed:** **Instruction:** `Execute 'git add .' followed by 'git commit -m "feat(render): add deterministic renderer and initial CI pipeline"'.` **Evidence:** Commit hash: 704dafa
 > 3.  **Finalize Story:**
 >     *   **Instruction:** Once the two checkboxes above are complete, you **MUST** update this story's main checkbox from `[ ]` to `[x]`.
 
@@ -189,7 +189,7 @@ This Phase is officially complete **only when all `STORY-1.x` checkboxes in Sect
 #### Final Acceptance Gate
 
 *   **Instruction:** You are at the final gate for this phase. Before marking the entire phase as done, you must perform one last, full regression test to ensure nothing was broken by the final commits.
-*   [ ] **Final Full Regression Test Passed:**
+*   [x] **Final Full Regression Test Passed:**
     *   **Instruction:** `Execute 'go test ./...'.`
     *   **Evidence:** Provide the full, final summary output from the test runner, showing the grand total of tests for this phase and confirming that 100% have passed.
 

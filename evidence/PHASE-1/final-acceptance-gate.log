@@ -1,0 +1,87 @@
+?   	github.com/karolswdev/docloom/cmd/docloom	[no test files]
+=== RUN   TestRootCmd_HelpFlag
+    root_test.go:29: Help output:
+        Docloom is a system for technical folks to generate high-quality documents 
+        by combining structured templates with source materials and model-assisted content. 
+        The aim is consistent, branded, and reviewable outputs that you can print, share, 
+        and iterate on quickly.
+        
+        Usage:
+          docloom [command]
+        
+        Available Commands:
+          completion  Generate the autocompletion script for the specified shell
+          generate    Generate a document from sources and template
+          help        Help about any command
+          templates   Manage document templates
+        
+        Flags:
+          -h, --help      help for docloom
+          -v, --verbose   Enable verbose logging
+        
+        Use "docloom [command] --help" for more information about a command.
+--- PASS: TestRootCmd_HelpFlag (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/cli	0.002s
+=== RUN   TestConfig_LoadWithPrecedence
+=== RUN   TestConfig_LoadWithPrecedence/CLI_overrides_all
+=== RUN   TestConfig_LoadWithPrecedence/ENV_overrides_file
+=== RUN   TestConfig_LoadWithPrecedence/File_value_when_no_overrides
+=== RUN   TestConfig_LoadWithPrecedence/Full_config_precedence
+=== RUN   TestConfig_LoadWithPrecedence/ENV_precedence_without_CLI
+=== RUN   TestConfig_LoadWithPrecedence/Default_values
+=== RUN   TestConfig_LoadWithPrecedence/Multiple_env_vars
+--- PASS: TestConfig_LoadWithPrecedence (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/CLI_overrides_all (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/ENV_overrides_file (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/File_value_when_no_overrides (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/Full_config_precedence (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/ENV_precedence_without_CLI (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/Default_values (0.00s)
+    --- PASS: TestConfig_LoadWithPrecedence/Multiple_env_vars (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/config	0.002s
+=== RUN   TestRenderer_RenderHTML_Golden
+=== RUN   TestRenderer_RenderHTML_Golden/JSON_sidecar_saved
+{"level":"info","html":"/tmp/TestRenderer_RenderHTML_GoldenJSON_sidecar_saved3038910754/001/output.html","json":"/tmp/TestRenderer_RenderHTML_GoldenJSON_sidecar_saved3038910754/001/output.json","time":"2025-09-05T18:12:13-06:00","message":"Successfully rendered template"}
+--- PASS: TestRenderer_RenderHTML_Golden (0.00s)
+    --- PASS: TestRenderer_RenderHTML_Golden/JSON_sidecar_saved (0.00s)
+=== RUN   TestRenderHTML_Pure
+=== RUN   TestRenderHTML_Pure/Simple_replacement
+=== RUN   TestRenderHTML_Pure/Nested_field
+=== RUN   TestRenderHTML_Pure/Multiple_replacements
+=== RUN   TestRenderHTML_Pure/Missing_field_leaves_placeholder
+{"level":"debug","field":"missing","time":"2025-09-05T18:12:13-06:00","message":"Field not found in data, leaving placeholder"}
+=== RUN   TestRenderHTML_Pure/Number_field
+--- PASS: TestRenderHTML_Pure (0.00s)
+    --- PASS: TestRenderHTML_Pure/Simple_replacement (0.00s)
+    --- PASS: TestRenderHTML_Pure/Nested_field (0.00s)
+    --- PASS: TestRenderHTML_Pure/Multiple_replacements (0.00s)
+    --- PASS: TestRenderHTML_Pure/Missing_field_leaves_placeholder (0.00s)
+    --- PASS: TestRenderHTML_Pure/Number_field (0.00s)
+=== RUN   TestRenderHTML_Idempotent
+--- PASS: TestRenderHTML_Idempotent (0.00s)
+=== RUN   TestRenderToWriter
+--- PASS: TestRenderToWriter (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/render	0.002s
+=== RUN   TestTemplateRegistry_Load
+=== RUN   TestTemplateRegistry_Load/Load_default_templates
+{"level":"debug","time":"2025-09-05T18:12:13-06:00","message":"Loading default embedded templates"}
+=== RUN   TestTemplateRegistry_Load/All_required_templates_present
+{"level":"debug","time":"2025-09-05T18:12:13-06:00","message":"Loading default embedded templates"}
+=== RUN   TestTemplateRegistry_Load/Load_from_directory
+{"level":"debug","dir":"/tmp/docloom-test-templates3890940601","time":"2025-09-05T18:12:13-06:00","message":"Loading templates from directory"}
+{"level":"debug","name":"test-template","html":"/tmp/docloom-test-templates3890940601/test-template/test-template.html","schema":"/tmp/docloom-test-templates3890940601/test-template/schema.json","prompt":"/tmp/docloom-test-templates3890940601/test-template/prompt.txt","time":"2025-09-05T18:12:13-06:00","message":"Loading template"}
+=== RUN   TestTemplateRegistry_Load/List_templates
+{"level":"debug","time":"2025-09-05T18:12:13-06:00","message":"Loading default embedded templates"}
+=== RUN   TestTemplateRegistry_Load/Get_non-existent_template
+{"level":"debug","time":"2025-09-05T18:12:13-06:00","message":"Loading default embedded templates"}
+--- PASS: TestTemplateRegistry_Load (0.00s)
+    --- PASS: TestTemplateRegistry_Load/Load_default_templates (0.00s)
+    --- PASS: TestTemplateRegistry_Load/All_required_templates_present (0.00s)
+    --- PASS: TestTemplateRegistry_Load/Load_from_directory (0.00s)
+    --- PASS: TestTemplateRegistry_Load/List_templates (0.00s)
+    --- PASS: TestTemplateRegistry_Load/Get_non-existent_template (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/internal/templates	0.002s
