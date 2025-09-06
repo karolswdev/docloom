@@ -39,5 +39,11 @@ Each entry follows the format:
 ### STORY-7.2: Building the Executable Agent and Final Integration  
 - **PROD-017** (Initial C# Analyzer Agent) → TC-23.2 → internal/cli/generate_agent_csharp_test.go:TestCSharpAgent_E2E_Integration
 
+## Phase 8 Traceability
+
+### STORY-8.1: Evolving the Agent into a Toolkit
+- **Agent-as-Toolkit** (Implied by Vision) → TC-24.1 → internal/agent/executor_tool_test.go:TestAgentExecutor_RunTool
+- **Documentation:** docs/agents/schema.md (tool-based architecture), docs/agents/csharp-analyzer.md (multi-tool docs), docs/agents/authoring-guide.md (tool paradigm)
+
 ## Previous Phases
 [Previous phase traceability would be maintained here]

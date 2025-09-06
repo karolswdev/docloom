@@ -11,14 +11,23 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// Analysis contains prompts for AI-driven analysis
+type Analysis struct {
+	SystemPrompt      string `json:"system_prompt"`
+	InitialUserPrompt string `json:"initial_user_prompt"`
+}
+
 // Template represents a document template with its assets
 type Template struct {
-	Assets      map[string][]byte `json:"-"`
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	HTMLContent string            `json:"-"`
-	Prompt      string            `json:"prompt"`
-	Schema      json.RawMessage   `json:"schema"`
+	Assets       map[string][]byte `json:"-"`
+	Name         string            `json:"name"`
+	Description  string            `json:"description"`
+	HTMLContent  string            `json:"-"`
+	HTMLTemplate string            `json:"-"` // For compatibility
+	Prompt       string            `json:"prompt"`
+	Schema       json.RawMessage   `json:"schema"`
+	FieldSchema  json.RawMessage   `json:"-"` // Alias for Schema
+	Analysis     *Analysis         `json:"analysis,omitempty"`
 }
 
 // Registry manages available templates
@@ -146,7 +155,19 @@ func (r *Registry) Get(name string) (*Template, error) {
 	if !exists {
 		return nil, fmt.Errorf("template '%s' not found", name)
 	}
+	// Set compatibility fields
+	if tmpl.HTMLTemplate == "" {
+		tmpl.HTMLTemplate = tmpl.HTMLContent
+	}
+	if tmpl.FieldSchema == nil {
+		tmpl.FieldSchema = tmpl.Schema
+	}
 	return tmpl, nil
+}
+
+// Load is an alias for Get for compatibility
+func (r *Registry) Load(name string) (*Template, error) {
+	return r.Get(name)
 }
 
 // Register adds a new template to the registry

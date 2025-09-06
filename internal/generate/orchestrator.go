@@ -11,6 +11,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/karolswdev/docloom/internal/agent"
 	"github.com/karolswdev/docloom/internal/ai"
 	"github.com/karolswdev/docloom/internal/ingest"
 	"github.com/karolswdev/docloom/internal/prompt"
@@ -37,13 +38,15 @@ type Options struct {
 
 // Orchestrator coordinates the document generation workflow.
 type Orchestrator struct {
-	aiClient  ai.Client
-	ingester  *ingest.Ingester
-	builder   *prompt.Builder
-	validator *validate.Validator
-	registry  *templates.Registry
-	renderer  *render.Renderer
-	outputDir string
+	aiClient      ai.Client
+	ingester      *ingest.Ingester
+	builder       *prompt.Builder
+	validator     *validate.Validator
+	registry      *templates.Registry
+	renderer      *render.Renderer
+	outputDir     string
+	agentRegistry *agent.Registry
+	agentExecutor *agent.Executor
 }
 
 // NewOrchestrator creates a new generation orchestrator.
@@ -54,14 +57,21 @@ func NewOrchestrator(aiClient ai.Client) *Orchestrator {
 		log.Warn().Err(err).Msg("Failed to load default templates")
 	}
 
+	// Initialize agent support
+	agentRegistry := agent.NewRegistry()
+	agentCache, _ := agent.NewArtifactCache()
+	agentExecutor := agent.NewExecutor(agentRegistry, agentCache, log.Logger)
+
 	return &Orchestrator{
-		aiClient:  aiClient,
-		ingester:  ingest.NewIngester(),
-		builder:   prompt.NewBuilder(),
-		validator: validate.NewValidator(),
-		registry:  registry,
-		renderer:  render.NewRenderer("output"), // Default output directory
-		outputDir: "output",
+		aiClient:      aiClient,
+		ingester:      ingest.NewIngester(),
+		builder:       prompt.NewBuilder(),
+		validator:     validate.NewValidator(),
+		registry:      registry,
+		renderer:      render.NewRenderer("output"), // Default output directory
+		outputDir:     "output",
+		agentRegistry: agentRegistry,
+		agentExecutor: agentExecutor,
 	}
 }
 
@@ -219,6 +229,33 @@ func (o *Orchestrator) Generate(ctx context.Context, opts Options) error {
 		Str("json_file", jsonFile).
 		Msg("Document generation complete")
 	log.Debug().Msg("Generation workflow completed successfully")
+
+	return nil
+}
+
+// writeOutput writes the generated HTML and JSON to files.
+func (o *Orchestrator) writeOutput(outputFile string, htmlContent string, fields map[string]interface{}, force bool) error {
+	// Check if output file exists and force flag
+	if !force {
+		if _, err := os.Stat(outputFile); err == nil {
+			return fmt.Errorf("output file '%s' already exists (use --force to overwrite)", outputFile)
+		}
+	}
+
+	// Write HTML file
+	if err := os.WriteFile(outputFile, []byte(htmlContent), 0644); err != nil {
+		return fmt.Errorf("failed to write HTML file: %w", err)
+	}
+
+	// Write JSON sidecar file
+	jsonFile := strings.TrimSuffix(outputFile, filepath.Ext(outputFile)) + ".json"
+	jsonData, err := json.MarshalIndent(fields, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal JSON: %w", err)
+	}
+	if err := os.WriteFile(jsonFile, jsonData, 0644); err != nil {
+		return fmt.Errorf("failed to write JSON file: %w", err)
+	}
 
 	return nil
 }

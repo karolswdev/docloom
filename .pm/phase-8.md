@@ -34,36 +34,36 @@
 
 ### **3. Implementation Plan (The Execution)**
 
-#### [ ] STORY-8.1: Evolving the Agent into a Toolkit
+#### [x] STORY-8.1: Evolving the Agent into a Toolkit
 
 1.  **Task:** Redesign the `agent.agent.yaml` specification to support tools.
     *   **Instruction:** `Update the Agent Definition Go structs and the YAML schema. Replace the single 'runner' field with a 'tools' array. Each tool MUST have a 'name', a 'description' (for the LLM), and a 'command'. The 'description' is critical—it's how the LLM will know when to use the tool.`
     *   **Fulfills:** `Agent-as-Toolkit` architecture.
     *   **Verification via Test Cases:** N/A (Schema change, verified by executor).
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Rewrite docs/agents/schema.md to reflect the new tool-based architecture. Provide a detailed example of an agent.agent.yaml with multiple tools. Emphasize the importance of writing clear, actionable descriptions for each tool, as this is the primary interface for the AI.` **Evidence:** The updated `schema.md` content.
+        *   [x] **Documentation Updated:** **Instruction:** `Rewrite docs/agents/schema.md to reflect the new tool-based architecture. Provide a detailed example of an agent.agent.yaml with multiple tools. Emphasize the importance of writing clear, actionable descriptions for each tool, as this is the primary interface for the AI.` **Evidence:** The updated `schema.md` content.
 2.  **Task:** Refactor the C# Analyzer into a multi-tool binary.
     *   **Instruction:** `Modify the Go-native C# agent from Phase 7. Instead of one main function, use subcommands (e.g., with Cobra for Go) to expose different functionalities: 'summarize_readme', 'list_projects', 'get_dependencies', 'get_api_surface', and 'get_file_content'.`
     *   **Fulfills:** Go-native agent implementation of the toolkit pattern.
     *   **Verification via Test Cases:** N/A (Internal agent change, verified E2E).
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Update docs/agents/csharp-analyzer.md to document each new subcommand (tool), its purpose, and the format of its output. This serves as the developer documentation for the agent itself.` **Evidence:** Diff of `csharp-analyzer.md`.
+        *   [x] **Documentation Updated:** **Instruction:** `Update docs/agents/csharp-analyzer.md to document each new subcommand (tool), its purpose, and the format of its output. This serves as the developer documentation for the agent itself.` **Evidence:** Diff of `csharp-analyzer.md`.
 3.  **Task:** Upgrade the Agent Executor to invoke specific tools.
     *   **Instruction:** `Update the /internal/agent/Executor to accept a tool name as an argument. The executor will now be responsible for looking up the specific tool's command from the agent definition and executing it.`
     *   **Fulfills:** `Agent-as-Toolkit` architecture.
     *   **Verification via Test Cases:**
         *   **Test Case `TC-24.1`:**
-            *   [ ] **Test Method Created:** **Evidence:** Provide the Go test code `TestAgentExecutor_RunTool`.
-            *   [ ] **Test Method Passed:** **Evidence:** Console output from `go test`.
+            *   [x] **Test Method Created:** **Evidence:** Provide the Go test code `TestAgentExecutor_RunTool`.
+            *   [x] **Test Method Passed:** **Evidence:** Console output from `go test`.
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Update docs/agents/authoring-guide.md to reflect the new, more powerful tool-based paradigm. Provide a clear example of how an agent binary should parse subcommands to function as a toolkit.` **Evidence:** The updated authoring guide.
+        *   [x] **Documentation Updated:** **Instruction:** `Update docs/agents/authoring-guide.md to reflect the new, more powerful tool-based paradigm. Provide a clear example of how an agent binary should parse subcommands to function as a toolkit.` **Evidence:** The updated authoring guide.
 
 ---
 > ### **Story Completion: STORY-8.1**
 > 1.  **Run Full Regression Test:**
->     *   [ ] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...'.` **Evidence:** Full summary output.
+>     *   [x] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...'.` **Evidence:** Full summary output.
 > 2.  **Create Git Commit:**
->     *   [ ] **Work Committed:** **Instruction:** `git commit -m "refactor(agent): evolve agents to a tool-based architecture"`. **Evidence:** Commit hash.
+>     *   [x] **Work Committed:** **Instruction:** `git commit -m "refactor(agent): evolve agents to a tool-based architecture"`. **Evidence:** Commit hash: 88f0d4a.
 > 3.  **Finalize Story:**
 >     *   **Instruction:** Update this story's main checkbox to `[x]`.
 
