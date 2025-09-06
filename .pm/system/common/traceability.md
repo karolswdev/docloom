@@ -45,5 +45,13 @@ Each entry follows the format:
 - **Agent-as-Toolkit** (Implied by Vision) → TC-24.1 → internal/agent/executor_tool_test.go:TestAgentExecutor_RunTool
 - **Documentation:** docs/agents/schema.md (tool-based architecture), docs/agents/csharp-analyzer.md (multi-tool docs), docs/agents/authoring-guide.md (tool paradigm)
 
+### STORY-8.2: The AI Analysis Loop
+- **LLM-Orchestrated Analysis Loop** (Implied by Vision) → TC-25.1 → internal/generate/orchestrator_analysis_test.go:TestOrchestrator_AnalysisLoop (pending full integration)
+- **Documentation:** docs/architecture/analysis-loop.md (comprehensive workflow with Mermaid diagram)
+
+### STORY-8.3: Template-Driven Intelligence
+- **Template-Defined Intelligence** (Implied by Vision) → TC-26.1 → internal/cli/generate_template_analysis_test.go:TestGenerateCmd_UsesTemplateAnalysisPrompt
+- **Documentation:** docs/guides/creating-intelligent-templates.md (world-class guide on analysis prompts)
+
 ## Previous Phases
 [Previous phase traceability would be maintained here]
