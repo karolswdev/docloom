@@ -1,0 +1,8 @@
+[90m2:46PM[0m [32mINF[0m [1mStarting C# repository analysis[0m [36mmodel=[0mclaude-3-opus-20240229 [36moutput=[0m/tmp/test-output [36mrepo=[0m/tmp/test-csharp-repo
+[90m2:46PM[0m DBG Found README file [36mfile=[0mREADME.md
+[90m2:46PM[0m DBG Found solution file [36mfile=[0mTestProject.sln
+[90m2:46PM[0m DBG Found key source file [36mfile=[0msrc/Program.cs
+[90m2:46PM[0m DBG Found project file [36mfile=[0msrc/TestProject.csproj
+[90m2:46PM[0m [32mINF[0m [1mRepository scan complete[0m [36mfiles_found=[0m4
+[90m2:46PM[0m DBG Generated analysis prompt [36mprompt_preview=[0m"You are an expert C# software architect analyzing a repository to generate comprehensive documentation.\n\nPlease analyze the following C# repository and provide a structured JSON response with detailed..."
+[90m2:46PM[0m [31mFTL[0m [1mFailed to get response from Claude[0m [36merror=[0m[31m[1m"failed to call Claude API: error, status code: 401, status: 401 Unauthorized, message: Invalid Anthropic API Key"[0m[0m

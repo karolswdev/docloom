@@ -1,7 +1,12 @@
 package cmd
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"strings"
+	
+	openai "github.com/sashabaranov/go-openai"
 )
 
 // ClaudeClient handles communication with the Claude API
@@ -93,17 +98,64 @@ type TechnicalDebtItem struct {
 
 // Analyze sends the prompt to Claude and returns the structured response
 func (c *ClaudeClient) Analyze(prompt string) (*AnalysisResponse, error) {
-	// This will be implemented in STORY-10.2
-	// For now, return a mock response for testing
-	return &AnalysisResponse{
-		ProjectName: "Mock Project",
-		Description: "This is a mock response for testing the scaffold",
-		ProjectType: "Web API",
-		Framework:   ".NET 6",
-		Architecture: Architecture{
-			Pattern: "Clean Architecture",
-			Layers:  []string{"API", "Application", "Domain", "Infrastructure"},
+	// Use OpenAI-compatible client for Claude API
+	client := openai.NewClient(c.apiKey)
+	
+	// Configure for Claude (Anthropic) API if needed
+	config := openai.DefaultConfig(c.apiKey)
+	if strings.Contains(c.model, "claude") {
+		// Set Anthropic API endpoint if using Claude directly
+		config.BaseURL = "https://api.anthropic.com/v1"
+	}
+	client = openai.NewClientWithConfig(config)
+	
+	// Create the chat completion request
+	resp, err := client.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model: c.model,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleSystem,
+					Content: "You are an expert C# software architect. Provide your analysis as valid JSON matching the provided structure.",
+				},
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: prompt,
+				},
+			},
+			MaxTokens:   c.maxTokens,
+			Temperature: 0.3,
 		},
-		RawResponse: "Mock response",
-	}, fmt.Errorf("Claude client not yet implemented - will be completed in STORY-10.2")
+	)
+	
+	if err != nil {
+		return nil, fmt.Errorf("failed to call Claude API: %w", err)
+	}
+	
+	if len(resp.Choices) == 0 {
+		return nil, fmt.Errorf("no response from Claude API")
+	}
+	
+	// Extract JSON from response
+	rawResponse := resp.Choices[0].Message.Content
+	
+	// Parse JSON response
+	var analysis AnalysisResponse
+	if err := json.Unmarshal([]byte(rawResponse), &analysis); err != nil {
+		// Try to extract JSON if it's wrapped in markdown code blocks
+		jsonStart := strings.Index(rawResponse, "{")
+		jsonEnd := strings.LastIndex(rawResponse, "}")
+		if jsonStart >= 0 && jsonEnd > jsonStart {
+			jsonContent := rawResponse[jsonStart : jsonEnd+1]
+			if err := json.Unmarshal([]byte(jsonContent), &analysis); err != nil {
+				return nil, fmt.Errorf("failed to parse Claude response as JSON: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("failed to parse Claude response as JSON: %w", err)
+		}
+	}
+	
+	analysis.RawResponse = rawResponse
+	return &analysis, nil
 }

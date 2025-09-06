@@ -1,0 +1,47 @@
+=== RUN   TestAnalysisResponse_JSONMarshaling
+--- PASS: TestAnalysisResponse_JSONMarshaling (0.00s)
+=== RUN   TestClaudeClient_ParseJSONFromMarkdown
+--- PASS: TestClaudeClient_ParseJSONFromMarkdown (0.00s)
+=== RUN   TestClaudeClient_NewClient
+--- PASS: TestClaudeClient_NewClient (0.00s)
+=== RUN   TestPromptGenerator_Generate
+--- PASS: TestPromptGenerator_Generate (0.00s)
+=== RUN   TestPromptGenerator_EmptyRepository
+--- PASS: TestPromptGenerator_EmptyRepository (0.00s)
+=== RUN   TestPromptGenerator_FileTypePrioritization
+--- PASS: TestPromptGenerator_FileTypePrioritization (0.00s)
+=== RUN   TestScanner_Scan
+{"level":"debug","file":"Dockerfile","time":"2025-09-06T14:45:27-06:00","message":"Found config file"}
+{"level":"debug","file":"README.md","time":"2025-09-06T14:45:27-06:00","message":"Found README file"}
+{"level":"debug","file":"TestProject.sln","time":"2025-09-06T14:45:27-06:00","message":"Found solution file"}
+{"level":"debug","file":"appsettings.json","time":"2025-09-06T14:45:27-06:00","message":"Found config file"}
+{"level":"debug","file":"src/Controllers/TestController.cs","time":"2025-09-06T14:45:27-06:00","message":"Found key source file"}
+{"level":"debug","file":"src/Program.cs","time":"2025-09-06T14:45:27-06:00","message":"Found key source file"}
+{"level":"debug","file":"src/TestProject.csproj","time":"2025-09-06T14:45:27-06:00","message":"Found project file"}
+--- PASS: TestScanner_Scan (0.00s)
+=== RUN   TestScanner_SkipsHiddenAndBuildDirectories
+{"level":"debug","file":"Program.cs","time":"2025-09-06T14:45:27-06:00","message":"Found key source file"}
+--- PASS: TestScanner_SkipsHiddenAndBuildDirectories (0.00s)
+=== RUN   TestArtifactWriter_Write
+{"level":"debug","dir":"/tmp/TestArtifactWriter_Write766129779/001/analysis","time":"2025-09-06T14:45:27-06:00","message":"Created artifact directory"}
+{"level":"debug","dir":"/tmp/TestArtifactWriter_Write766129779/001/repository-context","time":"2025-09-06T14:45:27-06:00","message":"Created artifact directory"}
+{"level":"debug","dir":"/tmp/TestArtifactWriter_Write766129779/001/technical-insights","time":"2025-09-06T14:45:27-06:00","message":"Created artifact directory"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_Write766129779/001/analysis/summary.json","time":"2025-09-06T14:45:27-06:00","message":"Wrote analysis summary"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_Write766129779/001/analysis/project-overview.md","time":"2025-09-06T14:45:27-06:00","message":"Wrote project overview"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_Write766129779/001/repository-context/architecture.md","time":"2025-09-06T14:45:27-06:00","message":"Wrote architecture details"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_Write766129779/001/repository-context/api-endpoints.md","time":"2025-09-06T14:45:27-06:00","message":"Wrote API documentation"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_Write766129779/001/technical-insights/technical-debt.md","time":"2025-09-06T14:45:27-06:00","message":"Wrote technical debt analysis"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_Write766129779/001/technical-insights/recommendations.md","time":"2025-09-06T14:45:27-06:00","message":"Wrote recommendations"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_Write766129779/001/metadata.json","time":"2025-09-06T14:45:27-06:00","message":"Wrote metadata"}
+--- PASS: TestArtifactWriter_Write (0.00s)
+=== RUN   TestArtifactWriter_EmptyOptionalSections
+{"level":"debug","dir":"/tmp/TestArtifactWriter_EmptyOptionalSections4266311907/001/analysis","time":"2025-09-06T14:45:27-06:00","message":"Created artifact directory"}
+{"level":"debug","dir":"/tmp/TestArtifactWriter_EmptyOptionalSections4266311907/001/repository-context","time":"2025-09-06T14:45:27-06:00","message":"Created artifact directory"}
+{"level":"debug","dir":"/tmp/TestArtifactWriter_EmptyOptionalSections4266311907/001/technical-insights","time":"2025-09-06T14:45:27-06:00","message":"Created artifact directory"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_EmptyOptionalSections4266311907/001/analysis/summary.json","time":"2025-09-06T14:45:27-06:00","message":"Wrote analysis summary"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_EmptyOptionalSections4266311907/001/analysis/project-overview.md","time":"2025-09-06T14:45:27-06:00","message":"Wrote project overview"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_EmptyOptionalSections4266311907/001/repository-context/architecture.md","time":"2025-09-06T14:45:27-06:00","message":"Wrote architecture details"}
+{"level":"debug","file":"/tmp/TestArtifactWriter_EmptyOptionalSections4266311907/001/metadata.json","time":"2025-09-06T14:45:27-06:00","message":"Wrote metadata"}
+--- PASS: TestArtifactWriter_EmptyOptionalSections (0.00s)
+PASS
+ok  	github.com/karolswdev/docloom/tools/claude-code-cli/cmd	0.004s

@@ -5,8 +5,12 @@ metadata:
   description: Orchestrates the Claude Code CLI for comprehensive C# code analysis
 spec:
   runner:
-    command: "./mock-cc-cli.sh"
-    args: []
+    command: "cc-cli"
+    args:
+      - "--repo-path"
+      - "{{.SourcePath}}"
+      - "--output-path"
+      - "{{.OutputPath}}"
   parameters:
     - name: language
       description: Programming language hint (e.g., csharp, go, python)

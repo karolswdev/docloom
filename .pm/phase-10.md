@@ -34,26 +34,26 @@
 
 **Note:** This phase involves creating a new, standalone Go CLI project in `/tools/claude-code-cli`.
 
-#### [ ] STORY-10.1: `cc-cli` Scaffolding and Core Logic
+#### [x] STORY-10.1: `cc-cli` Scaffolding and Core Logic
 
 1.  **Task:** Scaffold the **Claude Code CLI (`cc-cli`)** Go project.
     *   **Instruction:** `In a new directory /tools/claude-code-cli, initialize a new Go module. Use Cobra to create a CLI application that accepts arguments (--repo-path, --output-path) and optional parameters.`
     *   **Fulfills:** `PROD-018` (foundation).
     *   **Verification via Test Cases:** N/A (Structural).
     *   **Documentation:**
-        *   [ ] **Documentation Updated:** **Instruction:** `Create a comprehensive README.md within the /tools/claude-code-cli directory. This is the official user manual for the standalone Claude Code CLI. Document its purpose, installation, and usage.` **Evidence:** The new `README.md` for `cc-cli`.
+        *   [x] **Documentation Updated:** **Instruction:** `Create a comprehensive README.md within the /tools/claude-code-cli directory. This is the official user manual for the standalone Claude Code CLI. Document its purpose, installation, and usage.` **Evidence:** The new `README.md` for `cc-cli`.
 2.  **Task:** Implement repository scanning and prompt generation.
     *   **Instruction:** `Implement the core logic for the Claude Code CLI. This includes scanning the target repository for key files (READMEs, .sln, etc.), reading their content, and assembling a sophisticated initial prompt for the Claude LLM to perform high-level analysis.`
     *   **Fulfills:** `PROD-018`.
     *   **Verification via Test Cases:** (Verified by `TC-28.1`).
-    *   **Documentation:** [ ] No documentation updates required for this task.
+    *   **Documentation:** [x] No documentation updates required for this task.
 
 ---
 > ### **Story Completion: STORY-10.1**
 > 1.  **Run Full Regression Test:**
->     *   [ ] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...' within the cc-cli module.` **Evidence:** Test runner output.
+>     *   [x] **All Prior Tests Passed:** **Instruction:** `Execute 'go test ./...' within the cc-cli module.` **Evidence:** Test runner output.
 > 2.  **Create Git Commit:**
->     *   [ ] **Work Committed:** **Instruction:** `git commit -m "feat(cc-cli): scaffold claude code cli and implement core scanning"`. **Evidence:** Commit hash.
+>     *   [x] **Work Committed:** **Instruction:** `git commit -m "feat(cc-cli): scaffold claude code cli and implement core scanning"`. **Evidence:** Commit hash a09f5fc.
 > 3.  **Finalize Story:**
 >     *   **Instruction:** Update this story's main checkbox to `[x]`.
 

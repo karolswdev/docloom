@@ -326,6 +326,50 @@ Agents are defined using YAML files with a `.agent.yaml` extension. Place them i
 
 See [docs/agents/schema.md](docs/agents/schema.md) for the complete agent definition schema.
 
+### Claude Code CLI Agent
+
+DocLoom includes a powerful C# analysis agent powered by the Claude Code CLI (`cc-cli`). This agent performs deep analysis of C# repositories using the Claude LLM.
+
+#### Installation
+
+The Claude Code CLI must be installed separately:
+
+```bash
+# Build from source
+cd tools/claude-code-cli
+go build -o cc-cli
+# Add to PATH or copy to a location in PATH
+sudo cp cc-cli /usr/local/bin/
+
+# Or install with go install (when released)
+go install github.com/karolswdev/docloom/tools/claude-code-cli@latest
+```
+
+#### Usage
+
+```bash
+# Use the csharp-cc-cli agent with generate command
+docloom generate \
+  --type architecture-vision \
+  --source /path/to/csharp/project \
+  --agent csharp-cc-cli \
+  --out architecture.html
+```
+
+#### Configuration
+
+Set your Claude API key:
+```bash
+export CLAUDE_API_KEY="your-api-key"
+```
+
+The agent will analyze your C# codebase and generate comprehensive artifacts including:
+- Project overview and architecture
+- API documentation
+- Technical debt analysis
+- Security insights
+- Recommendations for improvement
+
 ## ⚙️ Configuration
 
 DocLoom supports flexible configuration through multiple sources (in precedence order):
