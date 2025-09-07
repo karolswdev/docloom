@@ -1,0 +1,158 @@
+/* Terumo Reveal.js Theme — generated from tokens/terumo.tokens.json */
+
+:root {
+  /* color.primary */
+  --terumo-color-green: #009367; /* [p.18–19] */
+  --terumo-color-white: #ffffff; /* [p.19] */
+  /* color.support */
+  --terumo-color-cg10: #64696f;  /* [p.19] */
+  --terumo-color-cg1: #e2e3e7;   /* [p.19] */
+  /* color.secondary */
+  --terumo-blue-100: #cadcf2;
+  --terumo-blue-200: #b0cdeb;
+  --terumo-blue-400: #6faedf;
+  --terumo-blue-600: #447fc1;
+  --terumo-teal-100: #b8e3ec;
+  --terumo-teal-200: #95d7e5;
+  --terumo-teal-400: #53c6d6;
+  --terumo-teal-600: #00aab3;
+  --terumo-green-400: #61c3a7;
+  --terumo-green-300: #8ccfba;
+  --terumo-green-200: #c6e6db;
+  --terumo-green-100: #e1f1eb;
+  --terumo-gray-900: #00000b;
+  --terumo-gray-700: #53585f;
+  --terumo-gray-600: #777b83;
+  --terumo-gray-500: #9b9fa8;
+  --terumo-gray-400: #b6b9bf;
+  --terumo-gray-300: #cfd1d7;
+  --terumo-pink-100: #fbd7e7;
+  --terumo-pink-300: #f8bbcd;
+  --terumo-pink-500: #f595a8;
+  --terumo-pink-700: #e76379;
+  --terumo-yellow-200: #ffdc91;
+  --terumo-yellow-300: #ffd079;
+  --terumo-yellow-600: #fdb515;
+  --terumo-orange-700: #f78d1e;
+  /* color.accessible */
+  --terumo-acc-ink: #23282d;
+  --terumo-acc-deepGreen: #005c3f;
+  --terumo-acc-navy: #2c527f;
+  --terumo-acc-cyan: #00a4c4;
+  --terumo-acc-ink2: #1a2732;
+  --terumo-acc-brandYellow: #ffc800;
+  --terumo-acc-deepRed: #9c1b30;
+  --terumo-acc-coral: #ef7253;
+  --terumo-acc-magenta: #c61e57;
+
+  /* typography */
+  --terumo-font-family: InterFace, Arial, Noto Sans, sans-serif; /* [p.23] */
+  --terumo-font-size-base: 18px; /* [p.24] */
+  --terumo-font-size-h3: 24px;
+  --terumo-font-size-h2: 29px;
+  --terumo-font-size-h1: 47px;
+  --terumo-line-height-body: 1.5;
+  --terumo-line-height-heading: 1.25;
+
+  /* spacing */
+  --terumo-space-1: 4px;
+  --terumo-space-2: 8px;
+  --terumo-space-3: 16px;
+  --terumo-space-4: 24px;
+  --terumo-space-5: 32px;
+}
+
+/* Base Reveal.js overrides */
+.reveal {
+  font-family: var(--terumo-font-family);
+  color: var(--terumo-color-cg10);
+  background: var(--terumo-color-white);
+}
+
+.reveal .slides section {
+  text-align: left; /* prefer left alignment [p.24] */
+}
+
+.reveal h1, .reveal h2, .reveal h3 {
+  color: var(--terumo-color-cg10); /* default allowed heading color */
+  line-height: var(--terumo-line-height-heading);
+  margin: 0 0 var(--terumo-space-3) 0;
+}
+.reveal h1 { font-size: var(--terumo-font-size-h1); }
+.reveal h2 { font-size: var(--terumo-font-size-h2); }
+.reveal h3 { font-size: var(--terumo-font-size-h3); }
+
+.reveal p, .reveal li, .reveal table, .reveal code, .reveal pre {
+  font-size: var(--terumo-font-size-base);
+  line-height: var(--terumo-line-height-body);
+}
+
+/* Links */
+.reveal a { color: var(--terumo-color-green); text-decoration: underline; }
+.reveal a:hover { opacity: 0.85; }
+
+/* Bullets: square, green or black; use utility classes for color */
+.reveal ul { list-style-type: square; padding-left: calc(var(--terumo-space-3) + 8px); }
+.reveal ul.bullets-green li::marker { color: var(--terumo-color-green); }
+.reveal ul.bullets-black li::marker { color: var(--terumo-gray-900); }
+.reveal ul.bullets-subtle li::marker { color: var(--terumo-gray-600); }
+
+/* Code: accessible dark background + light text */
+.reveal pre code {
+  background: var(--terumo-acc-ink);
+  color: var(--terumo-color-white);
+  padding: var(--terumo-space-2) var(--terumo-space-3);
+  border-radius: 4px;
+  display: block;
+}
+
+/* Blockquote */
+.reveal blockquote {
+  border-left: 4px solid var(--terumo-color-green);
+  padding-left: var(--terumo-space-3);
+  color: var(--terumo-color-cg10);
+}
+
+/* Tables */
+.reveal table { border-collapse: collapse; }
+.reveal th, .reveal td {
+  border-bottom: 1px solid var(--terumo-color-cg1);
+  padding: var(--terumo-space-2) var(--terumo-space-3);
+}
+.reveal th { color: var(--terumo-color-green); }
+
+/* Controls/Progress to support brand */
+.reveal .controls button { color: var(--terumo-color-green); }
+.reveal .progress { background: var(--terumo-color-cg1); }
+.reveal .progress span { background: var(--terumo-color-green); }
+
+/* Utilities for heading allowed colors */
+.is-green h1, .is-green h2, .is-green h3 { color: var(--terumo-color-green); }
+.is-white h1, .is-white h2, .is-white h3 { color: var(--terumo-color-white); }
+.is-gray h1, .is-gray h2, .is-gray h3 { color: var(--terumo-color-cg10); }
+
+/* Green Field utility (never place logo within) */
+.terumo-green-field {
+  background: var(--terumo-color-green); /* solid only [p.41] */
+  color: var(--terumo-color-white);
+  padding: var(--terumo-space-3);
+}
+
+/* Origami overlay placeholder classes (for gradients inside shapes only) */
+.origami-overlay {
+  position: relative;
+  overflow: hidden;
+}
+.origami-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--terumo-teal-400), transparent 70%);
+  mix-blend-mode: multiply; /* effect required [p.40] */
+  pointer-events: none;
+}
+
+/* Accessibility helpers */
+.contrast-ink { color: var(--terumo-acc-ink); }
+.bg-ink { background: var(--terumo-acc-ink); color: var(--terumo-color-white); }
+

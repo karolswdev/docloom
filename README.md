@@ -15,7 +15,7 @@
 
 **Beautiful, template-driven technical documentation — fast.**
 
-[Quick Start](#quick-start) • [Features](#features) • [Documentation](#documentation) • [Templates](#available-templates) • [Contributing](#contributing)
+[Quick Start](#quick-start) • [Features](#features) • [Templates](#templates) • [Documentation](#documentation) • [Contributing](#contributing)
 
 </div>
 
@@ -141,6 +141,41 @@ make install
 # Or use go install directly
 go install github.com/karolswdev/docloom/cmd/docloom@latest
 ```
+
+## 📄 Templates
+
+### Available Templates
+
+DocLoom ships with professional templates ready to use:
+
+- **Architecture Vision** - Document system architecture, decisions, and roadmap
+- **Technical Specification** - Detailed technical documentation with requirements
+- **Simple Documentation** - Clean, general-purpose template
+
+Templates are located in the `templates/` directory. Each template includes:
+- HTML structure with data-field placeholders
+- Professional CSS styling
+- YAML configuration with field schemas
+- AI analysis prompts for intelligent generation
+
+### Using Templates
+
+```bash
+# Use built-in template
+docloom generate --type architecture-vision --source ./docs --out output.html
+
+# Use custom template directory
+docloom generate --template-dir ./my-templates --type custom --source ./docs --out output.html
+```
+
+### Creating Custom Templates
+
+1. Create a new directory in `templates/`
+2. Add `template.html` with data-field placeholders
+3. Add `style.css` for styling
+4. Add `template.yaml` for configuration (optional)
+
+See `templates/README.md` for a complete guide on creating custom templates.
 
 ## 🔧 Usage
 

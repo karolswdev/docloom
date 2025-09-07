@@ -1,0 +1,164 @@
+/*
+  Architecture Vision HTML Template Styles
+  - Letter page size
+  - Fixed header/footer for print and screen
+  - Neutral styling with brand color variable
+*/
+
+:root {
+  /* Prefer Terumo tokens if available */
+  --brand-primary: var(--terumo-color-green, #0a7c6d);
+  --text-color: var(--terumo-color-cg10, #111);
+  --muted-color: var(--terumo-gray-600, #444);
+  --border-color: var(--terumo-color-cg1, #ddd);
+  --bg-color: #fff;
+  --font-sans: var(--terumo-font-family, Calibri, "Segoe UI", Arial, Helvetica, sans-serif);
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text-color);
+  background: var(--bg-color);
+  font-family: var(--font-sans);
+  font-size: var(--terumo-font-size-base, 18px);
+  line-height: var(--terumo-line-height-body, 1.35);
+}
+
+/* Header */
+.doc-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 88px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: #fff;
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.logo { display: flex; align-items: center; }
+.logo img { height: 32px; width: auto; display: block; }
+
+.brand-text { font-weight: 600; color: var(--brand-primary); }
+
+.doc-title { text-align: center; font-size: 20px; font-weight: 700; }
+
+.doc-meta {
+  text-align: right;
+  color: var(--muted-color);
+  font-size: 12px;
+}
+
+.doc-meta .label {
+  color: var(--muted-color);
+  opacity: 0.9;
+  margin-right: 6px;
+}
+
+/* Footer */
+.doc-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 24px;
+  border-top: 1px solid var(--border-color);
+  background: #fff;
+  z-index: 10;
+  font-size: 12px;
+  color: var(--muted-color);
+}
+
+.doc-footer .footer-right { display: flex; gap: 16px; }
+
+.doc-footer .doc-code {
+  color: var(--muted-color);
+  letter-spacing: 0.3px;
+}
+
+/* Content container with header/footer spacing */
+.doc {
+  padding: 112px 48px 80px; /* leave space for header/footer */
+}
+
+/* Pages */
+.page { page-break-after: always; max-width: 800px; margin: 0 auto; }
+
+.page:last-child {
+  page-break-after: auto;
+}
+
+.cover .doc-heading {
+  margin-top: var(--terumo-space-5, 32px);
+  font-size: var(--terumo-font-size-h1, 42px);
+  line-height: var(--terumo-line-height-heading, 1.25);
+}
+
+.doc-subtitle { color: var(--muted-color); margin-bottom: var(--terumo-space-4, 24px); }
+
+h1, h2, h3 { color: #000; line-height: var(--terumo-line-height-heading, 1.25); }
+
+h2 {
+  margin: var(--terumo-space-4, 24px) 0 var(--terumo-space-2, 8px);
+  font-size: var(--terumo-font-size-h2, 29px);
+  border-bottom: 3px solid var(--brand-primary);
+  padding-bottom: var(--terumo-space-1, 4px);
+}
+
+h3 {
+  margin: var(--terumo-space-3, 16px) 0 var(--terumo-space-1, 4px);
+  font-size: var(--terumo-font-size-h3, 24px);
+}
+
+.richtext p { margin: 0 0 var(--terumo-space-3, 16px); }
+.richtext ul, .richtext ol { margin: 0 0 var(--terumo-space-3, 16px) 22px; }
+.richtext li { margin: 4px 0; }
+
+/* References */
+
+/* Print styles */
+@page {
+  size: letter;
+  margin: 0.75in;
+}
+
+@media print {
+  body { background: #fff; }
+  .doc {
+    padding: 0; /* margins handled by @page */
+  }
+  .doc-header, .doc-footer {
+    position: fixed;
+    left: 0; right: 0;
+    background: #fff;
+  }
+  .doc-header { top: 0; }
+  .doc-footer { bottom: 0; }
+  .page {
+    page-break-after: always;
+    break-inside: avoid;
+    max-width: initial;
+    margin: 0;
+    padding-top: 100px; /* space for header */
+    padding-bottom: 64px; /* space for footer */
+  }
+  .page:last-child { page-break-after: auto; }
+}

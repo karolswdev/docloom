@@ -1,0 +1,83 @@
+name: simple-doc
+display_name: "Simple Documentation"
+description: "A clean, simple template for general technical documentation"
+version: "1.0.0"
+author: "DocLoom Team"
+
+# Field definitions with JSON schema
+fields:
+  title:
+    type: string
+    description: "Document title"
+    required: true
+    maxLength: 200
+  
+  author:
+    type: string
+    description: "Document author(s)"
+    required: true
+  
+  date:
+    type: string
+    format: date
+    description: "Publication date"
+    default: "{{TODAY}}"
+  
+  version:
+    type: string
+    description: "Document version"
+    default: "1.0.0"
+  
+  summary:
+    type: string
+    format: html
+    description: "Executive summary (1-2 paragraphs)"
+    maxLength: 1000
+  
+  introduction:
+    type: string
+    format: html
+    description: "Introduction and background"
+  
+  technical_details:
+    type: string
+    format: html
+    description: "Main technical content"
+  
+  conclusion:
+    type: string
+    format: html
+    description: "Conclusions and next steps"
+  
+  footer:
+    type: string
+    description: "Footer text (copyright, etc.)"
+    default: "© 2024 Your Organization. All rights reserved."
+
+# AI Analysis Configuration
+analysis:
+  system_prompt: |
+    You are a technical documentation specialist. Your role is to analyze source 
+    materials and create clear, well-structured documentation that is both 
+    comprehensive and easy to understand. Focus on:
+    - Clarity and readability
+    - Technical accuracy
+    - Logical flow of information
+    - Actionable insights
+  
+  initial_prompt: |
+    Analyze the provided source materials and generate documentation with:
+    
+    1. **Title**: A clear, descriptive title for the documentation
+    2. **Summary**: A 1-2 paragraph executive summary highlighting key points
+    3. **Introduction**: Background context and objectives
+    4. **Technical Details**: Core technical information, organized logically
+    5. **Conclusion**: Key takeaways and recommended next steps
+    
+    Ensure the content is:
+    - Technically accurate
+    - Well-organized with clear sections
+    - Written for a technical audience
+    - Free of unnecessary jargon
+    
+    Return your response as JSON matching the template schema.

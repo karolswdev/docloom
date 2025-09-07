@@ -1,0 +1,59 @@
+# Binaries
+docloom
+docloom-agent-csharp
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test artifacts
+*.out
+*.log
+coverage.html
+coverage.txt
+*.test
+
+# Go workspace
+vendor/
+go.work
+go.work.sum
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+/build/
+/dist/
+/release/
+
+# Docker
+.dockerignore
+
+# Environment
+.env
+.env.local
+*.env
+
+# Generated files
+/output/
+/generated/
+*.html
+!templates/**/*.html
+
+# Temporary files
+/tmp/
+/temp/
+*.tmp
+
+# CI/QA artifacts
+ci_check.sh
+QA_*.md
+test_output.log
+
+# Evidence (keep organized structure)
+# evidence/ directory is tracked for documentation

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Documentation Template</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 data-field="title">Document Title</h1>
+            <div class="metadata">
+                <span data-field="author">Author</span> • 
+                <span data-field="date">Date</span> •
+                <span data-field="version">Version</span>
+            </div>
+        </header>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ol>
+                <li><a href="#summary">Summary</a></li>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#details">Technical Details</a></li>
+                <li><a href="#conclusion">Conclusion</a></li>
+            </ol>
+        </nav>
+
+        <main>
+            <section id="summary">
+                <h2>Executive Summary</h2>
+                <div data-field="summary" class="content-block">
+                    A brief overview of the document's purpose and key points.
+                </div>
+            </section>
+
+            <section id="introduction">
+                <h2>Introduction</h2>
+                <div data-field="introduction" class="content-block">
+                    Background information and context for the documentation.
+                </div>
+            </section>
+
+            <section id="details">
+                <h2>Technical Details</h2>
+                <div data-field="technical_details" class="content-block">
+                    In-depth technical information, architecture decisions, and implementation details.
+                </div>
+            </section>
+
+            <section id="conclusion">
+                <h2>Conclusion</h2>
+                <div data-field="conclusion" class="content-block">
+                    Summary of key findings and next steps.
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div data-field="footer">© 2024 Your Organization. All rights reserved.</div>
+        </footer>
+    </div>
+</body>
+</html>
